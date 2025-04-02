@@ -1,5 +1,5 @@
 Sprint 1
-01/04/2025
+inicia 01/04/2025 - termina dia 15/04/2025
 Tempo da Sprint 2 semanas
 Tarefas
 Reunião com Clinte (Eduardo, Thiago)

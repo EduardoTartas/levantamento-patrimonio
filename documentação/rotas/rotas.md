@@ -171,7 +171,7 @@ Confirmação de atualização.
 
 ---  
 
-### 3.4.5 POST /bens/:id/foto  
+### 3.4.5 POST /levantamento/:id/foto  
 
 **Descrição**  
 Adicionar ou atualizar foto do bem.  

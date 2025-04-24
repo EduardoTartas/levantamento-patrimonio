@@ -216,17 +216,24 @@ Importação de dados via CSV para bens e salas.
 ### 3.6.1 POST /importacao/csv  
 
 **Descrição**  
-Importar registros via arquivo CSV para cadastro massivo de bens e salas.  
+Importar registros via arquivo CSV para cadastro de bens e salas.  
 
 **Regras de Negócio**  
 - CSV com colunas obrigatórias (ex: tombo, nome, sala, localização, estado).  
 - Validar dados, evitar duplicatas ou atualizar conforme política.  
 - Registrar logs.  
 
-**Parâmetros**  
-- Multipart/form-data, campo `file`: arquivo CSV.  
 
 **Resposta**  
 Resumo da importação: registros processados, inseridos, atualizados, rejeitados.  
 
 ---  
+
+### Segurança em todos os endpoints
+- **Autenticação via token JWT obrigatório**
+- **Controle de acesso com base na função do usuário**
+- **Logs de operações críticas**:
+  - Cadastro
+  - Edição
+  - Exclusão
+  - Finalização

@@ -14,6 +14,9 @@ Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com met
 **Objetivo:** Definição de requisitos e prototipação  
 
 ### ✅ Tarefas Concluídas  
+- **Banco de Dados**  
+  ✔ Modelagem MongoDB 
+  
 - **Documentação**  
   ✔ Revisão de RFs e RNFs  
   ✔ Requisitos desejáveis  
@@ -28,14 +31,13 @@ Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com met
     - Leitor QR Code  
 
 - **Reuniões**  
-  ✔ 2 sessões com cliente para validação  
+  ✔ 2 sessões com cliente para validação 
+
 
 ## Sprint 2 (16/04 - 29/04/2025)  
 **Objetivo:** Modelagem de dados e API  
 
-### ✅ Tarefas Concluídas  
-- **Banco de Dados**  
-  ✔ Modelagem MongoDB  
+### ✅ Tarefas Concluídas   
 
 - **Documentação de Rotas**  
   ```plaintext
@@ -43,5 +45,15 @@ Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com met
   GET /usuarios  
   POST /inventarios  
   PUT /itens/{id}  
+
+- **Metodologia - Métricas SCRUM**  
+   - Responsáveis: Eduardo, Thiago e Gustavo  
+
+- **Dificuldades Encontradas**  
+   - Responsáveis: Eduardo, Thiago e Gustavo  
+
+- **Aprendizagem com o Processo**
+   - Responsáveis: Eduardo, Thiago e Gustavo 
+
 
 

@@ -9,16 +9,17 @@
 ## Tarefas  
 
 
-1. **Reunião com o Cliente**  
+1. **Modelagem do banco de dados(MongoDB)**  
+   - Responsáveis: Eduardo, Thiago e Gustavo
+
+2. **Reunião com o Cliente**  
    - Responsáveis: Eduardo e Thiago  
 
-
-2. **Revisão dos Requisitos**  
+3. **Revisão dos Requisitos**  
    - Baseada na entrevista com o Cliente  
    - Responsáveis: Eduardo, Thiago e Gustavo 
 
-
-3. **Revisão e Reestruturação do Figma**  
+4. **Revisão e Reestruturação do Figma**  
    - Baseada na entrevista com o Cliente 
    - Responsáveis: Eduardo e Thiago
 

@@ -11,18 +11,22 @@
 
 
 ## Tarefas 
-1. **Documentação de rotas**  
+
+1. **Modelagem do banco de dados(MongoDB)**  
+   - Responsáveis: Eduardo, Thiago e Gustavo
+  
+2. **Documentação de rotas**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo  
 
 
-2. **Metodologia - Métricas SCRUM**  
+3. **Metodologia - Métricas SCRUM**  
    - Responsáveis: Eduardo, Thiago e Gustavo  
 
 
-3. **Dificuldades Encontradas**  
+4. **Dificuldades Encontradas**  
    - Responsáveis: Eduardo, Thiago e Gustavo  
 
 
-4. **Aprendizagem com o Processo**
+5. **Aprendizagem com o Processo**
    - Responsáveis: Eduardo, Thiago e Gustavo

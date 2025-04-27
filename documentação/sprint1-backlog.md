@@ -22,6 +22,3 @@
    - Baseada na entrevista com o Cliente 
    - Responsáveis: Eduardo e Thiago
 
-4. **Modelagem do banco de dados(MongoDB)**  
-   - Responsáveis: Eduardo, Thiago e Gustavo
-

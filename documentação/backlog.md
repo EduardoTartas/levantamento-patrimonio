@@ -3,9 +3,9 @@
 # Tarefas a Realizar. 
 - [x] Requisitos funcionais  
 - [x] Requisitos não funcionais  
-- [ ] Modelagem do banco de dados (MongoDB)  
-- [ ] Revisar protótipo no Figma 
-- [ ] Documetar rotas (incluindo regras de negócio) 
+- [x] Modelagem do banco de dados (MongoDB)  
+- [x] Revisar protótipo no Figma 
+- [x] Documetar rotas (incluindo regras de negócio) 
 - [ ] Readme 
 - [ ] Changelog
 - [ ] Gitflow 

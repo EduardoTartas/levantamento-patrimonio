@@ -1,4 +1,4 @@
-# 📋 Projeto: Levantamento de Patrimônio 
+# Projeto: Levantamento de Patrimônio 
 
 ### Equipe
 - Gustavo
@@ -7,10 +7,10 @@
 
 - Thiago
 
-## 🚀 Visão Geral  
+## Visão Geral  
 Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com metodologia **Scrum** em 2 sprints.  
 
-## ⏳ Sprint 1 (01/04 - 15/04/2025)  
+## Sprint 1 (01/04 - 15/04/2025)  
 **Objetivo:** Definição de requisitos e prototipação  
 
 ### ✅ Tarefas Concluídas  
@@ -30,7 +30,7 @@ Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com met
 - **Reuniões**  
   ✔ 2 sessões com cliente para validação  
 
-## ⏳ Sprint 2 (16/04 - 29/04/2025)  
+## Sprint 2 (16/04 - 29/04/2025)  
 **Objetivo:** Modelagem de dados e API  
 
 ### ✅ Tarefas Concluídas  

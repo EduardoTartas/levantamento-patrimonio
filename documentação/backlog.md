@@ -17,51 +17,50 @@
 # Requisitos Funcionais (RF)  
 
 
-### [RF001] Visualizar itens do inventário  
+### [RF000] Realizar Login  
+- **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
+- É necessário que o comissário realize login na plataforma com e-mail e senha.  
+
+### [RF001] Importar Arquivo CSV   
+- **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
+- O sistema deve permitir a importação de arquivos CSV contendo dados de levantamentos anteriores.  
+
+### [RF002] Visualizar itens do inventário  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
 - O sistema deve ser capaz de fornecer os dados dos itens de um determinado setor para visualização.  
 
-
-### [RF002] Gerenciar Comissionados  
+### [RF003] Inspecionar item  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
-- O sistema deve permitir a administração de comissionados, incluindo funcionalidades para:  
-  - Cadastrar novos usuários.  
-  - Atualizar informações de usuários existentes.  
-  - Excluir usuários existentes.  
-  - Listar todos os usuários cadastrados na comissão.  
+- É necessário que possa inspecionar cada item do inventário, podendo ver os dados dele com detalhe.  
 
-
-### [RF006] Cadastrar novos inventários  
+### [RF004] Gerenciar Comissionados  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
-- É preciso cadastrar novos inventários para permitir o tombamento dos itens por sala.  
+- O sistema deve permitir a administração de comissionados, incluindo funcionalidades para cadastrar novos usuários, atualizar informações de usuários existentes, excluir usuários existentes e listar todos os usuários cadastrados na comissão.  
 
-
-### [RF007] Inspecionar item  
+### [RF005] Cadastrar novos inventários  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
-- É necessário que seja possível inspecionar cada item do inventário, exibindo os dados detalhados do mesmo.  
+- É preciso cadastrar novos inventários para poder ser feito o tombamento dos itens por sala.  
 
-
-### [RF008] Finalizar inventários  
+### [RF006] Finalizar inventários  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
-- É necessário que o sistema permita finalizar o inventário, bloqueando quaisquer alterações posteriores.  
+- É necessário que finalize o inventário, não permitindo mais alterações.  
 
-
-### [RF009] Realizar Login  
+### [RF007] Emitir Relatório  
 - **Prioridade**: ☒ Essencial ☐ Importante ☐ Desejável  
-- É necessário que o comissário realize login na plataforma utilizando e-mail e senha.  
+- O sistema deve permitir ao usuário emitir relatórios.  
 
 
-### [RF010] Cadastro Simplificado  
+### [RF008] Cadastro Simplificado  
 - **Prioridade**: ☐ Essencial ☐ Importante ☒ Desejável  
 - Facilitar a conferência dos bens, tornando o acesso mais rápido.  
 
 
-### [RF011] Acesso Móvel  
+### [RF009] Acesso Móvel  
 - **Prioridade**: ☐ Essencial ☐ Importante ☒ Desejável  
 - Melhorar o acesso em dispositivos móveis.  
 
 
-### [RF012] Histórico de Atividades  
+### [RF010] Histórico de Atividades  
 - **Prioridade**: ☐ Essencial ☐ Importante ☒ Desejável  
 - Possuir uma opção para visualizar um histórico detalhado de atividades e alterações.  
 

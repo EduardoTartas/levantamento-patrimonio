@@ -5,6 +5,11 @@ import { type } from "os";
 class UsuarioModel {
     constructor() {
         const usuarioSchema = new mongoose.Schema({
+            campus: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "campus",
+                required: true,
+            },  
             nome: {
                 type: String,
                 index: true,

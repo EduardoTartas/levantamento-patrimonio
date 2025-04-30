@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 import { type } from "os";
 
-class UsuarioModel {
+class SalaModel {
     constructor() {}
-    const = usuarioSchema = new mongoose.Schema({
+    const = salaSchema = new mongoose.Schema({
         nome: {
             type: String,
             index: true,

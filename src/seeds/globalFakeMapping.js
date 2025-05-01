@@ -1,7 +1,6 @@
 import fakebr from 'faker-br';
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import loadModels from './loadModels.js';
 
 const fakeMappings = {
     // Campos comuns a vários models

@@ -11,6 +11,29 @@ class LevantamentoModel {
             },
             bem: {
                 type: mongoose.Schema.Types.ObjectId,
+                salaID:{
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "salas",
+                    required: true,
+                },
+                nome: {
+                    type: String,
+                    index: true,
+                    required: true,
+                },
+                tombo: {
+                    type: String,
+                    required: true,
+                    unique: true,
+                },
+                responsavel: {
+                    type: String,
+                    required: true,
+                },
+                ocioso: {
+                    type: Boolean,
+                    default: "false",
+                },
                 ref: "bens",
                 required: true,
             },
@@ -30,6 +53,9 @@ class LevantamentoModel {
             estado: {
                 type: String,
                 required: true,
+                enum: {
+                    values: ["Em condições de uso", "Inservível", "Danificado"]
+                }
             },
             data: {
                 type: Date,

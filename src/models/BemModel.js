@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { type } from "os";
 
 class BemModel {
     constructor() {
         const bemSchema = new mongoose.Schema({
+            sala: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "salas",
+                required: true,
+            },
             nome: {
                 type: String,
                 index: true,
@@ -25,7 +29,7 @@ class BemModel {
             valor: {
                 type: Number,
                 required: true,
-            }, 
+            },
             auditado: {
                 type: Boolean,
                 default: "false",
@@ -34,6 +38,13 @@ class BemModel {
                 type: Boolean,
                 default: "false",
             }
+        }, {
+            timestamps: true,
+            versionKey: false
         });
+
+        bemSchema.plugin(mongoosePaginate);
+
+        this.model = mongoose.model('bens', bemSchema);
     }
 }

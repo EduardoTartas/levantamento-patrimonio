@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { type } from "os";
 
 class SalaModel {
-        constructor() {
+    constructor() {
         const salaSchema = new mongoose.Schema({
             campus: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "campus",
                 required: true,
-            },  
+            },
             nome: {
                 type: String,
                 index: true,
@@ -19,6 +18,13 @@ class SalaModel {
                 type: String,
                 required: true,
             }
+        }, {
+            timestamps: true,
+            versionKey: false
         });
-    }   
+
+        salaSchema.plugin(mongoosePaginate);
+
+        this.model = mongoose.model('salas', salaSchema);
+    }
 }

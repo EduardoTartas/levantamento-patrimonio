@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { type } from "os";
 
 class CampusModel {
     constructor() {
@@ -29,6 +28,13 @@ class CampusModel {
                 type: String,
                 required: true,
             },
+        }, {
+            timestamps: true,
+            versionKey: false
         });
+
+        campusSchema.plugin(mongoosePaginate);
+
+        this.model = mongoose.model('campus', campusSchema);
     }
 }

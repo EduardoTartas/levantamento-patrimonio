@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { type } from "os";
 
 class InventarioModel {
     constructor() {
@@ -9,7 +8,7 @@ class InventarioModel {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "campus",
                 required: true,
-            }, 
+            },
             nome: {
                 type: String,
                 index: true,
@@ -23,6 +22,13 @@ class InventarioModel {
                 type: Boolean,
                 default: "false",
             },
+        }, {
+            timestamps: true,
+            versionKey: false
         });
+
+        inventarioSchema.plugin(mongoosePaginate);
+
+        this.model = mongoose.model('inventarios', inventarioSchema);
     }
 }

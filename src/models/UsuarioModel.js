@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import { type } from "os";
 
 class UsuarioModel {
     constructor() {
@@ -9,7 +8,7 @@ class UsuarioModel {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "campus",
                 required: true,
-            },  
+            },
             nome: {
                 type: String,
                 index: true,
@@ -38,7 +37,13 @@ class UsuarioModel {
                 type: Boolean,
                 default: "true",
             }
+        }, {
+            timestamps: true,
+            versionKey: false
         });
-    }   
-}
 
+        usuarioSchema.plugin(mongoosePaginate);
+
+        this.model = mongoose.model('usuarios', usuarioSchema);
+    }
+}

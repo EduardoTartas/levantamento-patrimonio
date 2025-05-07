@@ -5,11 +5,11 @@ import mongoose from 'mongoose';
 
 import DbConnect from '../config/dbConnect';
 
-import BemModel from '../models/Bem';
-import CampusModel from '../models/Campus';
-import InventarioModel from '../models/Inventario';
-import LevantamentoModel from '../models/Levantamento';
-import SalaModel from '../models/Sala';
-import UsuarioModel from '../models/Usuario';
+import Bem          from './models/Bem';
+import Campus       from './models/Campus';
+import Inventario   from './models/inventario';
+import Levantamento from './models/Levantamento';
+import Sala         from './models/Sala';
+import Usuario      from './models/Usuario';
 
 

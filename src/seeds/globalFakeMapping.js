@@ -111,7 +111,7 @@ export async function getGlobalFakeMapping() {
     return globalMapping;
   }
   
-  /**
+  /*
    * Função auxiliar para extrair os nomes dos campos de um schema,
    * considerando apenas os níveis superiores (campos aninhados são verificados pela parte antes do ponto).
    */
@@ -125,7 +125,7 @@ export async function getGlobalFakeMapping() {
     return Array.from(fieldNames);
   }
   
-  /**
+  /*
    * Valida se o mapping fornecido cobre todos os campos do model.
    * Retorna um array com os nomes dos campos que estiverem faltando.
    */
@@ -142,7 +142,7 @@ export async function getGlobalFakeMapping() {
     return missing;
   }
   
-  /**
+  /*
    * Executa a validação para os models fornecidos, utilizando o mapping específico de cada um.
    */
   async function validateAllMappings() {

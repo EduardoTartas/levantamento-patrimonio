@@ -25,7 +25,7 @@ class Sala{
 
         salaSchema.plugin(mongoosePaginate);
 
-        this.model = mongoose.model('salas', salaSchema);
+        this.model = mongoose.model('sala', salaSchema);
     }
 }
 

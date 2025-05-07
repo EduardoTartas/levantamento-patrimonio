@@ -68,7 +68,7 @@ class Levantamento{
 
         levantamentoSchema.plugin(mongoosePaginate);
 
-        this.model = mongoose.model('levantamentos', levantamentoSchema);
+        this.model = mongoose.model('levantamento', levantamentoSchema);
     }
 }
 

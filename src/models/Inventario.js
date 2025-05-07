@@ -29,7 +29,7 @@ class Inventario{
 
         inventarioSchema.plugin(mongoosePaginate);
 
-        this.model = mongoose.model('inventarios', inventarioSchema);
+        this.model = mongoose.model('inventario', inventarioSchema);
     }
 }
 

@@ -1,11 +1,12 @@
-import fakerbr from 'faker-br';
-import Inventario from '../models/inventario.js';
-import Sala from '../models/Sala.js';
-import Usuario from '../models/Usuario.js';
+import fakerbr      from 'faker-br';
+import Inventario   from '../models/inventario.js';
+import Sala         from '../models/Sala.js';
+import Usuario      from '../models/Usuario.js';
 import Levantamento from '../models/Levantamento.js';
-import Bem from '../models/Bem.js';
+import Bem          from '../models/Bem.js';
 
 export default async function levantamentoSeed() {
+
     // Coleta os inventários, salas, usuários e bens cadastrados no banco de dados
     const inventarioList = await Inventario.find({});
     const salaList = await Sala.find({});
@@ -27,15 +28,15 @@ export default async function levantamentoSeed() {
             bem: {
                 salaID: randomBem.salaID || randomSala._id,
                 nome: randomBem.nome || fakerbr.commerce.productName(),
-                tombo: randomBem.tombo || fakebr.random.alphaNumeric(10),
+                tombo: randomBem.tombo || fakerbr.random.alphaNumeric(10),
                 responsavel: randomBem.responsavel || fakerbr.name.findName(),
                 ocioso: randomBem.ocioso || fakerbr.random.boolean(),
             },
             sala: randomSala._id,
             usuario: randomUsuario._id,
-            imagem: fakerbr.image.imageUrl(),
-            estado: fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
-            data: fakerbr.date.past(),
+            imagem:  fakerbr.image.imageUrl(),
+            estado:  fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
+            data:    fakerbr.date.past(),
         };
 
         await Levantamento.create(levantamento);

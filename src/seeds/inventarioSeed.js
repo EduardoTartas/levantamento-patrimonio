@@ -1,6 +1,6 @@
-import fakerbr from 'faker-br';
+import fakerbr    from 'faker-br';
 import Inventario from '../models/inventario.js';
-import Campus from '../models/campus.js';
+import Campus     from '../models/campus.js';
 
 export default async function inventarioSeed() {
     //Coleta os campus cadastrados no banco de dados
@@ -15,8 +15,8 @@ export default async function inventarioSeed() {
 
         const inventario = {
             campus: randomCampus._id,
-            nome: fakerbr.lorem.word(10),
-            data: fakerbr.date.past(),
+            nome:   fakerbr.lorem.word(10),
+            data:   fakerbr.date.past(),
             status: fakerbr.random.boolean(),
         };
 

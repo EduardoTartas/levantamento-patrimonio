@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class UsuarioModel {
+class Bem{
     constructor() {
-        const usuarioSchema = new mongoose.Schema({
-            campus: {
+        const bemSchema = new mongoose.Schema({
+            sala: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "campus",
+                ref: "salas",
                 required: true,
             },
             nome: {
@@ -14,36 +14,37 @@ class UsuarioModel {
                 index: true,
                 required: true,
             },
-            cpf: {
+            tombo: {
                 type: String,
                 required: true,
                 unique: true,
             },
-            email: {
-                type: String,
-                required: true,
-                unique: true,
-            },
-            senha: {
-                type: String,
-                select: false,
-                required: true,
-            },
-            cargo: {
+            responsavel: {
                 type: String,
                 required: true,
             },
-            status: {
+            descricao: {
+                type: String,
+            },
+            valor: {
+                type: Number,
+                required: true,
+            },
+            auditado: {
                 type: Boolean,
-                default: "true",
+                default: "false",
+            },
+            ocioso: {
+                type: Boolean,
+                default: "false",
             }
         }, {
             timestamps: true,
             versionKey: false
         });
 
-        usuarioSchema.plugin(mongoosePaginate);
+        bemSchema.plugin(mongoosePaginate);
 
-        this.model = mongoose.model('usuarios', usuarioSchema);
+        this.model = mongoose.model('bens', bemSchema);
     }
 }

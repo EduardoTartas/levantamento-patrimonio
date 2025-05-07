@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class SalaModel {
+class Sala{
     constructor() {
         const salaSchema = new mongoose.Schema({
             campus: {

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class LevantamentoModel {
+class Levantamento{
     constructor() {
         const levantamentoSchema = new mongoose.Schema({
             inventario: {

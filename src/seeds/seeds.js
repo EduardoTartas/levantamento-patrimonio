@@ -3,11 +3,13 @@ import { faker } from '@faker-js/faker';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-import DbConnect from '../config/DBconfig';
+import DbConnect from '../config/dbConnect';
 
-import BemModel from '../models/BemModel';
-import CampusModel from '../models/CampusModel';
-import InventarioModel from '../models/InventarioModel';
-import LevantamentoModel from '../models/LevantamentoModel';
-import SalaModel from '../models/SalaModel';
-import UsuarioModel from '../models/UsuarioModel';
+import BemModel from '../models/Bem';
+import CampusModel from '../models/Campus';
+import InventarioModel from '../models/Inventario';
+import LevantamentoModel from '../models/Levantamento';
+import SalaModel from '../models/Sala';
+import UsuarioModel from '../models/Usuario';
+
+

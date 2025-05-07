@@ -28,3 +28,5 @@ class Sala{
         this.model = mongoose.model('salas', salaSchema);
     }
 }
+
+export default new Sala().model;

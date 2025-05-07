@@ -71,3 +71,5 @@ class Levantamento{
         this.model = mongoose.model('levantamentos', levantamentoSchema);
     }
 }
+
+export default new Levantamento().model;

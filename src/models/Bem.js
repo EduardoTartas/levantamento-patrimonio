@@ -48,3 +48,5 @@ class Bem{
         this.model = mongoose.model('bens', bemSchema);
     }
 }
+
+export default new Bem().model;

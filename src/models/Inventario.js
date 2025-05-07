@@ -32,3 +32,5 @@ class Inventario{
         this.model = mongoose.model('inventarios', inventarioSchema);
     }
 }
+
+export default new Inventario().model;

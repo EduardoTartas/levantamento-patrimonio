@@ -38,3 +38,5 @@ class Campus{
         this.model = mongoose.model('campus', campusSchema);
     }
 }
+
+export default new Campus().model;

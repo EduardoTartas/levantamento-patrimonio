@@ -47,3 +47,5 @@ class Usuario{
         this.model = mongoose.model('usuarios', usuarioSchema);
     }
 }
+
+export default new Usuario().model;

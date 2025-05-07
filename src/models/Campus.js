@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class Campus{
+export default class Campus{
     constructor() {
         const campusSchema = new mongoose.Schema({
             nome: {

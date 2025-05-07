@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class Bem{
+export default class Bem{
     constructor() {
         const bemSchema = new mongoose.Schema({
             sala: {

@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-export default class Bem{
+class Bem{
     constructor() {
         const bemSchema = new mongoose.Schema({
             sala: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "salas",
+                ref: "sala",
                 required: true,
             },
             nome: {

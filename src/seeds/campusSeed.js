@@ -1,6 +1,6 @@
 import fakerbr from "faker-br";
 import Campus from "../models/Campus.js";
-//import DbConnect from "../config/dbConnect.js";
+// import DbConnect from "../config/dbConnect.js";
 
 export default async function campusSeed() {
     // Deleta todos os campus existentes no banco de dados
@@ -24,4 +24,4 @@ export default async function campusSeed() {
 }
 
 //await DbConnect.conectar();
-//await campusSeed();
+// await campusSeed();

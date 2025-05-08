@@ -1,7 +1,7 @@
 import fakerbr from 'faker-br';
 import Bem from '../models/Bem.js';
 import Sala from '../models/Sala.js';
-import DbConnect from '../config/dbConnect.js';
+// import DbConnect from '../config/dbConnect.js';
 
 export default async function seedBens() {
     // Coleta as salas cadastradas no banco de dados
@@ -29,5 +29,5 @@ export default async function seedBens() {
     console.log("Seeds dos bens implementados com sucesso.");
 }
 
-await DbConnect.conectar();
-await seedBens();
+// await DbConnect.conectar();
+// await seedBens();

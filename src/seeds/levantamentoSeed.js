@@ -27,7 +27,7 @@ export default async function levantamentoSeed() {
         const levantamento = {
             inventario: randomInventario._id,
             bem: {
-                salaID: randomBem.salaID || randomSala._id,
+                salaID: randomBem.salaID._id,
                 nome: randomBem.nome || fakerbr.commerce.productName(),
                 tombo: randomBem.tombo || fakerbr.random.alphaNumeric(10),
                 responsavel: randomBem.responsavel || fakerbr.name.findName(),

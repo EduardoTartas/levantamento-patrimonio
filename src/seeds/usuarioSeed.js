@@ -13,6 +13,7 @@ export default async function usuarioSeed() {
     // Deleta todos os usuários existentes no banco de dados
     await Usuario.deleteMany({});
 
+    // Gera 50 usuários
     for(let i = 0; i < 20; i++) {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
 

@@ -4,7 +4,7 @@ import Sala         from '../models/Sala.js';
 import Usuario      from '../models/Usuario.js';
 import Levantamento from '../models/Levantamento.js';
 import Bem          from '../models/Bem.js';
-import DbConnect    from '../config/dbConnect.js';
+//import DbConnect    from '../config/dbConnect.js';
 
 export default async function levantamentoSeed() {
 
@@ -18,7 +18,7 @@ export default async function levantamentoSeed() {
     await Levantamento.deleteMany({});
 
     // Gera 100 levantamentos
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 500; i++) {
         const randomInventario = inventarioList[Math.floor(Math.random() * inventarioList.length)];
         const randomSala = salaList[Math.floor(Math.random() * salaList.length)];
         const randomUsuario = usuarioList[Math.floor(Math.random() * usuarioList.length)];
@@ -26,14 +26,8 @@ export default async function levantamentoSeed() {
 
         const levantamento = {
             inventario: randomInventario._id,
-            bem: {
-                salaID: randomBem.salaID._id,
-                nome: randomBem.nome || fakerbr.commerce.productName(),
-                tombo: randomBem.tombo || fakerbr.random.alphaNumeric(10),
-                responsavel: randomBem.responsavel || fakerbr.name.findName(),
-                ocioso: randomBem.ocioso || fakerbr.random.boolean(),
-            },
-            sala: randomSala._id,
+            bem:     randomBem._id,
+            sala:    randomSala._id,
             usuario: randomUsuario._id,
             imagem:  fakerbr.image.imageUrl(),
             estado:  fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
@@ -46,5 +40,5 @@ export default async function levantamentoSeed() {
     console.log("Levantamentos gerados com sucesso");
 }
 
-DbConnect.conectar();
-levantamentoSeed();
+//DbConnect.conectar();
+//await levantamentoSeed();

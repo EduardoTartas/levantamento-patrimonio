@@ -19,11 +19,11 @@ export default async function usuarioSeed() {
 
         const usuario = {
             campus: randomCampus._id,
-            nome: fakerbr.nome.findName(),
+            nome: `${fakerbr.name.firstName()} ${fakerbr.name.lastName()}`,
             cpf: fakerbr.br.cpf(),
             email: fakerbr.internet.email(),
             senha: fakerbr.internet.password(8),
-            cargo: fakerbr.name.jobTitle(),
+            cargo: fakerbr.random.arrayElement(["Comissario", "Funcionário Cpalm"]),
             status: fakerbr.random.boolean()
         };
 
@@ -32,3 +32,5 @@ export default async function usuarioSeed() {
 
     console.log("Usuários implementadas com sucesso.");
 }
+
+await usuarioSeed();

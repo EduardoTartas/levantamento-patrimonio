@@ -1,52 +1,33 @@
+import fakerbr from 'faker-br';
+import Bem from '../models/Bem.js';
+import Sala from '../models/Sala.js';
 import DbConnect from '../config/dbConnect.js';
-import Bem from '../models/Bem.js'
 
-await DbConnect.conectar();
+export default async function seedBens() {
+    // Coleta as salas cadastradas no banco de dados
+    const salaList = await Sala.find({});
 
-const bemModel = new Bem().model;
+    // Deleta todos os bens existentes no banco de dados
+    await Bem.deleteMany({});
 
-async function seedBens() {
-    try {
-        await bemModel.create([
-            {
-                sala: "", // O seed sala precisa ser feito, para adcionar o seu ObjectID aqui em seeds dos bens
-                nome: "Monitor Sony 24''",
-                tombo: "334455",
-                responsavel: "Thiago Hens",
-                descricao: "Monitor Full HD com entrada HDMI.",
-                valor: 950.00,
-                auditado: true,
-                ocioso: false,
-            },
-            {
-                sala: "",
-                nome: "Cadeira Fixa Ergoplax preta",
-                tombo: "413121",
-                responsavel: "Eduardo Tartas",
-                descricao: "Cadeira preta da marca Ergoplax, em excelente estado.",
-                valor: 230.00,
-                auditado: true,
-                ocioso: false,
-            },
-            {
-                sala: "",
-                nome: "Mouse Maxprint Universitário",
-                tombo: "152535",
-                responsavel: "Gustavo Oliveira",
-                descricao: "O Mouse Universitario USB2.0 da cor preta.",
-                valor: 50.00,
-                auditado: true,
-                ocioso: false,
-            },
-        ]);
-
-        console.log("Seeds dos bens implementados.");
-
-    } catch (err) {
-        console.error("Erro ao implementar seed do bem", err);
-    } finally {
-        await DbConnect.desconectar()
+    // Gera 50 bens com base nas salas disponíveis
+    for (let i = 0; i < 2; i++) {
+        const randomSala = salaList[Math.floor(Math.random() * salaList.length)];
+        const bem = {
+            sala: randomSala._id,
+            nome: fakerbr.commerce.productName(),
+            tombo: fakerbr.random.number({ min: 100000, max: 999999 }).toString(),
+            responsavel: fakerbr.name.findName(),
+            descricao: fakerbr.lorem.sentence(),
+            valor: parseFloat(fakerbr.commerce.price()),
+            auditado: fakerbr.random.boolean(),
+            ocioso: fakerbr.random.boolean(),
+        };
+            await Bem.create(bem);
     }
+
+    console.log("Seeds dos bens implementados com sucesso.");
 }
 
-export default seedBens
+await DbConnect.conectar();
+await seedBens();

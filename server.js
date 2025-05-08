@@ -1,9 +1,7 @@
-// server.js
-
 import "dotenv/config";
 import app from "./src/app.js";
 
-const port = process.env.PORT || 5011;
+const port = process.env.API_PORT || 3000;
 
 // retorno no terminal com o link
 app.listen(port, () => {

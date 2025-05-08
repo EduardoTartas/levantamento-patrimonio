@@ -10,7 +10,11 @@ class Levantamento{
                 required: true,
             },
             bem: {
-                type: mongoose.Schema.Types.ObjectId,
+                id: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "bem",
+                    required: true,
+                },
                 salaID:{
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "sala",
@@ -34,8 +38,7 @@ class Levantamento{
                     type: Boolean,
                     default: "false",
                 },
-                ref: "bem",
-                required: true,
+                
             },
             sala: {
                 type: mongoose.Schema.Types.ObjectId,

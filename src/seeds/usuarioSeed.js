@@ -1,9 +1,7 @@
 import fakerbr from 'faker-br';
-import Campus from '../models/Campus.js';
+import Campus  from '../models/Campus.js';
 import Usuario from '../models/Usuario.js';
 //import DbConnect from '../config/dbConnect.js';
-
-
 
 export default async function usuarioSeed() {
      

@@ -1,4 +1,4 @@
-import fakebr from 'faker-br';
+import fakerbr   from 'faker-br';
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
@@ -6,42 +6,42 @@ const fakeMappings = {
     // Campos comuns a vários models
     common: {
       nome: () =>
-        fakebr.name.firstName() +
+        fakerbr.name.firstName() +
         " " +
-        fakebr.name.lastName() +
+        fakerbr.name.lastName() +
         " " +
-        fakebr.name.lastName(),
-      email: () => fakebr.internet.email(),
-      senha: () => fakebr.internet.password(),
-      link_foto: () => fakebr.internet.url() + "/" + uuid() + ".jpg",
-      ativo: () => fakebr.random.boolean(),
-      descricao: () => fakebr.lorem.sentence(),
-      localidade: () => fakebr.address.city() + " - " + fakebr.address.state(),
-      rota: () => fakebr.lorem.word(10),
-      dominio: () => fakebr.internet.url(),
+        fakerbr.name.lastName(),
+      email: () => fakerbr.internet.email(),
+      senha: () => fakerbr.internet.password(),
+      link_foto: () => fakerbr.internet.url() + "/" + uuid() + ".jpg",
+      ativo: () => fakerbr.random.boolean(),
+      descricao: () => fakerbr.lorem.sentence(),
+      localidade: () => fakerbr.address.city() + " - " + fakerbr.address.state(),
+      rota: () => fakerbr.lorem.word(10),
+      dominio: () => fakerbr.internet.url(),
     },
   
     // Mapping específico para o model Usuario
     Usuario: {
         campus: () => new mongoose.Types.ObjectId().toString(),
         nome: () =>
-            fakebr.name.firstName() +
+            fakerbr.name.firstName() +
             " " +
-            fakebr.name.lastName() +
+            fakerbr.name.lastName() +
             " " +
-            fakebr.name.lastName(),
-        cpf: () => fakebr.br.cpf(),
-        email: () => fakebr.internet.email(),
-        senha: () => fakebr.internet.password(),
-        cargo: () => fakebr.lorem.word(10),
-        status: () => fakebr.random.boolean(),
+            fakerbr.name.lastName(),
+        cpf: () => fakerbr.br.cpf(),
+        email: () => fakerbr.internet.email(),
+        senha: () => fakerbr.internet.password(),
+        cargo: () => fakerbr.lorem.word(10),
+        status: () => fakerbr.random.boolean(),
     },
   
     // Mapping específico para o model Sala
     Sala: {
         campus: () => new mongoose.Types.ObjectId().toString(),
-        nome: () => fakebr.lorem.word(10),
-        bloco: () => fakebr.random.number({ min: 1, max: 10 }).toString(),
+        nome: () => fakerbr.lorem.word(10),
+        bloco: () => fakerbr.random.number({ min: 1, max: 10 }).toString(),
     },
   
     // Mapping específico para o model Levantamento
@@ -49,14 +49,14 @@ const fakeMappings = {
         inventario: () => new mongoose.Types.ObjectId().toString(),
         bem: () => ({
             salaID: () => new mongoose.Types.ObjectId().toString(),
-            nome: () => fakebr.commerce.productName(),
-            tombo: () => fakebr.random.alphaNumeric(10),
-            responsavel: () => fakebr.name.findName(),
-            ocioso: () => fakebr.random.boolean(),
+            nome: () => fakerbr.commerce.productName(),
+            tombo: () => fakerbr.random.alphaNumeric(10),
+            responsavel: () => fakerbr.name.findName(),
+            ocioso: () => fakerbr.random.boolean(),
         }),
         sala: () => new mongoose.Types.ObjectId().toString(),
         usuario: () => new mongoose.Types.ObjectId().toString(),
-        imagem: () => fakebr.internet.url() + "/" + uuid() + ".jpg",
+        imagem: () => fakerbr.internet.url() + "/" + uuid() + ".jpg",
         estado: () => {
             const values = ["Em condições de uso", "Inservível", "Danificado"];
             return values[Math.floor(Math.random() * values.length)];
@@ -66,31 +66,31 @@ const fakeMappings = {
     // Mapping específico para o model Inventario
     Inventario: {
         campus: () => new mongoose.Types.ObjectId().toString(),
-        nome: () => fakebr.lorem.word(10),
-        data: () => fakebr.date.past(),
-        status: () => fakebr.random.boolean(),
+        nome: () => fakerbr.lorem.word(10),
+        data: () => fakerbr.date.past(),
+        status: () => fakerbr.random.boolean(),
     },
   
     // Mapping específico para o model Campus
     Campus: {
-        nome: () => fakebr.lorem.word(10),
-        telefone: () => fakebr.phone.phoneNumber(),
-        cidade: () => fakebr.address.city(),
-        bairro: () => fakebr.address.neighborhood(),
-        rua: () => fakebr.address.streetName(),
-        numeroResidencia: () => fakebr.address.streetAddress(),
+        nome: () => fakerbr.lorem.word(10),
+        telefone: () => fakerbr.phone.phoneNumber(),
+        cidade: () => fakerbr.address.city(),
+        bairro: () => fakerbr.address.neighborhood(),
+        rua: () => fakerbr.address.streetName(),
+        numeroResidencia: () => fakerbr.address.streetAddress(),
     },
   
     // Mapping específico para o model Bem
     Bem: {
         sala: () => new mongoose.Types.ObjectId().toString(),
-        nome: () => fakebr.commerce.productName(),
-        tombo: () => fakebr.random.alphaNumeric(10),
-        responsavel: () => fakebr.name.findName(),
-        descricao: () => fakebr.lorem.sentence(),
-        valor: () => fakebr.commerce.price(),
-        auditado: () => fakebr.random.boolean(),
-        ocioso: () => fakebr.random.boolean(),
+        nome: () => fakerbr.commerce.productName(),
+        tombo: () => fakerbr.random.alphaNumeric(10),
+        responsavel: () => fakerbr.name.findName(),
+        descricao: () => fakerbr.lorem.sentence(),
+        valor: () => fakerbr.commerce.price(),
+        auditado: () => fakerbr.random.boolean(),
+        ocioso: () => fakerbr.random.boolean(),
 
     },
   };

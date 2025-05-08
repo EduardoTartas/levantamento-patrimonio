@@ -1,6 +1,6 @@
 import fakerbr from 'faker-br';
-import Bem from '../models/Bem.js';
-import Sala from '../models/Sala.js';
+import Bem     from '../models/Bem.js';
+import Sala    from '../models/Sala.js';
 //import DbConnect from '../config/dbConnect.js';
 
 export default async function seedBens() {

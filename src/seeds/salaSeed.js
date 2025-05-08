@@ -1,9 +1,7 @@
 import fakerbr from 'faker-br';
-import Sala from '../models/Sala.js';
-import Campus from '../models/Campus.js';
+import Sala    from '../models/Sala.js';
+import Campus  from '../models/Campus.js';
 //import DbConnect from '../config/dbConnect.js';
-
-
 
 export default async function salaSeed() {
      

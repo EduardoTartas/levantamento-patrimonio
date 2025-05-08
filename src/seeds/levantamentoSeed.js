@@ -18,7 +18,7 @@ export default async function levantamentoSeed() {
     await Levantamento.deleteMany({});
 
     // Gera 100 levantamentos
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 800; i++) {
         const randomInventario = inventarioList[Math.floor(Math.random() * inventarioList.length)];
         const randomSala = salaList[Math.floor(Math.random() * salaList.length)];
         const randomUsuario = usuarioList[Math.floor(Math.random() * usuarioList.length)];

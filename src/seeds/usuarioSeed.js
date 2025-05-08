@@ -12,7 +12,7 @@ export default async function usuarioSeed() {
     await Usuario.deleteMany({});
 
     // Gera 50 usuários
-    for(let i = 0; i < 20; i++) {
+    for(let i = 0; i < 50; i++) {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
 
         const usuario = {

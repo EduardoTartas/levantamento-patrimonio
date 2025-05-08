@@ -12,7 +12,7 @@ export default async function salaSeed() {
     Sala.deleteMany({});
 
     // Gera 20 salas
-    for(let i = 0; i < 20; i++) {
+    for(let i = 0; i < 100; i++) {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
 
         const sala = {

@@ -11,7 +11,7 @@ export default async function inventarioSeed() {
     await Inventario.deleteMany({});
 
     //Gera 50 inventários
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
 
         const inventario = {

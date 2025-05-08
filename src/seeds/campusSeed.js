@@ -7,7 +7,7 @@ export default async function campusSeed() {
     await Campus.deleteMany({});
 
     // Gera 25 campus
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 10; i++) {
         const campus = {
             nome: fakerbr.lorem.word(10),
             telefone: fakerbr.phone.phoneNumber().toString(),

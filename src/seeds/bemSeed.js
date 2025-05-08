@@ -1,9 +1,10 @@
 import fakerbr from 'faker-br';
 import Bem from '../models/Bem.js';
 import Sala from '../models/Sala.js';
-// import DbConnect from '../config/dbConnect.js';
+//import DbConnect from '../config/dbConnect.js';
 
 export default async function seedBens() {
+
     // Coleta as salas cadastradas no banco de dados
     const salaList = await Sala.find({});
 
@@ -11,7 +12,7 @@ export default async function seedBens() {
     await Bem.deleteMany({});
 
     // Gera 50 bens com base nas salas disponíveis
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 200; i++) {
         const randomSala = salaList[Math.floor(Math.random() * salaList.length)];
         const bem = {
             sala: randomSala._id,
@@ -29,5 +30,5 @@ export default async function seedBens() {
     console.log("Seeds dos bens implementados com sucesso.");
 }
 
-// await DbConnect.conectar();
-// await seedBens();
+//await DbConnect.conectar();
+//await seedBens();

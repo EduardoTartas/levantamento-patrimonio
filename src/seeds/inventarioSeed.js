@@ -1,10 +1,11 @@
 import fakerbr    from 'faker-br';
 import Inventario from '../models/Inventario.js';
-import campus     from '../models/Campus.js';
+import Campus     from '../models/Campus.js';
+//import DbConnect  from '../config/dbConnect.js';
 
 export default async function inventarioSeed() {
     //Coleta os campus cadastrados no banco de dados
-    const campusList = await campus.find({});
+    const campusList = await Campus.find({});
 
     //Deleta todos os inventários existentes no banco de dados
     await Inventario.deleteMany({});
@@ -25,3 +26,6 @@ export default async function inventarioSeed() {
 
     console.log("Inventários gerados com sucesso");
 }
+
+//DbConnect.conectar();
+//inventarioSeed();

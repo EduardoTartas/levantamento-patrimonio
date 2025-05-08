@@ -1,9 +1,10 @@
 import fakerbr      from 'faker-br';
-import Inventario   from '../models/inventario.js';
+import Inventario   from '../models/Inventario.js';
 import Sala         from '../models/Sala.js';
 import Usuario      from '../models/Usuario.js';
 import Levantamento from '../models/Levantamento.js';
 import Bem          from '../models/Bem.js';
+import DbConnect    from '../config/dbConnect.js';
 
 export default async function levantamentoSeed() {
 
@@ -44,3 +45,6 @@ export default async function levantamentoSeed() {
 
     console.log("Levantamentos gerados com sucesso");
 }
+
+DbConnect.conectar();
+levantamentoSeed();

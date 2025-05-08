@@ -6,14 +6,14 @@ class Levantamento{
         const levantamentoSchema = new mongoose.Schema({
             inventario: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "inventarios",
+                ref: "inventario",
                 required: true,
             },
             bem: {
                 type: mongoose.Schema.Types.ObjectId,
                 salaID:{
                     type: mongoose.Schema.Types.ObjectId,
-                    ref: "salas",
+                    ref: "sala",
                     required: true,
                 },
                 nome: {
@@ -34,17 +34,17 @@ class Levantamento{
                     type: Boolean,
                     default: "false",
                 },
-                ref: "bens",
+                ref: "bem",
                 required: true,
             },
             sala: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "salas",
+                ref: "sala",
                 required: true,
             },
             usuario: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "usuarios",
+                ref: "usuario",
                 required: true,
             },
             imagem: {

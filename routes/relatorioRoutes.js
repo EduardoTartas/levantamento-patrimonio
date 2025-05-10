@@ -10,6 +10,6 @@ const router = express.Router();
 
 router
 // Espera os parâmetros de query: inventarioId (obrigatório), sala (opcional), tipoRelatorio (obrigatório)
-.get("/relatorios",AuthMiddleware,authPermission,asyncWrapper(relatorioController.gerarRelatorio.bind(relatorioController)));
+.get("/relatorios",/*AuthMiddleware,authPermission,asyncWrapper(relatorioController.gerarRelatorio.bind(relatorioController))*/);
 
 export default router;

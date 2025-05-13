@@ -12,11 +12,11 @@
 
 ## Tarefas 
 
-1. **Desinvolvimento dos models**  
+1. **Desenvolvimento dos models**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
-2. **Desinvolvimento das seeds**  
+2. **Desenvolvimento das seeds**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo 
 

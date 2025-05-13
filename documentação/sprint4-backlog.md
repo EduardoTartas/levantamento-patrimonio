@@ -12,18 +12,18 @@
 
 ## Tarefas 
 
-1. **Desinvolvimento dos repositories das rotas implementadas**  
+1. **Desenvolvimento dos repositories das rotas implementadas**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
-2. **Desinvolvimento dos services das rotas implementadas**  
+2. **Desenvolvimento dos services das rotas implementadas**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
-3. **Desinvolvimento dos controllers das rotas implementadas**  
+3. **Desenvolvimento dos controllers das rotas implementadas**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
-4. **Desinvolvimento dos middlewares**  
+4. **Desenvolvimento dos middlewares**  
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo 

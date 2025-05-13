@@ -1,17 +1,25 @@
 // src/controllers/UsuarioController.js
+import UsuarioService from '../services/UsuarioService.js';
 import { UsuarioQuerySchema, UsuarioIdSchema } from '../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
 import { UsuarioSchema, UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js';
 import {
     CommonResponse,
     CustomError,
     HttpStatusCodes,
+    errorHandler,
+    messages,
+    StatusService,
+    asyncWrapper
 } from '../utils/helpers/index.js';
 
+const getDirname = () => path.dirname(fileURLToPath(import.meta.url));
 
 class UsuarioController {
-    // constructor() {
-         // Chama o código service
-    // }
+     constructor() {
+        this.service = new UsuarioService();
+    }
+
+
 
     // Lista usuários. Se um ID é fornecido, retorna um único objeto.
     // Caso contrário, retorna todos os objetos com suporte a filtros e paginação.

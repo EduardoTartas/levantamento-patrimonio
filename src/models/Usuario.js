@@ -42,6 +42,7 @@ class Usuario{
             versionKey: false
         });
 
+
         usuarioSchema.plugin(mongoosePaginate);
 
         this.model = mongoose.model('usuario', usuarioSchema);

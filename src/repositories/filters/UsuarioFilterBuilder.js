@@ -17,51 +17,26 @@ class UsuarioFilterBuilder {
         return this;
     }
 
-    comEmail(email) {
-        if (email) {
-            this.filtros.email = { $regex: email, $options: 'i' };
+    comAtivo(ativo = true) {
+        if (ativo === 'true' || ativo === true) {
+            this.filtros.status = true;
+        } else if (ativo === 'false' || ativo === false) {
+            this.filtros.status = false;
         }
         return this;
     }
+    
+    async comCampus(campus) {
+        if (campus) {
+            const CampusEncontrados = await this.unidadeRepository.buscarPorNome(campus);
 
-    comAtivo(ativo = 'true') {
-        if (ativo === 'true') {
-            this.filtros.ativo = true;
-        }
-        if (ativo === 'false') {
-            this.filtros.ativo = false;
-        }
-        this.filtros = {};
-        return this;
-    }
-
-    async comGrupo(grupo) {
-        if (grupo) {
-            // Não re-instancie o grupoRepository aqui.
-            const gruposEncontrados = await this.grupoRepository.buscarPorNome(grupo);
-
-            const grupoIds = gruposEncontrados
-                ? Array.isArray(gruposEncontrados)
-                    ? gruposEncontrados.map(g => g._id)
-                    : [gruposEncontrados._id]
+            const campusIds = campusEncontrados
+                ? Array.isArray(campusEncontrados)
+                    ? campusEncontrados.map(u => u._id)
+                    : [campusEncontrados._id]
                 : [];
 
-            this.filtros.grupos = { $in: grupoIds };
-        }
-        return this;
-    }
-
-    async comUnidade(unidade) {
-        if (unidade) {
-            const unidadesEncontradas = await this.unidadeRepository.buscarPorNome(unidade);
-
-            const unidadeIds = unidadesEncontradas
-                ? Array.isArray(unidadesEncontradas)
-                    ? unidadesEncontradas.map(u => u._id)
-                    : [unidadesEncontradas._id]
-                : [];
-
-            this.filtros.unidades = { $in: unidadeIds };
+            this.filtros.campus = { $in: campusIds };
         }
         return this;
     }

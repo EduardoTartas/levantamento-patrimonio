@@ -12,7 +12,7 @@ router
     .get("/usuarios/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.listar.bind(UsuarioController)))
     .post("/usuarios", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.criar.bind(UsuarioController)))
     .patch("/usuarios/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
-    .put("/usuarios/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
-    .delete("/usuarios/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.deletar.bind(UsuarioController)))
+    .put("/usuarios/:id", /*AuthMiddleware, leware, authauthPermission,*/ asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
+    .delete("/usuarios/:id", /*AuthMiddPermission,*/ asyncWrapper(UsuarioController.deletar.bind(UsuarioController)))
 
 export default router;

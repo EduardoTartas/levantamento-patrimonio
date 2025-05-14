@@ -26,8 +26,7 @@ class Usuario{
             },
             senha: {
                 type: String,
-                select: false,
-                required: true,
+                select: false
             },
             cargo: {
                 type: String,
@@ -35,12 +34,13 @@ class Usuario{
             },
             status: {
                 type: Boolean,
-                default: "true",
+                default: true,
             }
         }, {
             timestamps: true,
             versionKey: false
         });
+
 
         usuarioSchema.plugin(mongoosePaginate);
 

@@ -34,7 +34,7 @@ class UsuarioFilterBuilder {
     
     async comCampus(campus) {
         if (campus) {
-            const CampusEncontrados = await this.unidadeRepository.buscarPorNome(campus);
+            const CampusEncontrados = await this.campusRepository.buscarPorNome(campus);
 
             const campusIds = campusEncontrados
                 ? Array.isArray(campusEncontrados)

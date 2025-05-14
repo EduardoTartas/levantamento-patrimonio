@@ -62,12 +62,13 @@ class UsuarioRepository {
 
       return data;
     }
-    const { nome, ativo, page } = req.query;
+    const { nome, ativo, page, campus } = req.query;
     const limite = Math.min(parseInt(req.query.limite, 10) || 10, 100);
 
     const filterBuilder = new UsuarioFilterBuilder()
       .comNome(nome || "")
-      .comAtivo(ativo || "");
+      .comAtivo(ativo || "")
+      .comCampus(campus || "");
 
     if (typeof filterBuilder.build !== "function") {
       throw new CustomError({
@@ -104,18 +105,16 @@ class UsuarioRepository {
     return await usuario.save();
   }
 
-  async atualizar(id, parsedData) {
+async atualizar(id, parsedData) {
     const usuario = await this.model
-      .findByIdAndUpdate(id, parsedData, {
-        new: true,
-      })
-      .populate([
-        //ver populadores
-        //'campus',
-        // 'permissoes',
-        //'unidades'
-      ])
-      .exec();
+        .findByIdAndUpdate(id, parsedData, {
+            new: true,
+        })
+        .populate({
+            path: "campus",
+            select: "nome _id",
+        })
+        .lean();
 
     if (!usuario) {
       throw new CustomError({

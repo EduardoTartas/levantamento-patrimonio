@@ -45,7 +45,7 @@ class Bem{
 
         bemSchema.plugin(mongoosePaginate);
 
-        this.model = mongoose.model('bem', bemSchema);
+        this.model = mongoose.model('ben', bemSchema);
     }
 }
 

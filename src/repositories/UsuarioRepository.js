@@ -16,6 +16,26 @@ class UsuarioRepository {
     this.model = UsuarioModel;
   }
 
+  async buscarPorId(id, includeTokens = false) {
+        let query = this.model.findById(id);
+
+        if (includeTokens) {
+            query = query.select('+refreshtoken +accesstoken');
+        }
+        const user = await query;
+        if (!user) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Usuário',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Usuário')
+            });
+        }
+        return user;
+    }
+
+
    async buscarPorEmail(email, idIgnorado = null) {
         const filtro = { email };
 
@@ -67,8 +87,7 @@ class UsuarioRepository {
 
     const filterBuilder = new UsuarioFilterBuilder()
       .comNome(nome || "")
-      .comAtivo(ativo || "")
-      .comCampus(campus || "");
+      .comAtivo(ativo || "");
 
     if (typeof filterBuilder.build !== "function") {
       throw new CustomError({

@@ -142,30 +142,6 @@ class UsuarioService {
     /**
      * Valida o array de permissões.
      */
-    async validatePermissions(permissoes) {
-        // Se permissoes não for um array, define como array vazio
-        if (!Array.isArray(permissoes)) {
-            permissoes = [];
-        }
-
-        if (permissoes.length > 0) {
-            PermissoesArraySchema.parse(permissoes);
-        }
-
-        const permissoesExistentes = await this.repository.buscarPorPermissao(permissoes);
-
-        if (permissoesExistentes.length !== permissoes.length) {
-            throw new CustomError({
-                statusCode: 400,
-                errorType: 'validationError',
-                field: 'permissoes',
-                details: [{ path: 'permissoes', message: 'Permissões inválidas.' }],
-                customMessage: 'Permissões inválidas.',
-            });
-        }
-
-        return permissoesExistentes;
-    }
 
     /**
      * Garante que o usuário existe.

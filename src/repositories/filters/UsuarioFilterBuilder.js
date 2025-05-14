@@ -12,10 +12,16 @@ class UsuarioFilterBuilder {
 
     comNome(nome) {
         if (nome) {
-            this.filtros.nome = { $regex: nome, $options: 'i' };
+            const nomeEscaped = this.escapeRegex(nome);
+            if (nome.length === 1) {
+                this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: 'i' };
+            } else {
+                this.filtros.nome = { $regex: nomeEscaped, $options: 'i' };
+            }
         }
         return this;
     }
+
 
     comAtivo(ativo = true) {
         if (ativo === 'true' || ativo === true) {

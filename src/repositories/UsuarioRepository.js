@@ -4,56 +4,59 @@ import UsuarioFilterBuilder from "./filters/UsuarioFilterBuilder.js";
 import { CustomError, messages } from "../utils/helpers/index.js";
 
 class UsuarioRepository {
-  constructor({
-    Campus: CampusModel = Campus,
-    Usuario: UsuarioModel = Usuario,
-  } = {}) {
+  constructor({Campus: CampusModel = Campus, Usuario: UsuarioModel = Usuario,} = {}) 
+  {
     if (!UsuarioModel || typeof UsuarioModel.paginate !== "function") {
-      throw new Error(
-        "The Usuario model must include the paginate method. Ensure mongoose-paginate-v2 is applied."
-      );
+      throw new Error("The Usuario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
     }
     this.model = UsuarioModel;
   }
 
   async buscarPorId(id, includeTokens = false) {
-        let query = this.model.findById(id);
+    let query = this.model.findById(id);
 
-        if (includeTokens) {
-            query = query.select('+refreshtoken +accesstoken');
-        }
-        const user = await query;
-        if (!user) {
-            throw new CustomError({
-                statusCode: 404,
-                errorType: 'resourceNotFound',
-                field: 'Usuário',
-                details: [],
-                customMessage: messages.error.resourceNotFound('Usuário')
-            });
-        }
-        return user;
+    if (includeTokens) {
+      query = query.select("+refreshtoken +accesstoken");
     }
 
+    const user = await query;
+    if (!user) {
+      throw new CustomError({
+        statusCode: 404,
+        errorType: "resourceNotFound",
+        field: "Usuário",
+        details: [],
+        customMessage: messages.error.resourceNotFound("Usuário"),
+      });
+    }
+    return user;
+  }
 
-   async buscarPorEmail(email, idIgnorado = null) {
-        const filtro = { email };
+  async buscarPorEmail(email, idIgnorado = null) {
+    const filtro = {email};
 
-        if (idIgnorado) {
-            filtro._id = { $ne: idIgnorado };
-        }
-
-        const documento = await this.model.findOne(filtro, '+senha')
-            .populate({
-                path: 'grupos',
-                populate: { path: 'unidades' }
-            })
-            .populate('permissoes')
-            .populate('unidades');
-
-        return documento;
+    if (idIgnorado) {
+      filtro._id = {
+        $ne: idIgnorado,
+      };
     }
 
+    const documento = await this.model.findOne(filtro, "+senha");
+    return documento;
+  }
+
+  async buscarPorCpf(cpf, idIgnorado = null) {
+    const filtro = {cpf};
+
+    if (idIgnorado) {
+      filtro._id = {
+        $ne: idIgnorado,
+      };
+    }
+
+    const documento = await this.model.findOne(filtro);
+    return documento;
+  }
 
   async listar(req) {
     console.log("Estou no listar em UsuarioRepository");
@@ -67,8 +70,6 @@ class UsuarioRepository {
           select: "nome _id",
         })
         .lean();
-
-      // Se um ID for fornecido, retorna o usuário
 
       if (!data) {
         throw new CustomError({
@@ -115,7 +116,6 @@ class UsuarioRepository {
     };
 
     const resultado = await this.model.paginate(filtros, options);
-
     return resultado;
   }
 
@@ -124,16 +124,15 @@ class UsuarioRepository {
     return await usuario.save();
   }
 
-async atualizar(id, parsedData) {
+  async atualizar(id, parsedData) {
     const usuario = await this.model
-        .findByIdAndUpdate(id, parsedData, {
-            new: true,
-        })
-        .populate({
-            path: "campus",
-            select: "nome _id",
-        })
-        .lean();
+      .findByIdAndUpdate(id, parsedData, {
+        new: true,
+      })
+      .populate({
+        path: "campus",
+        select: "nome _id",
+      });
 
     if (!usuario) {
       throw new CustomError({

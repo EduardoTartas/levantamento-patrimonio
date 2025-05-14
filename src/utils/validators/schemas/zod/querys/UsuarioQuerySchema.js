@@ -13,9 +13,6 @@ export const UsuarioQuerySchema = z.object({
             message: "Nome não pode ser vazio",
         })
         .transform((val) => val?.trim()),
-    email: z
-        .union([z.string().email("Formato de email inválido"), z.undefined()])
-        .optional(),
     ativo: z
         .string()
         .optional()

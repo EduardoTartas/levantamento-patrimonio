@@ -10,10 +10,11 @@ import logRoutes from "../middlewares/LogRoutesMiddleware.js";
 
 //routes
 import usuarios from './usuarioRoutes.js';
-import importacao from './importacaoroutes.js';
+import importacao from './importacaoRoutes.js';
 import levantamento from './levantamentoRoutes.js';
 import login from './loginRoutes.js';
 import relatorio from './relatorioRoutes.js';
+import campus from './campusRoutes.js';
 
 dotenv.config();
 
@@ -39,7 +40,8 @@ const routes = (app) => {
         importacao,
         levantamento,
         login,
-        relatorio
+        relatorio,
+        campus
        
     );
 

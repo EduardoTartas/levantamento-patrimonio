@@ -1,24 +1,25 @@
-// src/utils/UsuarioFilterBuilder.js
-
 import Usuario from "../../models/Usuario.js";
 import UsuarioRepository from "../UsuarioRepository.js";
+import CampusRepository from "../CampusRepository.js";
 
 class UsuarioFilterBuilder {
   constructor() {
     this.filtros = {};
     this.usuarioRepository = new UsuarioRepository();
     this.usuarioModel = Usuario;
+    this.campusRepository = new CampusRepository();
   }
 
   comNome(nome) {
-    if (nome) {
-      const nomeEscaped = this.escapeRegex(nome);
-      if (nome.length === 1) {
-        this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
-      } else {
-        this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
-      }
+    if (!nome) return this;
+    
+    const nomeEscaped = this.escapeRegex(nome);
+    if (nome.length === 1) {
+      this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
+    } else {
+      this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
     }
+    
     return this;
   }
 
@@ -32,19 +33,18 @@ class UsuarioFilterBuilder {
   }
 
   async comCampus(campus) {
-    if (campus) {
-      const CampusEncontrados = await this.campusRepository.buscarPorNome(
-        campus
-      );
-
-      const campusIds = campusEncontrados
-        ? Array.isArray(campusEncontrados)
-          ? campusEncontrados.map((u) => u._id)
-          : [campusEncontrados._id]
-        : [];
-
-      this.filtros.campus = { $in: campusIds };
-    }
+    if (!campus) return this;
+    
+    const campusEncontrados = await this.campusRepository.buscarPorNome(campus);
+    
+    const campusIds = campusEncontrados
+      ? Array.isArray(campusEncontrados)
+        ? campusEncontrados.map((u) => u._id)
+        : [campusEncontrados._id]
+      : [];
+    
+    this.filtros.campus = { $in: campusIds };
+    
     return this;
   }
 

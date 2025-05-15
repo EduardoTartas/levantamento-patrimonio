@@ -1,11 +1,6 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import UsuarioRepository from "../repositories/UsuarioRepository.js";
-import {
-    CustomError,
-    HttpStatusCodes,
-    messages,
-} from "../utils/helpers/index.js";
+import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
 
 class UsuarioService {
     constructor() {
@@ -14,9 +9,7 @@ class UsuarioService {
 
     async listar(req) {
         console.log("Estou no listar em UsuarioService");
-
-        const data = await this.repository.listar(req); 
-        return data;
+        return this.repository.listar(req);
     }
 
     async criar(parsedData) {
@@ -30,10 +23,8 @@ class UsuarioService {
             parsedData.senha = await bcrypt.hash(parsedData.senha, saltRounds);
         }
 
-        console.log("Estou processando o schema em UsuarioService" + parsedData);
-
-        const data = await this.repository.criar(parsedData);
-        return data;
+        console.log(`Estou processando o schema em UsuarioService ${parsedData}`);
+        return this.repository.criar(parsedData);
     }
 
     async atualizar(id, parsedData) {
@@ -41,30 +32,22 @@ class UsuarioService {
 
         await this.validateEmail(parsedData.email);
         await this.validateCpf(parsedData.cpf);
+        await this.ensureUserExists(id);
 
-        // Senha nunca deve ser atualizada
         delete parsedData.senha;
         delete parsedData.email;
 
-        await this.ensureUserExists(id);
-
-        const data = await this.repository.atualizar(id, parsedData);
-        return data;
+        return this.repository.atualizar(id, parsedData);
     }
 
     async deletar(id) {
         console.log("Estou no deletar em UsuarioService");
-
         await this.ensureUserExists(id);
-        
-        const data = await this.repository.deletar(id);
-        return data;
+        return this.repository.deletar(id);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // MÉTODOS AUXILIARES
-    ////////////////////////////////////////////////////////////////////////////////
-
+    // Métodos auxiliares
+    
     async validateEmail(email, id = null) {
         const usuarioExistente = await this.repository.buscarPorEmail(email, id);
         if (usuarioExistente) {
@@ -102,7 +85,7 @@ class UsuarioService {
         const usuarioExistente = await this.repository.buscarPorId(id);
         if (!usuarioExistente) {
             throw new CustomError({
-                statusCode: 404,
+                statusCode: HttpStatusCodes.NOT_FOUND.code,
                 errorType: "resourceNotFound",
                 field: "Usuário",
                 details: [],

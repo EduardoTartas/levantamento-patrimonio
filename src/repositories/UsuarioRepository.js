@@ -4,8 +4,7 @@ import UsuarioFilterBuilder from "./filters/UsuarioFilterBuilder.js";
 import { CustomError, messages } from "../utils/helpers/index.js";
 
 class UsuarioRepository {
-  constructor({Campus: CampusModel = Campus, Usuario: UsuarioModel = Usuario,} = {}) 
-  {
+  constructor({ Campus: CampusModel = Campus, Usuario: UsuarioModel = Usuario } = {}) {
     if (!UsuarioModel || typeof UsuarioModel.paginate !== "function") {
       throw new Error("The Usuario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
     }
@@ -33,12 +32,10 @@ class UsuarioRepository {
   }
 
   async buscarPorEmail(email, idIgnorado = null) {
-    const filtro = {email};
+    const filtro = { email };
 
     if (idIgnorado) {
-      filtro._id = {
-        $ne: idIgnorado,
-      };
+      filtro._id = { $ne: idIgnorado };
     }
 
     const documento = await this.model.findOne(filtro, "+senha");
@@ -46,12 +43,10 @@ class UsuarioRepository {
   }
 
   async buscarPorCpf(cpf, idIgnorado = null) {
-    const filtro = {cpf};
+    const filtro = { cpf };
 
     if (idIgnorado) {
-      filtro._id = {
-        $ne: idIgnorado,
-      };
+      filtro._id = { $ne: idIgnorado };
     }
 
     const documento = await this.model.findOne(filtro);
@@ -59,7 +54,6 @@ class UsuarioRepository {
   }
 
   async listar(req) {
-    console.log("Estou no listar em UsuarioRepository");
     const id = req.params.id || null;
 
     if (id) {
@@ -83,13 +77,17 @@ class UsuarioRepository {
 
       return data;
     }
+
     const { nome, ativo, page, campus } = req.query;
     const limite = Math.min(parseInt(req.query.limite, 10) || 10, 100);
 
     const filterBuilder = new UsuarioFilterBuilder()
       .comNome(nome || "")
       .comAtivo(ativo || "");
-
+    
+    await filterBuilder.comCampus(campus || "");
+  
+    // Validação do filtro de unidade para evitar erro de cast
     if (typeof filterBuilder.build !== "function") {
       throw new CustomError({
         statusCode: 500,
@@ -109,14 +107,11 @@ class UsuarioRepository {
         path: "campus",
         select: "nome _id",
       },
-      sort: {
-        nome: 1,
-      },
+      sort: { nome: 1 },
       lean: true,
     };
 
-    const resultado = await this.model.paginate(filtros, options);
-    return resultado;
+    return await this.model.paginate(filtros, options);
   }
 
   async criar(dadosUsuario) {
@@ -126,13 +121,12 @@ class UsuarioRepository {
 
   async atualizar(id, parsedData) {
     const usuario = await this.model
-      .findByIdAndUpdate(id, parsedData, {
-        new: true,
-      })
+      .findByIdAndUpdate(id, parsedData, { new: true })
       .populate({
         path: "campus",
         select: "nome _id",
-      });
+      })
+      .lean();
 
     if (!usuario) {
       throw new CustomError({
@@ -143,12 +137,12 @@ class UsuarioRepository {
         customMessage: messages.error.resourceNotFound("Usuário"),
       });
     }
+    
     return usuario;
   }
 
   async deletar(id) {
-    const usuario = await this.model.findByIdAndDelete(id);
-    return usuario;
+    return await this.model.findByIdAndDelete(id);
   }
 }
 

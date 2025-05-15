@@ -47,6 +47,3 @@ export default async function levantamentoSeed() {
 
     console.log("Levantamentos gerados com sucesso");
 }
-
-DbConnect.conectar();
-await levantamentoSeed();

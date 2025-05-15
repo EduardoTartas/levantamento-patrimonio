@@ -4,9 +4,9 @@ import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 
 class LoginController {
-    // constructor() {
+     constructor() {
     //     // Chamará o service    
-    // }
+     }
 
     validarDados() {
         // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema

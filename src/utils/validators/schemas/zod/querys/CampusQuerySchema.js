@@ -1,11 +1,11 @@
 import { z } from "zod";
 import mongoose from 'mongoose';
 
-export const UnidadeIdSchema = z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
+export const CampusIdSchema = z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
     message: "ID inválido",
 });
 
-export const UnidadeQuerySchema = z.object({
+export const CampusQuerySchema = z.object({
     nome: z
         .string()
         .optional()
@@ -13,7 +13,7 @@ export const UnidadeQuerySchema = z.object({
             message: "Nome não pode ser vazio",
         })
         .transform((val) => val?.trim()),
-    locallidade: z
+    cidade: z
         .string()
         .optional()
         .refine((val) => !val || val.trim().length > 0, {

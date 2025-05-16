@@ -23,12 +23,13 @@ class CampusFilterBuilder {
     }
 
     comAtivo(ativo) {
-        if (ativo === 'true') {
+        if (ativo === "true" || ativo === true) {
             this.filtros.status = true;
-        } else if (ativo === 'false') {
+        } 
+        else if (ativo === "false" || ativo === false) {
             this.filtros.status = false;
         }
-        return this;
+    return this;
     }
 
     build() {

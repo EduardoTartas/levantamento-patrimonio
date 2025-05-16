@@ -19,6 +19,13 @@ export const UsuarioQuerySchema = z.object({
         .refine((value) => !value || value === "true" || value === "false", {
             message: "Ativo deve ser 'true' ou 'false'",
         }),
+        campus: z
+        .string()
+        .optional()
+        .refine((val) => !val || val.trim().length > 0, {
+            message: "campus não pode ser vazio",
+        })
+        .transform((val) => val?.trim()),
     page: z
         .string()
         .optional()

@@ -10,17 +10,11 @@ import logRoutes from "../middlewares/LogRoutesMiddleware.js";
 
 //routes
 import usuarios from './usuarioRoutes.js';
-//import grupos from './grupoRoutes.js';
-//import rotas from './rotaRoutes.js';
-//import unidades from './unidadeRoutes.js';
-//import auth from './authRoutes.js';
-//import cursos from "./cursoRoutes.js";
-//import turmas from "./turmaRoutes.js";
-//import estudantes from "./estudanteRoutes.js";
-//import projetos from "./projetoRoutes.js";
-//import estagios from "./estagioRoutes.js";
-//import refeicaoTurmas from "./refeicaoTurmaRoutes.js";
-//import refeicoes from "./refeicoesRoutes.js";
+import importacao from './importacaoRoutes.js';
+import levantamento from './levantamentoRoutes.js';
+import login from './loginRoutes.js';
+import relatorio from './relatorioRoutes.js';
+import campus from './campusRoutes.js';
 
 dotenv.config();
 
@@ -43,6 +37,11 @@ const routes = (app) => {
     app.use(express.json(),
     
         usuarios,
+        importacao,
+        levantamento,
+        login,
+        relatorio,
+        campus
        
     );
 

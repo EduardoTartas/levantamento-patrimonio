@@ -17,16 +17,17 @@ class Campus{
                 required: true,
             },
             bairro: {
-                type: String,
-                required: true,
+                type: String
             },
             rua: {
-                type: String,
-                required: true,
+                type: String
             },
             numeroResidencia: {
-                type: String,
-                required: true,
+                type: String
+            },
+            status: {
+                type: Boolean,
+                default: true
             },
         }, {
             timestamps: true,

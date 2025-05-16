@@ -31,11 +31,11 @@ const UsuarioSchema = z.object({
     .min(1, "Campo email é obrigatório."),
   senha: z
     .string()
-    .min(1, "A senha é obrigatória.") // Made senha required as per Mongoose model
-    .regex(senhaRegex, {
+    .refine((val) => val === undefined || senhaRegex.test(val), {
       message:
         "A senha deve ter pelo menos 8 caracteres, com 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial.",
-    }),
+    })
+    .optional(),
   cargo: z.enum(["Comissionado", "Funcionario Cpalm"], {
     errorMap: () => {
       return {
@@ -50,7 +50,7 @@ const UsuarioUpdateSchema = UsuarioSchema.partial().extend({
   // Make senha optional for updates, but if provided, it must match the regex
   senha: z
     .string()
-    .regex(senhaRegex, {
+    .refine((val) => val === undefined || senhaRegex.test(val), {
         message:
           "A senha deve ter pelo menos 8 caracteres, com 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial.",
       })

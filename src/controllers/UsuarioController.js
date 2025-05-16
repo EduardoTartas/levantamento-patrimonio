@@ -35,10 +35,12 @@ class UsuarioController {
     const parsedData = UsuarioSchema.parse(req.body);
 
     let data = await this.service.criar(parsedData);
-
-    let usuarioLimpo = delete data.senha;
-
+    
+    let usuarioLimpo = data.toObject();
+    delete usuarioLimpo.senha;
+   
     return CommonResponse.created(res, usuarioLimpo);
+  
   }
 
   // Atualiza um usuário existente.

@@ -78,7 +78,7 @@ class UsuarioRepository {
       return data;
     }
 
-    const { nome, ativo, page, campus } = req.query;
+    const { nome, ativo = true, page, campus } = req.query;
     const limite = Math.min(parseInt(req.query.limite, 10) || 10, 100);
 
     const filterBuilder = new UsuarioFilterBuilder()

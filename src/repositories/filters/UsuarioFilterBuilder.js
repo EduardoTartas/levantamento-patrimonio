@@ -23,7 +23,7 @@ class UsuarioFilterBuilder {
     return this;
   }
 
-  comAtivo(ativo = true) {
+  comAtivo(ativo) {
     if (ativo === "true" || ativo === true) {
       this.filtros.status = true;
     } else if (ativo === "false" || ativo === false) {

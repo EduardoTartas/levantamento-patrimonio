@@ -22,15 +22,15 @@ class CampusService {
         console.log('Estou no atualizar em UnidadeService');
 
         await this.validateNomeCidade(parsedData.nome, parsedData.cidade, id);
-        await this.ensureExists(id);
+        await this.ensureCampExists(id);
 
         return await this.repository.atualizar(id, parsedData);
     }
 
     async deletar(id) {
         console.log('Estou no deletar em CampusService');
-
-        await this.ensureExists(id);
+        
+        await this.ensureCampExists(id);
         const usuariosAssociados = await this.repository.verificarUsuariosAssociados(id);
 
         if (usuariosAssociados) {
@@ -62,14 +62,17 @@ class CampusService {
         }
     }
 
-    async ensureExists(id) {
+    async ensureCampExists(id) {
         const campusExistente = await this.repository.buscarPorId(id);
         if (!campusExistente) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.NOT_FOUND.code,
                 errorType: 'resourceNotFound',
                 field: 'Campus',
-                details: [],
+                details: [{
+                    path:"campus",
+                    message: "Campus não encontrado."
+                }],
                 customMessage: messages.error.resourceNotFound('Campus'),
             });
         }

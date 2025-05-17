@@ -32,9 +32,9 @@ class CampusRepository {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
-                field: 'Unidade',
+                field: 'Campus',
                 details: [],
-                customMessage: messages.error.resourceNotFound('Unidade')
+                customMessage: messages.error.resourceNotFound('Campus')
             });
         }
         

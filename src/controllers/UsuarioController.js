@@ -48,7 +48,9 @@ class UsuarioController {
     console.log("Estou no atualizar em UsuarioController");
 
     const { id } = req.params;
-    UsuarioIdSchema.parse(id);
+    if(id){
+      UsuarioIdSchema.parse(id);
+    }
 
     const parsedData = UsuarioUpdateSchema.parse(req.body);
 
@@ -66,17 +68,11 @@ class UsuarioController {
   async deletar(req, res) {
     console.log("Estou no deletar em UsuarioController");
 
-    const { id } = req.params || {};
-    if (!id) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: "validationError",
-        field: "id",
-        details: [],
-        customMessage: "ID do usuário é obrigatório para deletar.",
-      });
+    const { id } = req.params;
+    if(id){
+      UsuarioIdSchema.parse(id);
     }
-
+    
     const data = await this.service.deletar(id);
     return CommonResponse.success(res, data, 200, "Usuário excluído com sucesso.");
   }

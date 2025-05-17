@@ -56,14 +56,8 @@ class UnidadeController {
         console.log('Estou no deletar em CampusController');
 
         const { id } = req.params || null;
-         if (!id) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: "validationError",
-                field: "id",
-                details: [],
-                customMessage: "ID do campus é obrigatório para deletar.",
-            });
+        if (id) {
+            CampusIdSchema.parse(id);
         }
 
         const data = await this.service.deletar(id);

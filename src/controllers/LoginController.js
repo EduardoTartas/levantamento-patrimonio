@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export class LoginController {
+class LoginController {
     constructor() {
         this.repository = new LoginRepository;
         this.service = new LoginService(process.env.JWT_SECRET, process.env.JWT_EXPIRES_IN, this.repository);
@@ -23,3 +23,5 @@ export class LoginController {
         });
     }
 }
+
+export default LoginController;

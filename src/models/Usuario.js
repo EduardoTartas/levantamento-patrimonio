@@ -26,7 +26,7 @@ class Usuario{
             },
             senha: {
                 type: String,
-                select: false
+                select: false,
             },
             cargo: {
                 type: String,
@@ -35,7 +35,20 @@ class Usuario{
             status: {
                 type: Boolean,
                 default: true,
-            }
+            },
+            tokenUnico: { // token único para recuperação de senha
+                type: String, 
+                select: false 
+            }, 
+            refreshtoken: { // Refresh token para geração de access token de autenticação longa duração 7 dias para invalidação
+                type: String, 
+                select: false 
+            }, 
+            accesstoken: { // Refresh token para  autenticação curta longa 15 minutos para invalidação
+                type: String,
+                 select: false 
+            }, 
+
         }, {
             timestamps: true,
             versionKey: false

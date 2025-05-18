@@ -15,6 +15,7 @@ export default async function campusSeed() {
             bairro: fakerbr.lorem.word(15),
             rua: fakerbr.address.streetName().toString(),
             numeroResidencia: fakerbr.address.streetAddress().toString(),
+            status: fakerbr.datatype.boolean(),
         };
 
         await Campus.create(campus);

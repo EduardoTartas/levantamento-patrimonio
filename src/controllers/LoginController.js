@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 export class LoginController {
     constructor() {
         this.repository = new LoginRepository;

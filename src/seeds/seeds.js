@@ -49,4 +49,5 @@ async function main() {
 }
 
 // Executa todas as seeds
-main();
+await main();
+process.exit(0);

@@ -14,13 +14,14 @@ class UsuarioFilterBuilder {
     if (!nome) return this;
     
     const nomeEscaped = this.escapeRegex(nome);
-    if (nome.length === 1) {
-      this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
-    } else {
-      this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
-    }
-    
-    return this;
+        if (nome.length === 1) {
+            this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
+        } 
+        else {
+            this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
+        }
+        
+        return this;
   }
 
   comAtivo(ativo) {

@@ -15,6 +15,7 @@ import levantamento from './levantamentoRoutes.js';
 import login from './loginRoutes.js';
 import relatorio from './relatorioRoutes.js';
 import campus from './campusRoutes.js';
+//import inventario from './inventarioRoutes.js';
 
 dotenv.config();
 
@@ -41,7 +42,8 @@ const routes = (app) => {
         levantamento,
         login,
         relatorio,
-        campus
+        campus,
+       // inventario
        
     );
 

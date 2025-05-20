@@ -9,15 +9,23 @@ class CampusFilterBuilder {
     }
 
     comNome(nome) {
-        if (nome) {
-            this.filtros.nome = { $regex: nome, $options: 'i' };
+    if (!nome) return this;
+    
+    const nomeEscaped = this.escapeRegex(nome);
+        if (nome.length === 1) {
+            this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
+        } 
+        else {
+            this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
         }
+        
         return this;
-    }
+  }
 
     comCidade(cidade) {
         if (cidade) {
-            this.filtros.cidade = { $regex: cidade, $options: 'i' };
+            cidadeEscaped = this.escapeRegex(cidade);
+            this.filtros.cidade = { $regex: cidadeEscaped, $options: 'i' };
         }
         return this;
     }
@@ -31,6 +39,10 @@ class CampusFilterBuilder {
         }
     return this;
     }
+    
+    escapeRegex(texto) {
+    return texto.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  }
 
     build() {
         return this.filtros;

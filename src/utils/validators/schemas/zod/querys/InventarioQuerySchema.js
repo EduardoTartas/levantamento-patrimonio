@@ -1,11 +1,11 @@
 import { z } from "zod";
 import mongoose from 'mongoose';
 
-export const CursoIdSchema = z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
+export const InventarioIdSchema = z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
     message: "ID inválido",
 });
 
-export const CursoQuerySchema = z.object({
+export const InventarioQuerySchema = z.object({
     nome: z
         .string()
         .optional()
@@ -13,13 +13,18 @@ export const CursoQuerySchema = z.object({
             message: "Nome não pode ser vazio",
         })
         .transform((val) => val?.trim()),
-    codigo: z
+    ativo: z
+        .string()
+        .optional()
+        .refine((val) => !val || val === "true" || val === "false", {
+            message: "Ativo deve ser 'true' ou 'false'",
+        }),
+    data: z
         .string()
         .optional()
         .refine((val) => !val || val.trim().length > 0, {
-            message: "Código não pode ser vazio",
-        })
-        .transform((val) => val?.trim()),
+            message: "Data não pode ser vazia",
+        }),
     page: z
         .string()
         .optional()

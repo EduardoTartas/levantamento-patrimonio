@@ -36,7 +36,9 @@ class UsuarioService {
         await this.validateEmail(parsedData.email);
         await this.validateCpf(parsedData.cpf);
         await this.ensureUserExists(id);
-        await this.campusService.ensureCampExists(parsedData.campus);
+         if (parsedData.campus) {
+            await this.campusService.ensureCampExists(parsedData.campus);
+        }
 
         delete parsedData.senha;
         delete parsedData.email;

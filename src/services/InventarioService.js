@@ -25,9 +25,11 @@ class InventarioService {
     async atualizar(id, parsedData) {
         console.log("Estou no atualizar em InventarioService");
 
-        await this.ensureInvExists(id);
-        await this.campusService.ensureCampExists(parsedData.campus);
-
+        await this.ensureInvExists(id); 
+        if (parsedData.campus) {
+            await this.campusService.ensureCampExists(parsedData.campus);
+        }
+    
         return this.repository.atualizar(id, parsedData);
     }
 

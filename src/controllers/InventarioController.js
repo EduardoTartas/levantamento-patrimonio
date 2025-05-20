@@ -1,67 +1,77 @@
-//import CampusService from '../services/CampusService.js';
-import { CommonResponse, CustomError, HttpStatusCodes} from '../utils/helpers/index.js';
-import { InventarioQuerySchema, InventarioIdSchema } from '../utils/validators/schemas/zod/querys/InventarioQuerySchema.js';
-import { InventarioSchema} from '../utils/validators/schemas/zod/InventarioSchema.js';
+// src/controllers/UsuarioController.js
+import InventarioService from "../services/InventarioService.js";
+import {InventarioQuerySchema, InventarioIdSchema} from "../utils/validators/schemas/zod/querys/InventarioQuerySchema.js";
+import {InventarioSchema, InventarioUpdateSchema} from "../utils/validators/schemas/zod/InventarioSchema.js";
+import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
 class InventarioController {
-    constructor() {
-        //this.service = new CampusService();
+  constructor() {
+    this.service = new InventarioService();
+  }
+
+  // Lista usuários. Se um ID é fornecido, retorna um único objeto.
+  async listar(req, res) {
+    console.log("Estou no listar em InventarioController");
+
+    const { id } = req.params || {};
+    if (id) {
+      InventarioIdSchema.parse(id);
     }
 
-     // Lista inventarios. Se um ID é fornecido, retorna um único objeto.
-    async listar(req, res) {
-        console.log('Estou no listar em InventarioControlle, enviando req para InventarioControlle');
-
-        const { id } = req.params || null;
-        if (id) {
-            InventarioIdSchema.parse(id);
-        }
-
-        const query = req.query || {};
-        if (Object.keys(query).length !== 0) {
-            await InventarioQuerySchema.parseAsync(query);
-        }
-
-        //const data = await this.service.listar(req);
-        return CommonResponse.success(res, data);
+    const query = req.query || {};
+    if (Object.keys(query).length !== 0) {
+      await InventarioQuerySchema.parseAsync(query);
     }
 
-    async criar(req, res) {
-        console.log('Estou no criar em InventarioControlle');
+    const data = await this.service.listar(req);
+    return CommonResponse.success(res, data);
+  }
 
-        const parsedData = CampusSchema.parse(req.body);
+  async criar(req, res) {
+    console.log("Estou no criar em InventarioController");
 
-        const data = await this.service.criar(parsedData);
+    const parsedData = InventarioSchema.parse(req.body);
 
-        return CommonResponse.created(res, data);
+    let data = await this.service.criar(parsedData);
+    
+    data = data.toObject();
+   
+    return CommonResponse.created(res, data);
+  
+  }
+
+  // Atualiza um usuário existente.
+  async atualizar(req, res) {
+    console.log("Estou no atualizar em InventarioController");
+
+    const { id } = req.params;
+    if(id){
+      InventarioIdSchema.parse(id);
     }
 
-    async atualizar(req, res) {
-        console.log('Estou no atualizar em InventarioControlle');
+    const parsedData = InventarioUpdateSchema.parse(req.body);
 
-        const { id } = req.params || null;
-        if (id) {
-            CampusIdSchema.parse(id);
-        }
+    const data = await this.service.atualizar(id, parsedData);
 
-        const parsedData = CampusUpdateSchema.parse(req.body);
+    return CommonResponse.success(
+      res,
+      data,
+      200,
+      "Inventario atualizado com sucesso."
+    );
+  }
 
-        const data = await this.service.atualizar(id, parsedData);
+  async deletar(req, res) {
+    console.log("Estou no deletar em InventarioController");
 
-        return CommonResponse.success(res, data);
+    const { id } = req.params;
+    if(id){
+      InventarioIdSchema.parse(id);
     }
-
-    async deletar(req, res) {
-        console.log('Estou no deletar em InventarioControlle');
-
-        const { id } = req.params || null;
-        if (id) {
-            CampusIdSchema.parse(id);
-        }
-
-        const data = await this.service.deletar(id);
-        return CommonResponse.success(res, data, 200, 'Inventario deletado com sucesso');
-    }
+    
+    const data = await this.service.deletar(id);
+    return CommonResponse.success(res, data, 200, "Inventario excluído com sucesso.");
+  }
 }
 
 export default InventarioController;

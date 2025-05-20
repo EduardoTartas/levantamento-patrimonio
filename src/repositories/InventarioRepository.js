@@ -8,7 +8,7 @@ class InventarioRepository {
     if (!InventarioModel || typeof InventarioModel.paginate !== "function") {
       throw new Error("The inventario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
     }
-    this.model = UsuarioModel;
+    this.model = InventarioModel;
   }
 
   async buscarPorId(id, includeTokens = false) {

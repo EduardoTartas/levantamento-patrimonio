@@ -49,18 +49,34 @@ class InventarioFilterBuilder {
         return this;
     }
 
-    comData(data) {
+   comData(data) {
         if (data) {
-            const date = new Date(data);
-            date.setHours(0, 0, 0, 0);
-            
-            const endDate = new Date(date);
-            endDate.setHours(23, 59, 59, 999);
-            
-            this.filtros.data = {
-                $gte: date,
-                $lte: endDate
-            };
+            let dateParts;
+            let dateObj;
+
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(data)) {
+                dateParts = data.split('/');
+                dateObj = new Date(
+                    parseInt(dateParts[2], 10),
+                    parseInt(dateParts[1], 10) - 1,
+                    parseInt(dateParts[0], 10)
+                );
+            } else {
+                dateObj = new Date(data);
+            }
+
+            if (!isNaN(dateObj.getTime())) {
+                const startDate = new Date(dateObj);
+                startDate.setHours(0, 0, 0, 0);
+
+                const endDate = new Date(dateObj);
+                endDate.setHours(23, 59, 59, 999);
+
+                this.filtros.data = {
+                    $gte: startDate,
+                    $lte: endDate
+                };
+            }
         }
 
         return this;

@@ -10,13 +10,14 @@ const inventarioController = new InventarioController();
 
 router
   // Rota para cadastrar novo inventário
-  .post("inventario/",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.cadastrar.bind(inventarioController)))
+  .post("/inventarios",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.criar.bind(inventarioController)))
   // Rota para listar inventários com filtros
-  .get("inventario/",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.listar.bind(inventarioController)))
+  .get("/inventarios",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.listar.bind(inventarioController)))
+  .get("/inventarios/:id",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.listar.bind(inventarioController)))
   // Rota para finalizar inventário ou editar inventário
-  .patch("/inventario/:id", /*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.atualizar.bind(inventarioController)))
-  .put("/inventario/:id", /*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.atualizar.bind(inventarioController)))
+  .patch("/inventarios/:id", /*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.atualizar.bind(inventarioController)))
+  .put("/inventarios/:id", /*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.atualizar.bind(inventarioController)))
   // Rota para buscar inventário por ID
-  .delete("/campus/:id",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.deletar.bind(inventarioController)));
+  .delete("/inventarios/:id",/*AuthMiddleware,authPermission*/asyncWrapper(inventarioController.deletar.bind(inventarioController)));
 
 export default router;

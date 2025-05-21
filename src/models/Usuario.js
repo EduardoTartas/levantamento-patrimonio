@@ -46,7 +46,7 @@ class Usuario{
             }, 
             accesstoken: { // Refresh token para  autenticação curta longa 15 minutos para invalidação
                 type: String,
-                 select: false 
+                select: false 
             }, 
 
         }, {

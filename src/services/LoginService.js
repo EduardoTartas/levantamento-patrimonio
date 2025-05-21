@@ -2,7 +2,6 @@
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
-import Usuario from '../models/Usuario.js';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 
@@ -23,13 +22,13 @@ export class LoginService {
 
             const erro = resultado.error.errors[0];
             // Aqui está passando o erro para o middleware de tratamento de erros
-            return next(new AuthenticationError(erro.message));
+            throw new AuthenticationError(erro.message);
         }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
         if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
-            return next(new AuthenticationError('Email ou senha inválidos'));
+            throw new AuthenticationError('Email ou senha inválidos');
         };
 
         // gera o token jwt

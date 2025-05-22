@@ -90,7 +90,7 @@
       "/node_modules/"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/src/test/jest.setup.js"
+      "<rootDir>/jest.setup.js"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",

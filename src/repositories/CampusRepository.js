@@ -32,9 +32,9 @@ class CampusRepository {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
-                field: 'Unidade',
+                field: 'Campus',
                 details: [],
-                customMessage: messages.error.resourceNotFound('Unidade')
+                customMessage: messages.error.resourceNotFound('Campus')
             });
         }
         
@@ -60,13 +60,13 @@ class CampusRepository {
             return data;
         }
 
-        const { nome, cidade, ativo, page } = req.query || {};
+        const { nome, cidade, ativo = true, page } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
         
         const filterBuilder = new CampusFilterBuilder()
-            .comNome(nome)
-            .comCidade(cidade)
-            .comAtivo(ativo);
+            .comNome(nome || "")
+            .comCidade(cidade || "")
+            .comAtivo(ativo || "");
 
         if (typeof filterBuilder.build !== 'function') {
             throw new CustomError({

@@ -20,7 +20,7 @@ class Inventario{
             },
             status: {
                 type: Boolean,
-                default: "false",
+                default: "true",
             },
         }, {
             timestamps: true,

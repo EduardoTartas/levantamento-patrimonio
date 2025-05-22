@@ -4,7 +4,7 @@ import { CommonResponse, CustomError, HttpStatusCodes} from '../utils/helpers/in
 import { CampusQuerySchema, CampusIdSchema } from '../utils/validators/schemas/zod/querys/CampusQuerySchema.js';
 import { CampusSchema, CampusUpdateSchema } from '../utils/validators/schemas/zod/CampusSchema.js';
 
-class UnidadeController {
+class CampusController {
     constructor() {
         this.service = new CampusService();
     }
@@ -56,14 +56,8 @@ class UnidadeController {
         console.log('Estou no deletar em CampusController');
 
         const { id } = req.params || null;
-         if (!id) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: "validationError",
-                field: "id",
-                details: [],
-                customMessage: "ID do campus é obrigatório para deletar.",
-            });
+        if (id) {
+            CampusIdSchema.parse(id);
         }
 
         const data = await this.service.deletar(id);
@@ -71,4 +65,4 @@ class UnidadeController {
     }
 }
 
-export default UnidadeController;
+export default CampusController;

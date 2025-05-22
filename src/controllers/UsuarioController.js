@@ -1,18 +1,8 @@
 // src/controllers/UsuarioController.js
 import UsuarioService from "../services/UsuarioService.js";
-import {
-  UsuarioQuerySchema,
-  UsuarioIdSchema,
-} from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
-import {
-  UsuarioSchema,
-  UsuarioUpdateSchema,
-} from "../utils/validators/schemas/zod/UsuarioSchema.js";
-import {
-  CommonResponse,
-  CustomError,
-  HttpStatusCodes,
-} from "../utils/helpers/index.js";
+import {UsuarioQuerySchema, UsuarioIdSchema} from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
+import {UsuarioSchema, UsuarioUpdateSchema} from "../utils/validators/schemas/zod/UsuarioSchema.js";
+import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
 const getDirname = () => path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,10 +35,12 @@ class UsuarioController {
     const parsedData = UsuarioSchema.parse(req.body);
 
     let data = await this.service.criar(parsedData);
-
-    let usuarioLimpo = delete data.senha;
-
+    
+    let usuarioLimpo = data.toObject();
+    delete usuarioLimpo.senha;
+   
     return CommonResponse.created(res, usuarioLimpo);
+  
   }
 
   // Atualiza um usuário existente.
@@ -56,7 +48,9 @@ class UsuarioController {
     console.log("Estou no atualizar em UsuarioController");
 
     const { id } = req.params;
-    UsuarioIdSchema.parse(id);
+    if(id){
+      UsuarioIdSchema.parse(id);
+    }
 
     const parsedData = UsuarioUpdateSchema.parse(req.body);
 
@@ -74,17 +68,11 @@ class UsuarioController {
   async deletar(req, res) {
     console.log("Estou no deletar em UsuarioController");
 
-    const { id } = req.params || {};
-    if (!id) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: "validationError",
-        field: "id",
-        details: [],
-        customMessage: "ID do usuário é obrigatório para deletar.",
-      });
+    const { id } = req.params;
+    if(id){
+      UsuarioIdSchema.parse(id);
     }
-
+    
     const data = await this.service.deletar(id);
     return CommonResponse.success(res, data, 200, "Usuário excluído com sucesso.");
   }

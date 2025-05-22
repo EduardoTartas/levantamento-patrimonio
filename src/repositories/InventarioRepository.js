@@ -1,14 +1,14 @@
-import Usuario from "../models/Usuario.js";
+import Inventario from "../models/Inventario.js";
 import Campus from "../models/Campus.js";
-import UsuarioFilterBuilder from "./filters/UsuarioFilterBuilder.js";
+import InventarioFilterBuilder from "./filters/InventarioFilterBuild.js"
 import { CustomError, messages } from "../utils/helpers/index.js";
 
-class UsuarioRepository {
-  constructor({ Campus: CampusModel = Campus, Usuario: UsuarioModel = Usuario } = {}) {
-    if (!UsuarioModel || typeof UsuarioModel.paginate !== "function") {
-      throw new Error("The Usuario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
+class InventarioRepository {
+  constructor({ Campus: CampusModel = Campus, Inventario: InventarioModel = Inventario } = {}) {
+    if (!InventarioModel || typeof InventarioModel.paginate !== "function") {
+      throw new Error("The inventario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
     }
-    this.model = UsuarioModel;
+    this.model = InventarioModel;
   }
 
   async buscarPorId(id, includeTokens = false) {
@@ -23,34 +23,12 @@ class UsuarioRepository {
       throw new CustomError({
         statusCode: 404,
         errorType: "resourceNotFound",
-        field: "Usuário",
+        field: "Inventário",
         details: [],
-        customMessage: messages.error.resourceNotFound("Usuário"),
+        customMessage: messages.error.resourceNotFound("Inventário"),
       });
     }
     return user;
-  }
-
-  async buscarPorEmail(email, idIgnorado = null) {
-    const filtro = { email };
-
-    if (idIgnorado) {
-      filtro._id = { $ne: idIgnorado };
-    }
-
-    const documento = await this.model.findOne(filtro, "+senha");
-    return documento;
-  }
-
-  async buscarPorCpf(cpf, idIgnorado = null) {
-    const filtro = { cpf };
-
-    if (idIgnorado) {
-      filtro._id = { $ne: idIgnorado };
-    }
-
-    const documento = await this.model.findOne(filtro);
-    return documento;
   }
 
   async listar(req) {
@@ -69,32 +47,33 @@ class UsuarioRepository {
         throw new CustomError({
           statusCode: 404,
           errorType: "resourceNotFound",
-          field: "Usuário",
+          field: "Inventário",
           details: [],
-          customMessage: messages.error.resourceNotFound("Usuário"),
+          customMessage: messages.error.resourceNotFound("Inventário"),
         });
       }
 
       return data;
     }
 
-    const { nome, ativo = true, page, campus } = req.query;
+    const { nome, ativo = true, data, page, campus } = req.query;
     const limite = Math.min(parseInt(req.query.limite, 10) || 10, 100);
 
-    const filterBuilder = new UsuarioFilterBuilder()
+    const filterBuilder = new InventarioFilterBuilder()
       .comNome(nome || "")
-      .comAtivo(ativo || "");
+      .comAtivo(ativo || "")
+      .comData(data || "");
     
     await filterBuilder.comCampus(campus || "");
   
-    // Validação do filtro de unidade para evitar erro de cast
+    // Validação do filtro de Inventário para evitar erro de cast
     if (typeof filterBuilder.build !== "function") {
       throw new CustomError({
         statusCode: 500,
         errorType: "internalServerError",
-        field: "Usuário",
+        field: "Inventário",
         details: [],
-        customMessage: messages.error.internalServerError("Usuário"),
+        customMessage: messages.error.internalServerError("Inventário"),
       });
     }
 
@@ -114,13 +93,13 @@ class UsuarioRepository {
     return await this.model.paginate(filtros, options);
   }
 
-  async criar(dadosUsuario) {
-    const usuario = new this.model(dadosUsuario);
-    return await usuario.save();
+  async criar(parsedData) {
+    const inventario = new this.model(parsedData);
+    return await inventario.save();
   }
 
   async atualizar(id, parsedData) {
-    const usuario = await this.model
+    const inventario = await this.model
       .findByIdAndUpdate(id, parsedData, { new: true })
       .populate({
         path: "campus",
@@ -128,17 +107,17 @@ class UsuarioRepository {
       })
       .lean();
 
-    if (!usuario) {
+    if (!inventario) {
       throw new CustomError({
         statusCode: 404,
         errorType: "resourceNotFound",
-        field: "Usuário",
+        field: "Inventário",
         details: [],
-        customMessage: messages.error.resourceNotFound("Usuário"),
+        customMessage: messages.error.resourceNotFound("Inventário"),
       });
     }
     
-    return usuario;
+    return inventario;
   }
 
   async deletar(id) {
@@ -146,4 +125,4 @@ class UsuarioRepository {
   }
 }
 
-export default UsuarioRepository;
+export default InventarioRepository;

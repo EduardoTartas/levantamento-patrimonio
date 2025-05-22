@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
 import UsuarioRepository from "../repositories/UsuarioRepository.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
+import CampusService from "./CampusService.js";
 
 class UsuarioService {
     constructor() {
         this.repository = new UsuarioRepository();
+        this.campusService = new CampusService();
     }
 
     async listar(req) {
@@ -17,6 +19,7 @@ class UsuarioService {
 
         await this.validateEmail(parsedData.email);
         await this.validateCpf(parsedData.cpf);
+        await this.campusService.ensureCampExists(parsedData.campus);
 
         if (parsedData.senha) {
             const saltRounds = 10;
@@ -33,6 +36,9 @@ class UsuarioService {
         await this.validateEmail(parsedData.email);
         await this.validateCpf(parsedData.cpf);
         await this.ensureUserExists(id);
+         if (parsedData.campus) {
+            await this.campusService.ensureCampExists(parsedData.campus);
+        }
 
         delete parsedData.senha;
         delete parsedData.email;
@@ -88,7 +94,10 @@ class UsuarioService {
                 statusCode: HttpStatusCodes.NOT_FOUND.code,
                 errorType: "resourceNotFound",
                 field: "Usuário",
-                details: [],
+                details: [{
+                    path: "id",
+                    message: "Usuário não encontrado."
+                }],
                 customMessage: messages.error.resourceNotFound("Usuário"),
             });
         }

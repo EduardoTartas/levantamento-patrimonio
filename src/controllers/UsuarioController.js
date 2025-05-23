@@ -4,7 +4,7 @@ import {UsuarioQuerySchema, UsuarioIdSchema} from "../utils/validators/schemas/z
 import {UsuarioSchema, UsuarioUpdateSchema} from "../utils/validators/schemas/zod/UsuarioSchema.js";
 import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
-const getDirname = () => path.dirname(fileURLToPath(import.meta.url));
+//const getDirname = () => path.dirname(fileURLToPath(import.meta.url));
 
 class UsuarioController {
   constructor() {

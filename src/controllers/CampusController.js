@@ -13,7 +13,7 @@ class CampusController {
     async listar(req, res) {
         console.log('Estou no listar em UnidadeController, enviando req para UnidadeService');
 
-        const { id } = req.params || null;
+        const { id } = req.params || {};
         if (id) {
             CampusIdSchema.parse(id);
         }

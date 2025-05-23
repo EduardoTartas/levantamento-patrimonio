@@ -9,23 +9,26 @@ export const UsuarioQuerySchema = z.object({
     nome: z
         .string()
         .optional()
-        .refine((val) => !val || val.trim().length > 0, {
+        .refine((val) => val === undefined || val.trim().length > 0, {
             message: "Nome não pode ser vazio",
         })
         .transform((val) => val?.trim()),
+
     ativo: z
         .string()
         .optional()
-        .refine((value) => !value || value === "true" || value === "false", {
+        .refine((value) => value === undefined || value === "true" || value === "false", {
             message: "Ativo deve ser 'true' ou 'false'",
-        }),
-        campus: z
+        }), 
+
+    campus: z
         .string()
         .optional()
-        .refine((val) => !val || val.trim().length > 0, {
+        .refine((val) => val === undefined || val.trim().length > 0, {
             message: "campus não pode ser vazio",
         })
         .transform((val) => val?.trim()),
+
     page: z
         .string()
         .optional()
@@ -33,6 +36,7 @@ export const UsuarioQuerySchema = z.object({
         .refine((val) => Number.isInteger(val) && val > 0, {
             message: "Page deve ser um número inteiro maior que 0",
         }),
+
     limite: z
         .string()
         .optional()

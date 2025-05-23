@@ -47,7 +47,7 @@ describe('CampusController', () => {
     beforeEach(() => {
         controller = new CampusController();
         req = { params: {}, query: {}, body: {} };
-        res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+        res = mockResponse();
 
         // Mock os métodos do service
         controller.service.listar = jest.fn();

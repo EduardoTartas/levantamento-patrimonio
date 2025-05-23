@@ -55,6 +55,7 @@ const UsuarioUpdateSchema = UsuarioSchema.partial().extend({
           "A senha deve ter pelo menos 8 caracteres, com 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial.",
       })
     .optional(),
+    status: z.boolean().default(true),
 });
 
 export { UsuarioSchema, UsuarioUpdateSchema };

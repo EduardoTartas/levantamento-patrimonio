@@ -1,8 +1,6 @@
-import Usuario from '../../models/Usuario.js'; // Assuming this is the path to your compiled model
+import Usuario from '../../models/Usuario.js'; 
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-
-// src/tests/unit/models/Usuario.test.js
 
 let mongoServer;
 
@@ -12,7 +10,7 @@ beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
-    await Usuario.createIndexes(); // Ensure unique indexes are created
+    await Usuario.createIndexes(); 
 });
 
 afterAll(async () => {

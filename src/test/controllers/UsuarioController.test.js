@@ -34,8 +34,6 @@ jest.mock('../../utils/helpers/index.js', () => ({
         success: jest.fn(),
         created: jest.fn(),
     },
-    // Assumindo que CustomError e HttpStatusCodes possam ser usados em outros lugares,
-    // mas não diretamente pelos métodos do controller que estão sendo mockados.
     CustomError: jest.fn(),
     HttpStatusCodes: {},
 }));
@@ -47,7 +45,6 @@ describe('UsuarioController', () => {
     let mockRes;
 
     beforeEach(() => {
-        // Reseta os mocks para cada teste
         jest.clearAllMocks();
 
         usuarioController = new UsuarioController();
@@ -56,15 +53,14 @@ describe('UsuarioController', () => {
             query: {},
             body: {},
         };
-        mockRes = {}; // Os métodos do CommonResponse atuarão como res para as asserções
+        mockRes = {};
     });
 
     describe('listar', () => {
         it('deve listar todos os usuários quando nenhum ID ou query é fornecido', async () => {
             const mockUsers = [{ nome: 'Usuário 1' }, { nome: 'Usuário 2' }];
             UsuarioService.prototype.listar.mockResolvedValue(mockUsers);
-            UsuarioQuerySchema.parseAsync.mockResolvedValue({}); // Simulando o parse de query vazia
-
+            UsuarioQuerySchema.parseAsync.mockResolvedValue({});
             await usuarioController.listar(mockReq, mockRes);
 
             expect(UsuarioIdSchema.parse).not.toHaveBeenCalled();
@@ -77,13 +73,12 @@ describe('UsuarioController', () => {
             const userId = 'id-valido';
             const mockUser = { id: userId, nome: 'Usuário 1' };
             mockReq.params.id = userId;
-            UsuarioIdSchema.parse.mockReturnValue(userId); // Simula o parse bem-sucedido
+            UsuarioIdSchema.parse.mockReturnValue(userId);
             UsuarioService.prototype.listar.mockResolvedValue(mockUser);
 
             await usuarioController.listar(mockReq, mockRes);
 
             expect(UsuarioIdSchema.parse).toHaveBeenCalledWith(userId);
-            // Ou chamado com {} se a lógica prosseguir, dependendo da implementação exata
             expect(UsuarioQuerySchema.parseAsync).not.toHaveBeenCalled();
             expect(UsuarioService.prototype.listar).toHaveBeenCalledWith(mockReq);
             expect(CommonResponse.success).toHaveBeenCalledWith(mockRes, mockUser);
@@ -93,7 +88,7 @@ describe('UsuarioController', () => {
             const query = { nome: 'Teste' };
             const mockUsers = [{ nome: 'Usuário Teste' }];
             mockReq.query = query;
-            UsuarioQuerySchema.parseAsync.mockResolvedValue(query); // Simula o parse bem-sucedido
+            UsuarioQuerySchema.parseAsync.mockResolvedValue(query);
             UsuarioService.prototype.listar.mockResolvedValue(mockUsers);
 
             await usuarioController.listar(mockReq, mockRes);
@@ -127,7 +122,7 @@ describe('UsuarioController', () => {
         it('deve propagar erro do service.listar', async () => {
             const error = new Error('Erro no serviço');
             UsuarioService.prototype.listar.mockRejectedValue(error);
-            UsuarioQuerySchema.parseAsync.mockResolvedValue({}); // Para passar pela validação da query
+            UsuarioQuerySchema.parseAsync.mockResolvedValue({});
 
             await expect(usuarioController.listar(mockReq, mockRes)).rejects.toThrow(error);
         });
@@ -139,23 +134,21 @@ describe('UsuarioController', () => {
         const mockSavedUser = { ...mockUserData, _id: 'novo-id', toObject: jest.fn() };
 
         beforeEach(() => {
-             // Reseta o mock de toObject para cada teste neste bloco describe
             mockSavedUser.toObject.mockImplementation(function() {
-                // 'this' se refere a mockSavedUser neste contexto
                 const obj = { ...this };
-                delete obj.toObject; // remove a própria função toObject do objeto simples
+                delete obj.toObject;
                 return obj;
             });
         });
 
         it('deve criar um usuário com sucesso', async () => {
             mockReq.body = mockUserData;
-            UsuarioSchema.parse.mockReturnValue(mockUserData); // Dados parseados
+            UsuarioSchema.parse.mockReturnValue(mockUserData); 
             UsuarioService.prototype.criar.mockResolvedValue(mockSavedUser);
             
-            const plainUserObject = { ...mockSavedUser }; // Objeto após toObject()
-            delete plainUserObject.senha; // Conforme a lógica do controller
-            delete plainUserObject.toObject; // Remove o mock de toObject do objeto esperado
+            const plainUserObject = { ...mockSavedUser }; 
+            delete plainUserObject.senha; 
+            delete plainUserObject.toObject; 
 
 
             await usuarioController.criar(mockReq, mockRes);

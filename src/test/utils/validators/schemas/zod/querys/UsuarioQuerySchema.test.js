@@ -1,5 +1,5 @@
 import { clear } from 'winston';
-import { UsuarioIdSchema, UsuarioQuerySchema } from '../../../../../../utils/validators/schemas/zod/querys/UsuarioQuerySchema';
+import { UsuarioIdSchema, UsuarioQuerySchema } from '@utils/validators/schemas/zod/querys/UsuarioQuerySchema';
 
 describe('UsuarioIdSchema', () => {
     const validObjectId = '507f1f77bcf86cd799439011';

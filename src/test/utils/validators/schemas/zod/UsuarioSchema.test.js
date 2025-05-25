@@ -1,12 +1,12 @@
-import { UsuarioSchema, UsuarioUpdateSchema } from '../../../../../utils/validators/schemas/zod/UsuarioSchema'; // Ajuste o caminho se necessário
+import { UsuarioSchema, UsuarioUpdateSchema } from '@utils/validators/schemas/zod/UsuarioSchema';
 
 describe('UsuarioSchema', () => {
     const baseDadosValidos = {
         campus: "507f191e810c19729de860ea",
         nome: 'Usuário Teste',
-        cpf: '12345678909', // Use um CPF que passe na sua validação `isValidCPF`
+        cpf: '12345678909',
         email: 'usuario@exemplo.com',
-        senha: 'Senha@Valida1', // Certifique-se que esta senha passa na sua regex
+        senha: 'Senha@Valida1',
         cargo: 'Comissionado',
     };
 

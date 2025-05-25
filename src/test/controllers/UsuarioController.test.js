@@ -1,4 +1,4 @@
-import UsuarioController from "../../controllers/UsuarioController.js";
+import UsuarioController from "@controllers/UsuarioController.js";
 import UsuarioService from "../../services/UsuarioService.js";
 import {
   UsuarioQuerySchema,
@@ -11,10 +11,10 @@ import {
 import { CommonResponse } from "../../utils/helpers/index.js";
 
 // Mocka o serviço
-jest.mock("../../services/UsuarioService.js");
+jest.mock("@services/UsuarioService.js");
 
 // Mocka os schemas Zod
-jest.mock("../../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js", () => ({
+jest.mock("@utils/validators/schemas/zod/querys/UsuarioQuerySchema.js", () => ({
   UsuarioIdSchema: {
     parse: jest.fn(),
   },
@@ -23,7 +23,7 @@ jest.mock("../../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js", () 
   },
 }));
 
-jest.mock("../../utils/validators/schemas/zod/UsuarioSchema.js", () => ({
+jest.mock("@utils/validators/schemas/zod/UsuarioSchema.js", () => ({
   UsuarioSchema: {
     parse: jest.fn(),
   },
@@ -32,7 +32,7 @@ jest.mock("../../utils/validators/schemas/zod/UsuarioSchema.js", () => ({
   },
 }));
 
-jest.mock("../../utils/helpers/index.js", () => ({
+jest.mock("@utils/helpers/index.js", () => ({
   CommonResponse: {
     success: jest.fn(),
     created: jest.fn(),

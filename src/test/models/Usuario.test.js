@@ -1,4 +1,4 @@
-import Usuario from '../../models/Usuario.js'; 
+import Usuario from '@models/Usuario.js'; 
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 

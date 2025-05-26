@@ -105,19 +105,16 @@ describe("UsuarioService", () => {
         });
 
        it("deve criar um usuário com sucesso, hasheando a senha", async () => {
+            const originalSenha = mockParsedData.senha;
             const result = await usuarioService.criar(mockParsedData);
 
             expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith(mockParsedData.email, null);
             expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith(mockParsedData.cpf, null);
             expect(mockCampusServiceInstance.ensureCampExists).toHaveBeenCalledWith(mockParsedData.campus);
-            // CORREÇÃO AQUI: bcrypt.hash é chamado com a senha original
-            expect(bcrypt.hash).toHaveBeenCalledWith(mockParsedData.senha, 10);
-            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith({
-                ...mockParsedData,
-                senha: hashedPassword,
-            });
+            expect(bcrypt.hash).toHaveBeenCalledWith(originalSenha, 10);
+            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith({...mockParsedData, senha: hashedPassword,});
             expect(result.senha).toBe(hashedPassword);
-        });
+});
 
         it("deve criar um usuário sem senha, se não fornecida", async () => {
             const dataSemSenha = { ...mockParsedData, senha: undefined };

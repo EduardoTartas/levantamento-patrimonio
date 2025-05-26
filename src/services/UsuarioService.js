@@ -33,18 +33,27 @@ class UsuarioService {
     async atualizar(id, parsedData) {
         console.log("Estou no atualizar em UsuarioService");
 
-        await this.validateEmail(parsedData.email);
-        await this.validateCpf(parsedData.cpf);
         await this.ensureUserExists(id);
-         if (parsedData.campus) {
+
+        if (parsedData.hasOwnProperty('email') && parsedData.email !== undefined) {
+            await this.validateEmail(parsedData.email, id);
+        }
+
+        if (parsedData.hasOwnProperty('cpf') && parsedData.cpf !== undefined) {
+            await this.validateCpf(parsedData.cpf, id);
+        }
+
+        if (parsedData.campus) {
             await this.campusService.ensureCampExists(parsedData.campus);
         }
 
-        delete parsedData.senha;
-        delete parsedData.email;
+        const dataToUpdate = { ...parsedData };
 
-        return this.repository.atualizar(id, parsedData);
-    }
+        delete dataToUpdate.senha;
+        delete dataToUpdate.email;
+
+        return this.repository.atualizar(id, dataToUpdate);
+}
 
     async deletar(id) {
         console.log("Estou no deletar em UsuarioService");

@@ -9,7 +9,7 @@
             "@repositories/*": ["repositories/*"],
             "@routes/*": ["routes/*"],
             "@seeds/*": ["seeds/*"],
-            "@services": ["services/*"],
+            "@services/*": ["services/*"],
             "@utils/*": ["utils/*"],
             "@tests/*": ["tests/*"],
         }

@@ -19,12 +19,18 @@ class CampusService {
     }
 
     async atualizar(id, parsedData) {
-        console.log('Estou no atualizar em UnidadeService');
+        console.log('Estou no atualizar em CampusService');
 
-        await this.validateNomeCidade(parsedData.nome, parsedData.cidade, id);
         await this.ensureCampExists(id);
 
-        return await this.repository.atualizar(id, parsedData);
+        if (parsedData.hasOwnProperty('nome') && parsedData.nome !== undefined &&
+            parsedData.hasOwnProperty('cidade') && parsedData.cidade !== undefined) {
+            await this.validateNomeCidade(parsedData.nome, parsedData.cidade, id);
+        }
+
+        const dataToUpdate = { ...parsedData };
+
+        return await this.repository.atualizar(id, dataToUpdate);
     }
 
     async deletar(id) {

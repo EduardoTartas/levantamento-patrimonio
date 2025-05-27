@@ -4,7 +4,7 @@
         "paths": {
             "@config/*": ["config/*"],
             "@controllers/*": ["controllers/*"],
-            "@midllewares/*": ["midllewares/*"],
+            "@middlewares/*": ["middlewares/*"],
             "@models/*": ["models/*"],
             "@repositories/*": ["repositories/*"],
             "@routes/*": ["routes/*"],
@@ -12,6 +12,6 @@
             "@services": ["services/*"],
             "@utils/*": ["utils/*"],
             "@tests/*": ["tests/*"],
-        }
+        }  
     }
 }

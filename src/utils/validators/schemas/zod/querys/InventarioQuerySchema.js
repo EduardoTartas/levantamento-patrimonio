@@ -8,11 +8,11 @@ export const InventarioIdSchema = z.string().refine((id) => mongoose.Types.Objec
 export const InventarioQuerySchema = z.object({
     nome: z
         .string()
-        .optional()
-        .refine((val) => !val || val.trim().length > 0, {
+        .transform((val) => val?.trim())
+        .refine((val) => val === undefined || val.length > 0, {
             message: "Nome não pode ser vazio",
         })
-        .transform((val) => val?.trim()),
+        .optional(),
     ativo: z
         .string()
         .optional()
@@ -24,7 +24,8 @@ export const InventarioQuerySchema = z.object({
         .optional()
         .refine((val) => !val || val.trim().length > 0, {
             message: "Data não pode ser vazia",
-        }),
+        })
+        .transform((val) => val?.trim()), 
     page: z
         .string()
         .optional()

@@ -27,7 +27,7 @@ describe('CampusRepository', () => {
     repo = new CampusRepository();
   });
 
-  it('construtor lança erro se paginate estiver ausente', () => {
+  it('construtor lança erro se o método paginate estiver ausente', () => {
     delete Campus.paginate;
     expect(() => new CampusRepository()).toThrow(
       /must include the paginate method/
@@ -52,7 +52,7 @@ describe('CampusRepository', () => {
       expect(result).toBe('campus2');
     });
 
-    it('findOne é chamado com nome e id diferente', async () => {
+    it('findOne é chamado com nome e idDiferente', async () => {
       Campus.findOne = jest.fn().mockResolvedValue('campus3');
       const result = await repo.buscarPorNome('UFRO', null, '123');
       expect(Campus.findOne).toHaveBeenCalledWith({
@@ -64,21 +64,21 @@ describe('CampusRepository', () => {
   });
 
   describe('buscarPorId', () => {
-    it('retorna campus se encontrado', async () => {
+    it('retorna o campus se encontrado', async () => {
       Campus.findById = jest.fn().mockResolvedValue('campus1');
       const result = await repo.buscarPorId('id1');
       expect(Campus.findById).toHaveBeenCalledWith('id1');
       expect(result).toBe('campus1');
     });
 
-    it('lança CustomError se não for encontrado', async () => {
+    it('lança CustomError se não encontrado', async () => {
       Campus.findById = jest.fn().mockResolvedValue(null);
       await expect(repo.buscarPorId('id1')).rejects.toThrow(CustomError);
     });
   });
 
   describe('listar', () => {
-    it('retorna dados quando id é fornecido e encontrado', async () => {
+    it('retorna dados quando o id é fornecido e encontrado', async () => {
       const req = { params: { id: 'abc' }, query: {} };
       Campus.findById = jest.fn().mockResolvedValue('campusData');
       const result = await repo.listar(req);
@@ -86,7 +86,7 @@ describe('CampusRepository', () => {
       expect(result).toBe('campusData');
     });
 
-    it('lança erro se id for fornecido mas não encontrado', async () => {
+    it('lança erro se o id for fornecido mas não encontrado', async () => {
       const req = { params: { id: 'abc' }, query: {} };
       Campus.findById = jest.fn().mockResolvedValue(null);
       await expect(repo.listar(req)).rejects.toThrow(CustomError);
@@ -156,7 +156,7 @@ describe('CampusRepository', () => {
       expect(result).toBe('updatedCampus');
     });
 
-    it('lança CustomError se campus não for encontrado', async () => {
+    it('lança CustomError se o campus não for encontrado', async () => {
       Campus.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
       await expect(repo.atualizar('id1', {})).rejects.toThrow(CustomError);
     });
@@ -170,7 +170,7 @@ describe('CampusRepository', () => {
       expect(result).toBe('deletedCampus');
     });
 
-    it('lança CustomError se campus não for encontrado', async () => {
+    it('lança CustomError se o campus não for encontrado', async () => {
       Campus.findByIdAndDelete = jest.fn().mockResolvedValue(null);
       await expect(repo.deletar('id1')).rejects.toThrow(CustomError);
     });

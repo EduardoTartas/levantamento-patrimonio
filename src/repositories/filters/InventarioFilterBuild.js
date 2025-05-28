@@ -1,28 +1,23 @@
-import Inventario from "../../models/Inventario.js";
-import InventarioRepository from "../InventarioRepository.js";
 import CampusRepository from "../CampusRepository.js";
 
 class InventarioFilterBuilder {
     constructor() {
         this.filtros = {};
-        this.inventarioRepository = new InventarioRepository();
-        this.InventarioModel = Inventario;
         this.campusRepository = new CampusRepository();
     }
 
     comNome(nome) {
-    if (!nome) return this;
+        if (!nome || typeof nome !== 'string' || nome.trim() === '') return this;
     
-    const nomeEscaped = this.escapeRegex(nome);
-        if (nome.length === 1) {
+        const nomeEscaped = this.escapeRegex(nome.trim());
+        if (nome.trim().length === 1) {
             this.filtros.nome = { $regex: `^${nomeEscaped}`, $options: "i" };
-        } 
-        else {
+        } else {
             this.filtros.nome = { $regex: nomeEscaped, $options: "i" };
         }
         
         return this;
-  }
+    }
 
     comAtivo(ativo) {
         if (ativo === "true" || ativo === true) {
@@ -34,14 +29,14 @@ class InventarioFilterBuilder {
     }
 
     async comCampus(campus) {
-        if (!campus) return this;
+        if (!campus || typeof campus !== 'string' || campus.trim() === '') return this;
         
-        const campusEncontrados = await this.campusRepository.buscarPorNome(campus);
+        const campusEncontrados = await this.campusRepository.buscarPorNome(campus.trim());
         
         const campusIds = campusEncontrados
             ? Array.isArray(campusEncontrados)
-                ? campusEncontrados.map((u) => u._id)
-                : [campusEncontrados._id]
+                ? campusEncontrados.map((c) => c._id)
+                : (typeof campusEncontrados === 'object' && campusEncontrados._id ? [campusEncontrados._id] : [])
             : [];
         
         this.filtros.campus = { $in: campusIds };
@@ -49,42 +44,76 @@ class InventarioFilterBuilder {
         return this;
     }
 
-   comData(data) {
-        if (data) {
-            let dateParts;
-            let dateObj;
+    comData(data) {
+        if (!data) return this;
 
-            if (/^\d{2}\/\d{2}\/\d{4}$/.test(data)) {
-                dateParts = data.split('/');
-                dateObj = new Date(
-                    parseInt(dateParts[2], 10),
-                    parseInt(dateParts[1], 10) - 1,
-                    parseInt(dateParts[0], 10)
-                );
+        let dateObjCandidate;
+        let isStringDateForUTCRange = false;
+
+        if (typeof data === 'string') {
+            const trimmedData = data.trim();
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmedData)) {
+                const parts = trimmedData.split('/');
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10);
+                const year = parseInt(parts[2], 10);
+
+                const tempDate = new Date(year, month - 1, day);
+                if (tempDate.getFullYear() === year && tempDate.getMonth() === month - 1 && tempDate.getDate() === day) {
+                    dateObjCandidate = tempDate;
+                    isStringDateForUTCRange = true;
+                }
+            } else if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedData)) {
+                dateObjCandidate = new Date(trimmedData);
+                if (!isNaN(dateObjCandidate.getTime())) {
+                    isStringDateForUTCRange = true;
+                }
             } else {
-                dateObj = new Date(data);
+                dateObjCandidate = new Date(trimmedData);
             }
+        } else if (data instanceof Date) {
+            dateObjCandidate = data;
+        }
 
-            if (!isNaN(dateObj.getTime())) {
-                const startDate = new Date(dateObj);
+        if (dateObjCandidate && !isNaN(dateObjCandidate.getTime())) {
+            let startDate, endDate;
+
+            if (isStringDateForUTCRange) {
+                let year, monthIndex, dayOfMonth;
+
+                if (typeof data === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(data.trim())) {
+                     year = dateObjCandidate.getFullYear();
+                     monthIndex = dateObjCandidate.getMonth();
+                     dayOfMonth = dateObjCandidate.getDate();
+                } else {
+                     year = dateObjCandidate.getUTCFullYear();
+                     monthIndex = dateObjCandidate.getUTCMonth();
+                     dayOfMonth = dateObjCandidate.getUTCDate();
+                }
+                startDate = new Date(Date.UTC(year, monthIndex, dayOfMonth, 0, 0, 0, 0));
+                endDate = new Date(Date.UTC(year, monthIndex, dayOfMonth, 23, 59, 59, 999));
+            } else {
+                startDate = new Date(dateObjCandidate.getTime());
                 startDate.setHours(0, 0, 0, 0);
 
-                const endDate = new Date(dateObj);
+                endDate = new Date(dateObjCandidate.getTime());
                 endDate.setHours(23, 59, 59, 999);
-
-                this.filtros.data = {
+            }
+            
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                 this.filtros.data = {
                     $gte: startDate,
                     $lte: endDate
                 };
             }
         }
-
         return this;
     }
 
     escapeRegex(texto) {
-    return texto.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-  }
+        if (typeof texto !== 'string') return '';
+        return texto.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    }
 
     build() {
         return this.filtros;

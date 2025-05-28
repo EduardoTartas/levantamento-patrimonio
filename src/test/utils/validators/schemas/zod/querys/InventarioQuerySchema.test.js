@@ -1,18 +1,14 @@
-import { z } from "zod";
-// mongoose não é usado diretamente nos testes, mas o schema o utiliza.
-// import mongoose from 'mongoose';
-// Certifique-se de que o caminho para o seu arquivo de schema está correto
-import { InventarioQuerySchema } from '@utils/validators/schemas/zod/querys/InventarioQuerySchema'; // Supondo que este é o caminho correto
+import { InventarioQuerySchema } from '@utils/validators/schemas/zod/querys/InventarioQuerySchema';
 
 describe('InventarioQuerySchema', () => {
     it('should parse an empty object correctly (using defaults from transform)', () => {
         const resultado = InventarioQuerySchema.parse({});
         expect(resultado).toEqual({
-            nome: undefined,    // Opcional, sem default explícito no transform para ausência
-            ativo: undefined,   // Opcional, sem default explícito no transform para ausência
-            data: undefined,    // Opcional e não fornecido, resulta em undefined.
-            page: 1,            // Default de transform: (val ? parseInt(val, 10) : 1)
-            limite: 10,         // Default de transform: (val ? parseInt(val, 10) : 10)
+            nome: undefined,
+            ativo: undefined,
+            data: undefined,
+            page: 1,
+            limite: 10,
         });
     });
 
@@ -20,15 +16,15 @@ describe('InventarioQuerySchema', () => {
         const query = {
             nome: '  Inventário Central  ',
             ativo: 'true',
-            data: '  2024-05-26  ', // Será trimado pelo schema
+            data: '  2024-05-26  ',
             page: '3',
             limite: '25',
         };
         const resultado = InventarioQuerySchema.parse(query);
         expect(resultado).toEqual({
-            nome: 'Inventário Central', // 'nome' é trimado pela transformação no schema.
+            nome: 'Inventário Central',
             ativo: 'true',
-            data: '2024-05-26',     // 'data' agora também é trimada pela transformação no schema.
+            data: '2024-05-26',
             page: 3,
             limite: 25,
         });
@@ -38,12 +34,10 @@ describe('InventarioQuerySchema', () => {
         const query = { ativo: 'false' };
         const resultado = InventarioQuerySchema.parse(query);
         expect(resultado.ativo).toBe('false');
-        // Verifica se os defaults são aplicados corretamente quando outros campos são omitidos
         expect(resultado.page).toBe(1);
         expect(resultado.limite).toBe(10);
     });
 
-    // Testes para 'nome'
     it('throws an error when "nome" is an empty string (after trim attempt by refine)', () => {
         const query = { nome: '' };
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
@@ -54,7 +48,6 @@ describe('InventarioQuerySchema', () => {
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
     });
 
-    // Testes para 'ativo'
     it('throws an error when "ativo" is an invalid string value', () => {
         const query = { ativo: 'talvez' };
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
@@ -65,15 +58,13 @@ describe('InventarioQuerySchema', () => {
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
     });
 
-    // Testes para 'data'
-
     it('throws an error when "data" contains only spaces (after trim attempt by refine)', () => {
         const query = { data: '   ' };
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Data não pode ser vazia/);
     });
 
     it('should accept valid "data" string (and it should be trimmed if schema has trim transform)', () => {
-        const query = { data: '2023-10-15' }; // Já está trimada
+        const query = { data: '2023-10-15' };
         const resultado = InventarioQuerySchema.parse(query);
         expect(resultado.data).toBe('2023-10-15');
     });
@@ -84,8 +75,6 @@ describe('InventarioQuerySchema', () => {
         expect(resultado.data).toBe('2023-10-15');
     });
 
-
-    // Testes para 'page'
     it('throws an error when "page" is provided as a non-numeric string', () => {
         const query = { page: 'abc' };
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
@@ -107,7 +96,6 @@ describe('InventarioQuerySchema', () => {
         expect(resultado.page).toBe(2);
     });
 
-    // Testes para 'limite'
     it('throws an error when "limite" is provided as a non-numeric string', () => {
         const query = { limite: 'xyz' };
         expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);

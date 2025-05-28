@@ -187,7 +187,6 @@ describe("UsuarioService", () => {
             const resultado = await usuarioService.atualizar(userId, dadosParaAtualizar);
 
             expect(mockUsuarioRepositoryInstance.buscarPorId).toHaveBeenCalledWith(userId);
-            // A asserção aqui espera que 'userId' seja passado, o que requer a correção no UsuarioService.js
             expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith(mockUpdateData.email, userId);
             expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith(mockUpdateData.cpf, userId);
             expect(mockCampusServiceInstance.ensureCampExists).toHaveBeenCalledWith(mockUpdateData.campus);

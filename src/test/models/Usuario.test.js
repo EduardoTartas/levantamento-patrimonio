@@ -69,7 +69,6 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         expect(savedUserWithPassword.senha).toBeUndefined();
     });
 
-
     // --- Testes de validação de campos obrigatórios (required: true) ---
     it('não deve criar um usuário sem nome', async () => {
         const { nome, ...invalidData } = baseValidUserData();

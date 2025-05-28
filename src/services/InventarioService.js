@@ -60,6 +60,21 @@ class InventarioService {
                 customMessage: messages.error.resourceNotFound("Inventário"),
             });
         }
+
+        // Se o status for false, impede qualquer alteração
+        if (inventarioExistente.status === false) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: "invalidOperation",
+                field: "status",
+                details: [{
+                    path: "status",
+                    message: "Inventário está inativo. Não é possível alterar ou deletar."
+                }],
+                customMessage: "Operação não permitida em inventário inativo.",
+            });
+        }
+
         return inventarioExistente;
     }
 }

@@ -5,7 +5,7 @@
 ## 1. /login  
 
 **Caso de Uso**  
-Permite que o comissionado realize login na plataforma utilizando e-mail e senha.  
+ - Permite que o comissionado realize login na plataforma utilizando e-mail e senha.  
 
 **Regras de Negócio**  
 - **Verificação de Credenciais:** Validar login/senha ou outro método de autenticação.
@@ -25,7 +25,7 @@ Gerenciamento dos comissionados: criação, edição, listagem e exclusão.
 ### 2.1 POST /usuarios  
 
 **Caso de Uso** 
-Cadastrar novos usuários.  
+ - Cadastrar novos usuários.  
 
 **Regras de Negócio**  
 - **Campos obrigatórios**: `nome`, `CPF`, `função`, `e-mail` e `campus`.  
@@ -47,7 +47,7 @@ Cadastrar novos usuários.
 ### 2.2 GET /usuarios  
 
 **Caso de Uso** 
-Listar todos os usuários cadastrados, com filtros opcionais.  
+ - Listar todos os usuários cadastrados, com filtros opcionais.  
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
@@ -63,7 +63,7 @@ Listar todos os usuários cadastrados, com filtros opcionais.
 ### 2.3 GET /usuarios/:id  
 
 **Caso de Uso** 
-Obter dados detalhados de um usuário específico.  
+ - Obter dados detalhados de um usuário específico.  
 
 **Regras de Negócio**  
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -77,7 +77,7 @@ Obter dados detalhados de um usuário específico.
 ### 2.4 PATCH /usuarios/:id  
 
 **Caso de Uso** 
-Atualizar informações de um usuário.  
+ - Atualizar informações de um usuário.  
 
 **Regras de Negócio**  
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -115,7 +115,7 @@ Gerenciamento de inventários: criação, listagem, edição, exclusão e finali
 ### 3.1 POST /inventarios  
 
 **Caso de Uso**  
-Cadastrar novo inventário para registro de levantamentos.  
+ - Cadastrar novo inventário para registro de levantamentos.  
 
 **Regras de Negócio**  
 - **Campos obrigatórios**: `campus`, `nome` e `data`.
@@ -133,7 +133,7 @@ Cadastrar novo inventário para registro de levantamentos.
 ### 3.2 GET /inventarios  
 
 **Caso de Uso** 
-Listar todos os inventários cadastrados, com filtros opcionais.   
+ - Listar todos os inventários cadastrados, com filtros opcionais.   
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
@@ -149,7 +149,7 @@ Listar todos os inventários cadastrados, com filtros opcionais.
 ### 3.3 GET /inventarios/:id
 
 **Caso de Uso** 
-Obter dados detalhados de um inventário específico. 
+ - Obter dados detalhados de um inventário específico. 
 
 **Regras de Negócio**  
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -163,7 +163,7 @@ Obter dados detalhados de um inventário específico.
 ### 3.4 PATCH /inventarios/:id  
 
 **Caso de Uso** 
-Atualizar informações de um inventário.  
+ - Atualizar informações de um inventário.  
 
 **Regras de Negócio**
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -181,7 +181,8 @@ Atualizar informações de um inventário.
 ### 3.5 DELETE /inventarios/:id
 
 **Caso de Uso** 
-- Excluir um inventário que não será mais utilizado.
+ - Excluir um inventário que não será mais utilizado.
+
 **Regras de Negócio**
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
 - **Desativação e Exclusão**:o inventario só será excluido caso ele não tenha relacionamento com nenhum outro documento.
@@ -198,7 +199,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 ### 4.1 POST /campus  
 
 **Caso de Uso**  
-Cadastrar novos campus.  
+ - Cadastrar novos campus.  
 
 **Regras de Negócio**  
 - **Campos obrigatórios**: `nome` e `cidade`.
@@ -214,7 +215,7 @@ Cadastrar novos campus.
 ### 4.2 GET /campus  
 
 **Caso de Uso** 
-Listar todos os campus cadastrados, com filtros opcionais.   
+ - Listar todos os campus cadastrados, com filtros opcionais.   
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
@@ -230,7 +231,7 @@ Listar todos os campus cadastrados, com filtros opcionais.
 ### 4.3 GET /campus/:id
 
 **Caso de Uso** 
-Obter dados detalhados de um campus específico. 
+ - Obter dados detalhados de um campus específico. 
 
 **Regras de Negócio**  
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -244,7 +245,7 @@ Obter dados detalhados de um campus específico.
 ### 4.4 PATCH /campus/:id
 
 **Caso de Uso** 
-Atualizar informações de um campus.  
+ - Atualizar informações de um campus.  
 
 **Regras de Negócio**
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -273,12 +274,12 @@ Atualizar informações de um campus.
 ---
 
 ## 5. /levantamentos 
-Gerenciamento de levantamentos: cadastro, listagem, edição e exclusão
+ - Gerenciamento de levantamentos: cadastro, listagem, edição e exclusão
 
 ### 5.1 POST /levantamentos/:idBem
 
 **Caso de Uso**  
-Cadastrar novo levantamento para registro das informaçoes dos bens.  
+ - Cadastrar novo levantamento para registro das informaçoes dos bens.  
 
 **Regras de Negócio**  
 **Validações:**
@@ -298,7 +299,7 @@ Cadastrar novo levantamento para registro das informaçoes dos bens.
 ### 5.2 POST /levantamentos/:id/foto  
 
 **Caso de Uso**  
-Adicionar ou atualizar foto do bem.  
+ - Adicionar ou atualizar foto do bem.  
 
 **Regras de Negócio**  
 **Validações:** 
@@ -314,7 +315,7 @@ Adicionar ou atualizar foto do bem.
 ### 5.3 GET /levantamentos
 
 **Caso de Uso**  
-Listar todos os levantamentos cadastrados, com filtros opcionais.    
+ - Listar todos os levantamentos cadastrados, com filtros opcionais.    
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
@@ -330,7 +331,7 @@ Listar todos os levantamentos cadastrados, com filtros opcionais.
 ### 5.4 GET /levantamentos/:id  
 
 **Caso de Uso**  
-Obter dados detalhados de um levantamento específico.    
+ - Obter dados detalhados de um levantamento específico.    
 
 **Regras de Negócio**  
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
@@ -345,6 +346,7 @@ Obter dados detalhados de um levantamento específico.
 
 **Caso de Uso** 
 - Excluir um levantamento que não será mais utilizado.
+
 **Regras de Negócio**
 - **Validação de Existência:** Confirmar se o registro existe e seu `status` (ativo/inativo).
 - **Validações:** verificar se o status do inventário no qual o levantamento está vinculado é `true`.
@@ -401,7 +403,7 @@ Geração de relatórios filtrados por inventário, sala e tipo.
 ### 8.1 GET /relatorios  
 
 **Caso de Uso**   
-Gerar relatórios com filtros variados e opção de exportação em PDF.  
+ - Gerar relatórios com filtros variados e opção de exportação em PDF.  
 
 **Parâmetros de Query**  
 
@@ -429,7 +431,7 @@ Importação de dados via CSV para bens e salas.
 ### 9.1 POST /importacao/csv  
 
 **Caso de Uso** 
-Importar registros via arquivo CSV para cadastro de bens e salas.  
+ - Importar registros via arquivo CSV para cadastro de bens e salas.  
 
 **Regras de Negócio** 
 - **Validações:**

@@ -13,10 +13,9 @@
 
 ## 1 - Introdução
 
-O presente sistema tem como objetivo informatizar a gestão de uma biblioteca, oferecendo funcionalidades que abrangem o cadastro de livros, controle de empréstimos e devoluções, gerenciamento de usuários (alunos, funcionários e administradores), e aplicação de regras específicas como limite de empréstimos e cálculo de multas por atraso.
+O presente sistema tem como objetivo informatizar o processo de levantamento e gestão patrimonial do Instituto Federal de Rondônia (IFRO), oferecendo funcionalidades que abrangem o registro detalhado de bens (incluindo identificação, descrição, categoria, localização), a atualização de seu estado de conservação, o rastreamento de movimentações, e o gerenciamento de usuários e seus respectivos níveis de acesso ao sistema.
 
-Este plano de teste descreve os cenários, critérios de aceitação e verificações que serão aplicados sobre as principais funcionalidades do sistema, visando garantir o correto funcionamento das regras de negócio, a integridade dos dados e a experiência do usuário.
-
+Este plano de teste descreve os cenários, critérios de aceitação e verificações que serão aplicados sobre as principais funcionalidades do sistema, visando garantir a correta implementação das regras de negócio para o controle patrimonial, a integridade e consistência dos dados dos bens, a segurança no acesso e manipulação das informações, e a conformidade do sistema com os requisitos estabelecidos pelo IFRO.
 
 ## 2 - Arquitetura da API
 

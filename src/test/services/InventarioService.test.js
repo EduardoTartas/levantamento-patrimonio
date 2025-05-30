@@ -67,6 +67,7 @@ describe('InventarioService', () => {
         };
         const mockInventarioCriado = { id: 'invNew', ...mockParsedData };
 
+         /*APRESENTAR CRIAR SUCESSO*/
         it('Criar inventário (sucesso)', async () => {
             mockCampusService.ensureCampExists.mockResolvedValue(true);
             mockInventarioRepository.criar.mockResolvedValue(mockInventarioCriado);
@@ -130,6 +131,7 @@ describe('InventarioService', () => {
             expect(result).toEqual(mockInventarioAtualizado);
         });
 
+         /*APRESENTAR ATUALIZAR SUCESSO*/
         it('Atualizar inventário (sucesso, com campus novo)', async () => {
             const mockInventarioAttComCampus = { id: mockId, ...mockUpdateDataComCampus };
             mockInventarioRepository.buscarPorId.mockResolvedValue(mockInventarioExistenteAtivo);
@@ -257,6 +259,7 @@ describe('InventarioService', () => {
             expect(CustomError).toHaveBeenCalledWith(expect.objectContaining(expectedErrorDetails));
         });
 
+        /*APRESENTAR DELETANDO INATIVO*/
          it('Deletar inventário (inventário INATIVO)', async () => {
             mockInventarioRepository.buscarPorId.mockResolvedValue(mockInventarioExistenteInativo);
             const expectedErrorDetails = {

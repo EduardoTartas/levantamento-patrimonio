@@ -69,13 +69,27 @@ describe('InventarioService', () => {
 
          /*APRESENTAR CRIAR SUCESSO*/
         it('Criar inventário (sucesso)', async () => {
+            // Configuração dos mock do 'mockCampusService' e 'mockInventarioRepository'.
+
+            // Quando 'ensureCampExists' for chamado, ele deve simular uma promessa que resolve para 'true'.
             mockCampusService.ensureCampExists.mockResolvedValue(true);
+            
+            // 'mockInventarioCriado' é um objeto que representa  um inventário criado com sucesso.
             mockInventarioRepository.criar.mockResolvedValue(mockInventarioCriado);
 
+            // Chama o método 'criar' do serviço que está sendo testado ('service').
             const result = await service.criar(mockParsedData);
 
+            // Verifica se o método 'ensureCampExists' do 'mockCampusService' foi chamado.
+            // E também verifica se foi chamado com o argumento correto (o campus de 'mockParsedData').
             expect(mockCampusService.ensureCampExists).toHaveBeenCalledWith(mockParsedData.campus);
+
+            // Verifica se o método 'criar' do 'mockInventarioRepository' foi chamado.
+            // E também verifica se foi chamado com o argumento correto ('mockParsedData').
             expect(mockInventarioRepository.criar).toHaveBeenCalledWith(mockParsedData);
+
+            // Verifica se o resultado retornado pelo método 'service.criar' é igual a 'mockInventarioCriado'.
+            // Isso confirma que o serviço retornou o inventário que o repositório (simulado) criou.
             expect(result).toEqual(mockInventarioCriado);
         });
 
@@ -134,15 +148,31 @@ describe('InventarioService', () => {
          /*APRESENTAR ATUALIZAR SUCESSO*/
         it('Atualizar inventário (sucesso, com campus novo)', async () => {
             const mockInventarioAttComCampus = { id: mockId, ...mockUpdateDataComCampus };
+
+            // Configuraçã dos  mocks.
+            // Quando 'buscarPorId' for chamado, ele deve simular uma promessa que resolve com 'mockInventarioExistenteAtivo'.
             mockInventarioRepository.buscarPorId.mockResolvedValue(mockInventarioExistenteAtivo);
+
+            // Quando 'ensureCampExists' for chamado (para o novo campus), ele deve simular uma promessa que resolve para 'true'.
             mockCampusService.ensureCampExists.mockResolvedValue(true);
+
+            // Quando o método 'atualizar' for chamado, ele deve simular uma promessa que resolve com 'mockInventarioAttComCampus'.
             mockInventarioRepository.atualizar.mockResolvedValue(mockInventarioAttComCampus);
 
+            // Chama o método 'atualizar' do serviço que está sendo testado ('service').
             const result = await service.atualizar(mockId, mockUpdateDataComCampus);
 
+            // Verifica se a função 'ensureInvExistsSpy' foi chamada com o 'mockId'.
+            // que garante que o inventário existe antes de prosseguir com a atualização (usando o 'buscarPorId' mockado acima).
             expect(ensureInvExistsSpy).toHaveBeenCalledWith(mockId);
+
+            // Verifica se o método 'ensureCampExists' do 'mockCampusService' foi chamado.
             expect(mockCampusService.ensureCampExists).toHaveBeenCalledWith(mockUpdateDataComCampus.campus);
+
+            // Verifica se o método 'atualizar' do 'mockInventarioRepository' foi chamado.
             expect(mockInventarioRepository.atualizar).toHaveBeenCalledWith(mockId, mockUpdateDataComCampus);
+
+            // Isso confirma que o serviço retornou o inventário atualizado conforme esperado.
             expect(result).toEqual(mockInventarioAttComCampus);
         });
 
@@ -260,21 +290,31 @@ describe('InventarioService', () => {
         });
 
         /*APRESENTAR DELETANDO INATIVO*/
-         it('Deletar inventário (inventário INATIVO)', async () => {
+        it('Deletar inventário (inventário INATIVO)', async () => {
+
+            // Configura o mock do 'mockInventarioRepository'.
+            // Quando 'buscarPorId' for chamado, ele deve simular uma promessa que resolve com 'mockInventarioExistenteInativo'.
             mockInventarioRepository.buscarPorId.mockResolvedValue(mockInventarioExistenteInativo);
+
+            // Define um objeto 'expectedErrorDetails' com os detalhes do erro que se espera ser lançado.
             const expectedErrorDetails = {
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: "invalidOperation",
-                field: "status",
+                statusCode: HttpStatusCodes.BAD_REQUEST.code, 
+                errorType: "invalidOperation",                
+                field: "status",                              
                 customMessage: "Operação não permitida em inventário inativo.",
             };
 
-            await expect(service.deletar(mockId))
-                .rejects
-                .toEqual(expect.objectContaining(expectedErrorDetails));
+            // Executa a chamada ao método 'service.deletar(mockId)' e espera que ela seja rejeitada (lance um erro).
+            await expect(service.deletar(mockId)).rejects.toEqual(expect.objectContaining(expectedErrorDetails));
 
+            // Verifica se a função 'ensureInvExists' foi chamada com o 'mockId'.
             expect(ensureInvExistsSpy).toHaveBeenCalledWith(mockId);
+
+            // Verifica se o método 'deletar' do 'mockInventarioRepository' NÃO foi chamado.
             expect(mockInventarioRepository.deletar).not.toHaveBeenCalled();
+
+            // Verifica se o construtor de 'CustomError' foi chamado
+            // Isso confirma que o tipo específico de erro esperado foi instanciado e lançado pela lógica do serviço.
             expect(CustomError).toHaveBeenCalledWith(expect.objectContaining(expectedErrorDetails));
         });
 

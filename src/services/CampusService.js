@@ -22,6 +22,7 @@ class CampusService {
         console.log('Estou no atualizar em CampusService');
 
         await this.ensureCampExists(id);
+        await this.validateNomeCidade(parsedData.nome, parsedData.cidade, id);
 
         if (parsedData.hasOwnProperty('nome') && parsedData.nome !== undefined &&
             parsedData.hasOwnProperty('cidade') && parsedData.cidade !== undefined) {

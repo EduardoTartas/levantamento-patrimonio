@@ -1,44 +1,54 @@
-import AuthenticationError from '../utils/errors/AuthenticationError.js';
-import Usuario from '../models/Usuario.js';
-import bcrypt from 'bcrypt';
+//src/services/LoginService.js
+import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 
-dotenv.config()
+import AuthenticationError from '../utils/errors/AuthenticationError.js';
+import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
-class LoginService {
-   async autenticar(email, senha) {
-        // Busca no banco de dados um usuário com o email fornecido, incluindo o campo 'senha'
-        const usuario = await Usuario.findOne({ email }).select('+senha');
+export class LoginService {
+    constructor(jwtSecret, jwtExpireIn = '15min', loginRepository) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpireIn = jwtExpireIn;
+        this.loginRepository = loginRepository
+    }
 
-        const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
+    async autenticar(email, senha) {
+        // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
+        const resultado = LoginSchema.safeParse({ email, senha });
 
-        if (!usuario || !senhaCorreta) {
-            throw new AuthenticationError('Email ou senha inválidos');
+        if (!resultado.success) {
+            // Captura o primeiro erro de validação e cria um erro de autenticação
+
+            const erro = resultado.error.errors[0];
+            // Aqui está passando o erro para o middleware de tratamento de erros
+            throw new AuthenticationError(erro.message);
         }
 
-        const infoUser = {
-            id: usuario._id,
-            email: usuario.email,
+        const usuario = await this.loginRepository.buscarPorEmail(email);
+
+        if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
+            throw new AuthenticationError('Email ou senha inválidos');
         };
 
-        // Gerando token jwt com as informações do usuário
-        const token = jwt.sign(infoUser, JWT_SECRET, {
-            expiresIn: JWT_EXPIRES_IN,
-        });
+        // gera o token jwt
+        const token = this._gerarToken(usuario);
 
         return {
-            menssagem: 'Login realizado com sucesso.',
-            token,
             usuario: {
-                usuarioId: usuario._id,
-                nome: usuario.nome
-            }
+                id: usuario._id,
+                nome: usuario.nome,
+                email: usuario.email
+            },
+            token,
         };
-   }
-}
+    };
 
-export default LoginService;
+    _gerarToken(usuario) {
+        return jwt.sign(
+            { id: usuario._id, email: usuario.email },
+            this.jwtExpireIn,
+            { expiresIn: this.jwtExpireIn }
+        );
+    };
+}

@@ -7,10 +7,12 @@ import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 
 
 export class LoginService {
-    constructor(jwtSecret, jwtExpireIn = '15min', loginRepository) {
+    constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', loginRepository) {
         this.jwtSecret = jwtSecret;
         this.jwtExpireIn = jwtExpireIn;
-        this.loginRepository = loginRepository
+        this.jwtRefreshSecret = jwtRefreshSecret;
+        this.jwtRefreshExpireIn = jwtRefreshExpireIn;
+        this.loginRepository = loginRepository;
     }
 
     async autenticar(email, senha) {
@@ -26,13 +28,16 @@ export class LoginService {
         }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
+        console.log(usuario);
+        
 
         if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
             throw new AuthenticationError('Email ou senha inválidos');
         };
 
         // gera o token jwt
-        const token = this._gerarToken(usuario);
+        const accessToken = this._gerarAccessToken(usuario);
+        const refreshToken = this._gerarRefreshToken(usuario);
 
         return {
             usuario: {
@@ -40,15 +45,24 @@ export class LoginService {
                 nome: usuario.nome,
                 email: usuario.email
             },
-            token,
+            accessToken,
+            refreshToken
         };
     };
 
-    _gerarToken(usuario) {
+    _gerarAccessToken(usuario) {
         return jwt.sign(
             { id: usuario._id, email: usuario.email },
-            this.jwtExpireIn,
+            this.jwtSecret,
             { expiresIn: this.jwtExpireIn }
+        );
+    };
+
+    _gerarRefreshToken(usuario) {
+        return jwt.sign(
+            { id: usuario._id, email: usuario.email },
+            this.jwtRefreshSecret,
+            { expiresIn: this.jwtRefreshExpireIn }
         );
     };
 }

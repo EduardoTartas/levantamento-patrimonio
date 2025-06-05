@@ -7,8 +7,14 @@ dotenv.config();
 
 class LoginController {
     constructor() {
-        this.repository = new LoginRepository;
-        this.service = new LoginService(process.env.JWT_SECRET, process.env.JWT_EXPIRES_IN, this.repository);
+        this.repository = new LoginRepository();
+        this.service = new LoginService(
+            process.env.JWT_SECRET, 
+            process.env.JWT_EXPIRES_IN, 
+            process.env.JWT_REFRESH_SECRET,
+            process.env.JWT_REFRESH_EXPIRE_IN,
+            this.repository
+        );
     }
 
     // POST /login
@@ -21,6 +27,8 @@ class LoginController {
             mensagem: 'Login realizado com sucesso.',
             ...usuario
         });
+
+        next()
     }
 }
 

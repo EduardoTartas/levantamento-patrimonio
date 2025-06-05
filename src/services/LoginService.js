@@ -28,8 +28,6 @@ export class LoginService {
         }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
-        console.log(usuario);
-        
 
         if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
             throw new AuthenticationError('Email ou senha inválidos');

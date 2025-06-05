@@ -13,11 +13,11 @@ class Bem{
                 type: String,
                 index: true,
                 required: true,
-            },
-            tombo: {
+            },            tombo: {
                 type: String,
-                required: true,
-                unique: true,
+                required: false,
+                unique: function() { return this.tombo && this.tombo.trim() !== ''; }, // Apenas aplica unique se o tombo não for vazio
+                sparse: true // Permite múltiplos documentos com campo vazio
             },
             responsavel: {
                 type: String,
@@ -32,11 +32,11 @@ class Bem{
             },
             auditado: {
                 type: Boolean,
-                default: "false",
+                default: false,
             },
             ocioso: {
                 type: Boolean,
-                default: "false",
+                default: false,
             }
         }, {
             timestamps: true,

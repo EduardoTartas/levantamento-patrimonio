@@ -1,4 +1,5 @@
 // src/controllers/LoginController.js
+import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginRepository } from '../repositories/LoginRepository.js';
 import { LoginService } from '../services/LoginService.js';
 import dotenv from 'dotenv';
@@ -29,6 +30,18 @@ class LoginController {
         });
 
         next()
+    }
+
+    async refreshToken(req, res, next) {
+        const { refresh_Token } = req.body;
+
+        if (!refresh_Token) {
+            throw new AuthenticationError('Token de atualização não fornecido.')
+        }
+
+        const tokens = await this.service.refreshToken(refresh_Token);
+
+        res.status(200).json(tokens);
     }
 }
 

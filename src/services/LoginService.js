@@ -63,4 +63,36 @@ export class LoginService {
             { expiresIn: this.jwtRefreshExpireIn }
         );
     };
+
+    async refreshToken(token) {
+        const dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        
+        /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
+        const tokenIat = dataToken.iat * 1000;// Converte para ms
+        const nowDate = Date.now();
+
+        const maxSessionTime = 7 * 24 * 60 * 60 * 1000;// Tempo máximo do refresh token(7d)
+
+        if (nowDate - tokenIat > maxSessionTime) {
+            throw new AuthenticationError('Sessão expirada, faça login novamente');
+        };
+
+        const newAccessToken = jwt.sign(
+            { id: dataToken.id, email: dataToken.email },
+            this.jwtSecret,
+            { expiresIn: this.jwtExpireIn }
+        );
+
+        // Aqui irá ser gerado um novo refresh_token que ira rotacionar com o access_token
+        const newRefreshToken = jwt.sign(
+            { id: dataToken.id, email: dataToken.email },
+            this.jwtRefreshSecret,
+            { expiresIn: this.jwtRefreshExpireIn }
+        );
+        
+        return {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        };
+    }
 }

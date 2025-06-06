@@ -27,7 +27,7 @@ const fileUploadValidationSchema = z.object({
     }),
     size: z.number()
         .gt(0, "O tamanho do arquivo deve ser maior que zero.")
-        .lte(10 * 1024 * 1024, "O arquivo não pode ser maior que 10MB.")
+        .lte(60 * 1024 * 1024, "O arquivo não pode ser maior que 10MB.")
 }).passthrough();
 
 export {fileUploadValidationSchema};

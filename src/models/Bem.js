@@ -19,16 +19,16 @@ const bemSchema = new mongoose.Schema({
         sparse: true
     },
     // --- ALTERAÇÃO AQUI ---
-    // O responsável agora é um objeto
     responsavel: {
         nome: { 
             type: String, 
             required: true 
         },
+        // O CPF agora não é mais obrigatório
         cpf: { 
             type: String, 
-            required: true,
-            index: true // Adicionar um índice ao CPF pode ser útil para buscas
+            required: false, // Alterado para false
+            index: true
         }
     },
     // ----------------------

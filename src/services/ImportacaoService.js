@@ -1,6 +1,6 @@
 import re from 'node:util';
 import ImportacaoRepository from '../repositories/ImportacaoRepository.js';
-import { CustomError, HttpStatusCodes, messages } from '../utils/helpers/index.js';
+import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 
 class ImportacaoService {
     constructor() {
@@ -17,26 +17,22 @@ class ImportacaoService {
         }
         return { nome: localizacaoRaw, bloco: 'Não Especificado' };
     }
-
-    /**
-     * Analisa o conteúdo do arquivo com delimitadores personalizados.
-     * @param {Buffer} buffer - O buffer do arquivo enviado.
-     * @returns {Array<object>} Um array de registros de bens extraídos.
-     */
+    
     _parseCSV(buffer) {
         const content = buffer.toString('utf-8');
-        // CORREÇÃO: Dividir por novas linhas primeiro para isolar cada registro.
         const lines = content.split(/\r?\n/).filter(line => line.trim().startsWith('D¥¥'));
-        
+
         return lines.map((line, index) => {
-            // A estrutura é DATA £ NOTA. Pegamos a parte dos dados.
             const dataPart = line.split('£')[0];
             const fields = dataPart.split('¥');
 
-            // Verificação de segurança para linhas malformadas.
-            if (fields.length < 25) {
-                return null;
-            }
+            // Garante que a linha tenha um número mínimo de campos para ser válida
+            if (fields.length < 25) return null;
+
+            // --- CORREÇÃO AQUI ---
+            // Analisa a linha a partir do final para mais robustez,
+            // pois a quantidade de '¥¥' no meio varia.
+            const len = fields.length;
 
             return {
                 linha: index + 1,
@@ -44,11 +40,11 @@ class ImportacaoService {
                 localizacao: fields[4] || '',
                 valor: fields[10] || '0',
                 tombo: fields[15] || '',
-                // CORREÇÃO: Índices ajustados para CPF e Nome do Responsável.
-                cpfResponsavel: fields[23] || '',
-                nomeResponsavel: fields[24] || 'Não especificado'
+                // Pega os campos de responsável baseando-se na posição a partir do fim.
+                cpfResponsavel: fields[len - 6] || '',
+                nomeResponsavel: fields[len - 5] || 'Não especificado',
             };
-        }).filter(record => record !== null); // Remove qualquer linha nula/malformada.
+        }).filter(Boolean); // Remove linhas nulas/malformadas
     }
 
     async importCSV(file, options) {
@@ -57,46 +53,58 @@ class ImportacaoService {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST,
                 errorType: 'validationError',
-                customMessage: 'O ID do campus é obrigatório para a importação.'
+                customMessage: 'O ID do campus é obrigatório para a importação.',
             });
         }
 
+        const registros = this._parseCSV(file.buffer);
+        
+        // Objeto para estatísticas detalhadas dos erros
+        const failureStats = {
+            'Tombos duplicados que já existem no banco de dados': 0,
+            'Nome do responsável ausente ou inválido': 0,
+            'Falhas de inserção no banco de dados (validação do modelo, etc.)': 0,
+        };
+
         const summary = {
-            totalRecordsProcessed: 0,
+            totalRecordsProcessed: registros.length,
             totalRecordsInserted: 0,
             totalRecordsSkipped: 0,
-            errors: []
+            errors: [],
         };
-        
-        const registros = this._parseCSV(file.buffer);
-        summary.totalRecordsProcessed = registros.length;
 
-        if (registros.length === 0) return summary;
+        if (registros.length === 0) {
+            return summary;
+        }
 
-        const tombosParaVerificar = registros.map(r => r.tombo).filter(t => t);
-        const tombosDuplicados = new Set(await this.repository.verificarTombosDuplicados(tombosParaVerificar));
+        const tombosParaVerificar = registros.map(r => r.tombo).filter(Boolean);
+        const tombosDuplicadosNoDB = new Set(await this.repository.verificarTombosDuplicados(tombosParaVerificar));
 
         const bensParaInserir = [];
         const salasCache = new Map();
 
         for (const registro of registros) {
-            if (registro.tombo && tombosDuplicados.has(registro.tombo)) {
-                summary.totalRecordsSkipped++;
+            if (registro.tombo && tombosDuplicadosNoDB.has(registro.tombo)) {
+                failureStats['Tombos duplicados que já existem no banco de dados']++;
+                continue;
+            }
+
+            const nomeResponsavelLimpo = registro.nomeResponsavel.trim();
+            if (!nomeResponsavelLimpo || nomeResponsavelLimpo === 'Não especificado') {
+                failureStats['Nome do responsável ausente ou inválido']++;
                 summary.errors.push({
-                    type: 'Duplicado',
-                    message: `O bem com o tombo '${registro.tombo}' já existe no sistema.`,
-                    linha: registro.linha
+                    type: 'Dados Inválidos',
+                    message: `Nome do responsável ausente.`,
+                    linha: registro.linha,
                 });
                 continue;
             }
 
-            let sala;
             const { nome: nomeSala, bloco: blocoSala } = this._extractSalaInfo(registro.localizacao);
             const cacheKey = `${nomeSala}|${blocoSala}`;
+            let sala = salasCache.get(cacheKey);
 
-            if (salasCache.has(cacheKey)) {
-                sala = salasCache.get(cacheKey);
-            } else {
+            if (!sala) {
                 sala = await this.repository.findSala(nomeSala, blocoSala, campus_id);
                 if (!sala) {
                     sala = await this.repository.createSala(nomeSala, blocoSala, campus_id);
@@ -111,8 +119,8 @@ class ImportacaoService {
                 nome: nomeBem,
                 tombo: registro.tombo,
                 responsavel: {
-                    nome: registro.nomeResponsavel,
-                    cpf: registro.cpfResponsavel
+                    nome: nomeResponsavelLimpo,
+                    cpf: registro.cpfResponsavel.trim(),
                 },
                 descricao: registro.descricaoCompleta,
                 valor: parseFloat(registro.valor) / 100.0,
@@ -129,18 +137,28 @@ class ImportacaoService {
                 summary.totalRecordsInserted = error.result?.nInserted || 0;
                 const writeErrors = error.writeErrors || [];
                 
+                failureStats['Falhas de inserção no banco de dados (validação do modelo, etc.)'] = writeErrors.length;
                 writeErrors.forEach(err => {
                     const failedDoc = err.op;
                     summary.errors.push({
-                        type: 'Erro de Inserção',
-                        message: `Falha ao inserir bem '${failedDoc.nome}' (Tombo: ${failedDoc.tombo}). Motivo: ${err.errmsg}`,
-                        linha: 'N/A'
+                        type: 'Erro de Inserção no Banco',
+                        message: `Falha ao inserir bem (Tombo: ${failedDoc.tombo}). Motivo: ${err.errmsg}`,
+                        linha: 'N/A',
                     });
                 });
             }
         }
-        
-        summary.totalRecordsSkipped = summary.totalRecordsProcessed - summary.totalRecordsInserted;
+
+        summary.totalRecordsSkipped = Object.values(failureStats).reduce((a, b) => a + b, 0);
+        summary.errorsCount = summary.errors.length;
+
+        console.log('\n--- Detalhamento da Importação ---');
+        for (const [reason, count] of Object.entries(failureStats)) {
+            if (count > 0) {
+                console.log(`- ${count.toLocaleString('pt-BR')} registros pulados por: ${reason}`);
+            }
+        }
+        console.log('------------------------------------\n');
 
         return summary;
     }

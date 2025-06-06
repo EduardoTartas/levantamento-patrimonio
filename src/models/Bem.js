@@ -13,11 +13,12 @@ class Bem{
                 type: String,
                 index: true,
                 required: true,
-            },            tombo: {
+            },            
+            tombo: {
                 type: String,
                 required: false,
-                unique: function() { return this.tombo && this.tombo.trim() !== ''; }, // Apenas aplica unique se o tombo não for vazio
-                sparse: true // Permite múltiplos documentos com campo vazio
+                unique: function() { return this.tombo && this.tombo.trim() !== ''; },
+                sparse: true
             },
             responsavel: {
                 type: String,

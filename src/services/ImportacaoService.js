@@ -26,25 +26,20 @@ class ImportacaoService {
             const dataPart = line.split('£')[0];
             const fields = dataPart.split('¥');
 
-            // Garante que a linha tenha um número mínimo de campos para ser válida
             if (fields.length < 25) return null;
 
-            // --- CORREÇÃO AQUI ---
-            // Analisa a linha a partir do final para mais robustez,
-            // pois a quantidade de '¥¥' no meio varia.
             const len = fields.length;
-
+            
             return {
                 linha: index + 1,
                 descricaoCompleta: fields[2] || '',
                 localizacao: fields[4] || '',
                 valor: fields[10] || '0',
                 tombo: fields[15] || '',
-                // Pega os campos de responsável baseando-se na posição a partir do fim.
-                cpfResponsavel: fields[len - 6] || '',
-                nomeResponsavel: fields[len - 5] || 'Não especificado',
+                cpfResponsavel: fields[len - 7] || '',
+                nomeResponsavel: fields[len - 6] || 'Responsável não informado',
             };
-        }).filter(Boolean); // Remove linhas nulas/malformadas
+        }).filter(Boolean);
     }
 
     async importCSV(file, options) {
@@ -59,7 +54,6 @@ class ImportacaoService {
 
         const registros = this._parseCSV(file.buffer);
         
-        // Objeto para estatísticas detalhadas dos erros
         const failureStats = {
             'Tombos duplicados que já existem no banco de dados': 0,
             'Nome do responsável ausente ou inválido': 0,
@@ -89,16 +83,13 @@ class ImportacaoService {
                 continue;
             }
 
-            const nomeResponsavelLimpo = registro.nomeResponsavel.trim();
-            if (!nomeResponsavelLimpo || nomeResponsavelLimpo === 'Não especificado') {
-                failureStats['Nome do responsável ausente ou inválido']++;
-                summary.errors.push({
-                    type: 'Dados Inválidos',
-                    message: `Nome do responsável ausente.`,
-                    linha: registro.linha,
-                });
-                continue;
+            // --- ALTERAÇÃO AQUI ---
+            // Define um nome padrão se o original estiver ausente ou inválido.
+            let nomeResponsavelLimpo = registro.nomeResponsavel.trim();
+            if (!nomeResponsavelLimpo || nomeResponsavelLimpo === 'FALSE') {
+                nomeResponsavelLimpo = 'Responsável não informado';
             }
+            // ----------------------
 
             const { nome: nomeSala, bloco: blocoSala } = this._extractSalaInfo(registro.localizacao);
             const cacheKey = `${nomeSala}|${blocoSala}`;
@@ -119,7 +110,7 @@ class ImportacaoService {
                 nome: nomeBem,
                 tombo: registro.tombo,
                 responsavel: {
-                    nome: nomeResponsavelLimpo,
+                    nome: nomeResponsavelLimpo, // Usa o nome, que agora tem um valor padrão.
                     cpf: registro.cpfResponsavel.trim(),
                 },
                 descricao: registro.descricaoCompleta,

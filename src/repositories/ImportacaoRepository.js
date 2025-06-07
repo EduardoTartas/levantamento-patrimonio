@@ -3,13 +3,6 @@ import Sala from '../models/Sala.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
 
 class ImportacaoRepository {
-    /**
-     * Busca uma sala existente por nome, bloco e campus
-     * @param {string} nome - Nome da sala
-     * @param {string} bloco - Bloco da sala
-     * @param {string} campusId - ID do campus
-     * @returns {Promise<object|null>} Sala encontrada ou null
-     */
     async findSala(nome, bloco, campusId) {
         return await Sala.findOne({
             nome: nome,
@@ -18,13 +11,26 @@ class ImportacaoRepository {
         });
     }
 
-    /**
-     * Cria uma nova sala no banco de dados
-     * @param {string} nome - Nome da sala
-     * @param {string} bloco - Bloco da sala
-     * @param {string} campusId - ID do campus
-     * @returns {Promise<object>} Sala criada
-     */
+    async findSalasByCombinations(combinations, campusId) {
+        if (!combinations || combinations.length === 0) {
+            return [];
+        }
+
+        // Cria uma consulta $or para encontrar qualquer combinação de nome/bloco
+        const orQueries = combinations.map(comp => ({
+            nome: comp.nome,
+            bloco: comp.bloco,
+        }));
+
+        // Executa a busca com o campusId e as combinações
+        return await Sala.find({
+            $and: [
+                { campus: campusId },
+                { $or: orQueries }
+            ]
+        });
+    }
+
     async createSala(nome, bloco, campusId) {
         try {
             const novaSala = new Sala({
@@ -45,26 +51,18 @@ class ImportacaoRepository {
         }
     }
 
-    /**
-     * Verifica se existem bens com os mesmos tombos
-     * @param {Array<string>} tombos - Array de números de tombamento para verificar
-     * @returns {Promise<Array<string>>} Tombos que já existem no banco de dados
-     */
     async verificarTombosDuplicados(tombos) {
         try {
-            // Filtra tombos não vazios
             const tombosValidos = tombos.filter(tombo => tombo && tombo.trim() !== '');
             
             if (tombosValidos.length === 0) {
                 return [];
             }
             
-            // Busca bens com os tombos informados
             const bensEncontrados = await Bem.find({ 
                 tombo: { $in: tombosValidos } 
             }).select('tombo');
             
-            // Retorna apenas os tombos encontrados
             return bensEncontrados.map(bem => bem.tombo);
         } catch (error) {
             console.error('[REPO ERROR] Erro ao verificar tombos duplicados:', error.message);
@@ -78,19 +76,12 @@ class ImportacaoRepository {
         }
     }
 
-    /**
-     * Insere múltiplos bens no banco de dados
-     * @param {Array<object>} bens - Array de objetos bem
-     * @param {object} options - Opções de inserção
-     * @returns {Promise<object>} Resultado da operação
-     */
     async insertManyBens(bens, options = {}) {
         try {
             return await Bem.insertMany(bens, options);
         } catch (error) {
-            // Se tiver writeErrors, significa que alguns documentos foram inseridos com sucesso
             if (error.writeErrors) {
-                throw error; // Mantém o erro original com writeErrors
+                throw error;
             } else {
                 console.error('[REPO ERROR] Erro ao inserir bens em lote:', error.message);
                 throw new CustomError({

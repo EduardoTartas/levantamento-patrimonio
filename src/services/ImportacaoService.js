@@ -1,4 +1,3 @@
-import re from 'node:util';
 import ImportacaoRepository from '../repositories/ImportacaoRepository.js';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 
@@ -55,9 +54,8 @@ class ImportacaoService {
         const registros = this._parseCSV(file.buffer);
         
         const failureStats = {
-            'Tombos duplicados que já existem no banco de dados': 0,
-            'Nome do responsável ausente ou inválido': 0,
-            'Falhas de inserção no banco de dados (validação do modelo, etc.)': 0,
+            'Tombos duplicados': 0,
+            'Falhas de inserção no banco': 0,
         };
 
         const summary = {
@@ -71,36 +69,42 @@ class ImportacaoService {
             return summary;
         }
 
+        const uniqueSalaCombinations = [...new Map(
+            registros.map(r => this._extractSalaInfo(r.localizacao))
+                     .map(salaInfo => [`${salaInfo.nome}|${salaInfo.bloco}`, salaInfo])
+        ).values()];
+
+        const salasExistentes = await this.repository.findSalasByCombinations(uniqueSalaCombinations, campus_id);
+
+        const salasCache = new Map();
+        salasExistentes.forEach(sala => {
+            const cacheKey = `${sala.nome}|${sala.bloco}`;
+            salasCache.set(cacheKey, sala);
+        });
+
         const tombosParaVerificar = registros.map(r => r.tombo).filter(Boolean);
         const tombosDuplicadosNoDB = new Set(await this.repository.verificarTombosDuplicados(tombosParaVerificar));
 
         const bensParaInserir = [];
-        const salasCache = new Map();
 
         for (const registro of registros) {
             if (registro.tombo && tombosDuplicadosNoDB.has(registro.tombo)) {
-                failureStats['Tombos duplicados que já existem no banco de dados']++;
+                failureStats['Tombos duplicados']++;
                 continue;
             }
 
-            // --- ALTERAÇÃO AQUI ---
-            // Define um nome padrão se o original estiver ausente ou inválido.
             let nomeResponsavelLimpo = registro.nomeResponsavel.trim();
             if (!nomeResponsavelLimpo || nomeResponsavelLimpo === 'FALSE') {
                 nomeResponsavelLimpo = 'Responsável não informado';
             }
-            // ----------------------
 
             const { nome: nomeSala, bloco: blocoSala } = this._extractSalaInfo(registro.localizacao);
             const cacheKey = `${nomeSala}|${blocoSala}`;
             let sala = salasCache.get(cacheKey);
 
             if (!sala) {
-                sala = await this.repository.findSala(nomeSala, blocoSala, campus_id);
-                if (!sala) {
-                    sala = await this.repository.createSala(nomeSala, blocoSala, campus_id);
-                }
-                salasCache.set(cacheKey, sala);
+                sala = await this.repository.createSala(nomeSala, blocoSala, campus_id);
+                salasCache.set(cacheKey, sala); 
             }
             
             const nomeBem = registro.descricaoCompleta.split('.')[0] || 'Item sem descrição';
@@ -110,7 +114,7 @@ class ImportacaoService {
                 nome: nomeBem,
                 tombo: registro.tombo,
                 responsavel: {
-                    nome: nomeResponsavelLimpo, // Usa o nome, que agora tem um valor padrão.
+                    nome: nomeResponsavelLimpo,
                     cpf: registro.cpfResponsavel.trim(),
                 },
                 descricao: registro.descricaoCompleta,
@@ -128,7 +132,7 @@ class ImportacaoService {
                 summary.totalRecordsInserted = error.result?.nInserted || 0;
                 const writeErrors = error.writeErrors || [];
                 
-                failureStats['Falhas de inserção no banco de dados (validação do modelo, etc.)'] = writeErrors.length;
+                failureStats['Falhas de inserção no banco'] = writeErrors.length;
                 writeErrors.forEach(err => {
                     const failedDoc = err.op;
                     summary.errors.push({

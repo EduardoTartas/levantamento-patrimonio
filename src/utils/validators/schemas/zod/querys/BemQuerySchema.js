@@ -20,6 +20,13 @@ export const BemQuerySchema = z.object({
             message: "Tombo não pode ser vazio",
         })
         .transform((val) => val?.trim()),
+    sala: z
+        .string()
+        .optional()
+        .refine((val) => !val || val.trim().length > 0, {
+            message: "Sala não pode ser vazio",
+        })
+        .transform((val) => val?.trim()),
     auditado: z
         .string()
         .optional()

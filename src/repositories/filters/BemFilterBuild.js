@@ -6,6 +6,7 @@ class BemFilterBuilder {
         this.filtros = {};
         this.bemRepository = new BemRepository();
         this.bemModel = Bem;
+        this._nomeSala = null; // Adicionando campo para armazenar o nome da sala
     }
 
     comNome(nome) {
@@ -29,8 +30,18 @@ class BemFilterBuilder {
         this.filtros.tombo = tomboEscaped;
         
         return this;
+    }    
+    comSala(salaId) {
+        if (!salaId) return this;
+        
+        if (/^[0-9a-fA-F]{24}$/.test(salaId)) {
+            this.filtros.sala = salaId;
+        }
+        
+        return this;
     }
-      comResponsavel(responsavel) {
+
+    comResponsavel(responsavel) {
         if (!responsavel) return this;
         
         const responsavelEscaped = this.escapeRegex(responsavel);
@@ -47,6 +58,10 @@ class BemFilterBuilder {
             this.filtros.auditado = false;
         }
         return this;
+    }
+
+    getNomeSala() {
+        return this._nomeSala;
     }
 
     escapeRegex(texto) {

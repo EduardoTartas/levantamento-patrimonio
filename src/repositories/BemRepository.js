@@ -35,13 +35,14 @@ class BemRepository {
             return data;
         }
 
-        const { nome, tombo, responsavel, auditado = false, page } = req.query || {};
+        const { nome, tombo, responsavel, auditado = false, sala, page } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
         
         const filterBuilder = new BemFilterBuilder()
             .comNome(nome || "")
             .comTombo(tombo || "")
             .comResponsavel(responsavel || "")
+            .comSala(sala || "")
             .comAuditado(auditado);
 
         if (typeof filterBuilder.build !== 'function') {

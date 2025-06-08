@@ -16,6 +16,7 @@ import login from './loginRoutes.js';
 import relatorio from './relatorioRoutes.js';
 import campus from './campusRoutes.js';
 import inventario from './inventarioRoutes.js';
+import bem from './bemRoutes.js';
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ const routes = (app) => {
         app.use(logRoutes);
     }
     // rota para encaminhar da raiz para /docs
-    app.get("/", (req, res) => {
+    app.get("/", (_req, res) => {
         res.redirect("/docs");
     });
 
@@ -43,7 +44,8 @@ const routes = (app) => {
         login,
         relatorio,
         campus,
-        inventario
+        bem,
+        inventario,
        
     );
 

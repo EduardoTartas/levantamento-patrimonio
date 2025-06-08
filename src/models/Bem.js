@@ -31,7 +31,6 @@ const bemSchema = new mongoose.Schema({
             index: true
         }
     },
-    // ----------------------
     descricao: {
         type: String,
     },
@@ -43,10 +42,6 @@ const bemSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    ocioso: {
-        type: Boolean,
-        default: false,
-    }
 }, {
     timestamps: true,
     versionKey: false

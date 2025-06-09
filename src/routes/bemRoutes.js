@@ -6,7 +6,7 @@ const router = express.Router();
 const BemController = new bemController(); 
 
 router
-    .get("/bem", /*AuthMiddleware, authPermission,*/ asyncWrapper(BemController.listar.bind(BemController)))
-    .get("/bem/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(BemController.listar.bind(BemController)))
+    .get("/bens", /*AuthMiddleware, authPermission,*/ asyncWrapper(BemController.listar.bind(BemController)))
+    .get("/bens/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(BemController.listar.bind(BemController)))
 
 export default router;

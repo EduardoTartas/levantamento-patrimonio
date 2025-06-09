@@ -18,16 +18,14 @@ const bemSchema = new mongoose.Schema({
         unique: function() { return this.tombo && this.tombo.trim() !== ''; },
         sparse: true
     },
-    // --- ALTERAÇÃO AQUI ---
     responsavel: {
         nome: { 
             type: String, 
             required: true 
         },
-        // O CPF agora não é mais obrigatório
         cpf: { 
             type: String, 
-            required: false, // Alterado para false
+            required: false,
             index: true
         }
     },

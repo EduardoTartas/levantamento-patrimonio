@@ -425,10 +425,10 @@ Geração de relatórios filtrados por inventário, sala e tipo.
 
 ---  
 
-## 9. /importacao  
+## 9. /csv  
 Importação de dados via CSV para bens e salas.  
 
-### 9.1 POST /importacao/csv  
+### 9.1 POST /csv/:campusID  
 
 **Caso de Uso** 
  - Importar registros via arquivo CSV para cadastro de bens e salas.  

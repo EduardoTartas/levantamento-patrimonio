@@ -142,4 +142,17 @@ export class LoginService {
         });
     }
 
+    async redefinirSenha(token, novaSenha) {
+        const payload = jwt.verify(token, this.jwtSecret);
+        const usuario = await this.loginRepository.buscarPorId(payload.id);
+
+        if (!usuario) {
+            throw new AuthenticationError("Usuário não encontrado.");
+        }
+
+        usuario.senha = novaSenha;
+        await this.loginRepository.atualizarSenha(usuario._id, novaSenha);
+
+        return { mensagem: "Senha alterada com sucesso." };
+    }
 }

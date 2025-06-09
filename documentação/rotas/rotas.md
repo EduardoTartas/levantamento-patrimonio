@@ -319,7 +319,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
-- **Filtros**: Filtra levantamentos polo `tombo` do bem, `sala` e `inventario` . 
+- **Filtros**: Filtra levantamentos por `tombo` do bem, `sala`, `inventario` e `estado` do bem (ex: Em condições de uso, Inservível, Danificado).
 
 **Resposta**  
 - Retorno de uma lista de levantamentos conforme os filtros aplicados.

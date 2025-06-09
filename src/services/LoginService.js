@@ -117,4 +117,29 @@ export class LoginService {
         };
     }
 
+    async enviarEmailRecuperacao(usuario, token) {
+        const urlRecuperacao = `http://localhost:3001/redefinir-senha?token=${token}`;
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: usuario.email,
+            subject: 'Recuperação de senha',
+            html: `
+            <h1>Recuperação de senha</h1>
+            <p>Olá ${usuario.nome},</p>
+            <p>Clique no link abaixo para redefinir sua senha:</p>
+            <a href="${urlRecuperacao}">Redefinir senha</a>
+            <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
+        `
+        });
+    }
+
 }

@@ -276,7 +276,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 ## 5. /levantamentos 
  - Gerenciamento de levantamentos: cadastro, listagem, edição e exclusão
 
-### 5.1 POST /levantamentos/:idBem
+### 5.1 POST /levantamentos
 
 **Caso de Uso**  
  - Cadastrar novo levantamento para registro das informaçoes dos bens.  

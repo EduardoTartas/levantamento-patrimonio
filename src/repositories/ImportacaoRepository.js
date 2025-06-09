@@ -16,13 +16,11 @@ class ImportacaoRepository {
             return [];
         }
 
-        // Cria uma consulta $or para encontrar qualquer combinação de nome/bloco
         const orQueries = combinations.map(comp => ({
             nome: comp.nome,
             bloco: comp.bloco,
         }));
 
-        // Executa a busca com o campusId e as combinações
         return await Sala.find({
             $and: [
                 { campus: campusId },

@@ -12,13 +12,12 @@ class ImportacaoController {
     console.log(
       "Estou no importarCSV em ImportacaoController com validação Zod"
     );
-    // Validação do ID do campus
+
     const { campusId } = req.params || {};
     if (campusId) {
       CampusIdSchema.parse(campusId);
     }
 
-    // Validação do arquivo
     if (!req.file) {
       throw new CustomError({
         statusCode: HttpStatusCodes.BAD_REQUEST.code,

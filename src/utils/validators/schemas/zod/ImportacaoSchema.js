@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Schema para validar arquivos CSV enviados para importação
- * Verifica tipo MIME, tamanho e existência de conteúdo válido
- */
 const fileUploadValidationSchema = z.object({
     fieldname: z.string().optional(),
     originalname: z.string()

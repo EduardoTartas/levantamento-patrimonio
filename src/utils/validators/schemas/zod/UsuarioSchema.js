@@ -1,16 +1,9 @@
-// src/utils/validators/schemas/zod/UsuarioSchema.js
-
 import { z } from "zod";
 import objectIdSchema from "./ObjectIdSchema.js";
 import isValidCPF from "../../../cpfValidator.js"; 
 
-/** Definição da expressão regular para a senha
- * Padrão: 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial
- * Tamanho mínimo: 8 caracteres
- **/
 const senhaRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
 
 const UsuarioSchema = z.object({
   campus: objectIdSchema,
@@ -18,7 +11,7 @@ const UsuarioSchema = z.object({
   cpf: z
     .string()
     .min(1, "Campo CPF é obrigatório.")
-    .transform(val => val.replace(/[.-]/g, '')) // Remove dashes and dots
+    .transform(val => val.replace(/[.-]/g, ''))
     .refine(val => /^\d{11}$/.test(val), {
       message: "CPF deve conter 11 dígitos numéricos.",
     })
@@ -47,7 +40,6 @@ const UsuarioSchema = z.object({
 });
 
 const UsuarioUpdateSchema = UsuarioSchema.partial().extend({
-  // Make senha optional for updates, but if provided, it must match the regex
   senha: z
     .string()
     .refine((val) => val === undefined || senhaRegex.test(val), {

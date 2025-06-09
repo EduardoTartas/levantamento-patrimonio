@@ -9,13 +9,13 @@ export default async function campusSeed() {
     // Gera 25 campus
     for (let i = 0; i < 10; i++) {
         const campus = {
-            nome: fakerbr.lorem.word(10),
+            nome: fakerbr.lorem.word(),
             telefone: fakerbr.phone.phoneNumber().toString(),
             cidade: fakerbr.address.city(),
             bairro: fakerbr.lorem.word(15),
             rua: fakerbr.address.streetName().toString(),
             numeroResidencia: fakerbr.address.streetAddress().toString(),
-            status: fakerbr.datatype.boolean(),
+            status: Math.random() < 0.5,
         };
 
         await Campus.create(campus);
@@ -24,5 +24,5 @@ export default async function campusSeed() {
     console.log("Campus gerados com sucesso");
 }
 
-//await DbConnect.conectar();
+// await DbConnect.conectar();
 // await campusSeed();

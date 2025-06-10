@@ -4,11 +4,11 @@ import { promisify } from 'util';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
 import { CustomError } from '../utils/helpers/index.js';
-import AuthService from '../services/AuthService.js';
+import { LoginService } from '../services/LoginService.js';
 
 class AuthMiddleware {
   constructor() {
-    this.service = new AuthService();
+    this.service = new LoginService();
 
     /**
      * Vinculação para grantir ao método handle o contexto 'this' correto

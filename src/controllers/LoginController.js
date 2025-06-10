@@ -14,6 +14,7 @@ class LoginController {
             process.env.JWT_EXPIRES_IN,
             process.env.JWT_REFRESH_SECRET,
             process.env.JWT_REFRESH_EXPIRE_IN,
+            process.env.JWT_PASSWORD_RESET_SECRET,
             this.repository
         );
     }
@@ -28,18 +29,16 @@ class LoginController {
             mensagem: 'Login realizado com sucesso.',
             ...usuario
         });
-
-        next()
     }
 
     async refreshToken(req, res, next) {
-        const { refresh_Token } = req.body;
+        const { refreshToken } = req.body;
 
-        if (!refresh_Token) {
+        if (!refreshToken) {
             throw new AuthenticationError('Token de atualização não fornecido.')
         }
 
-        const tokens = await this.service.refreshToken(refresh_Token);
+        const tokens = await this.service.refreshToken(refreshToken);
 
         res.status(200).json(tokens);
     }
@@ -57,19 +56,22 @@ class LoginController {
             return res.status(200).json(resultado);
         }
 
-        return res.status(400).json({ erro: "Parâmetros inválidos para recuperação de senha." });
+        return res.status(400).json({
+            erro: "Parâmetros inválidos para recuperação de senha.",
+            recebido: { email, token, novaSenha }
+        });
     }
 
-    async confirmarEmail(req, res, next) {
-        const { token } = req.query;
+    // async confirmarEmail(req, res, next) {
+    //     const { token } = req.query;
 
-        if (!token) {
-            return res.status(400).json({ erro: "Token não fornecido." });
-        }
+    //     if (!token) {
+    //         return res.status(400).json({ erro: "Token não fornecido." });
+    //     }
 
-        const resultado = await this.service.confirmarEmail(token);
-        return res.status(200).json(resultado);
-    }
+    //     const resultado = await this.service.confirmarEmail(token);
+    //     return res.status(200).json(resultado);
+    // }
 }
 
 export default LoginController;

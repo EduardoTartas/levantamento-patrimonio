@@ -1,9 +1,7 @@
 import { z } from "zod";
 import objectIdSchema from "./ObjectIdSchema.js"; 
 
-//os dados dos bens adicionais vao ser adicionados pelo service
-// usuario que fez o levantamento vai ser adcionado pelo service
-export const LevantamentoPayloadSchema = z.object({
+const LevantamentoSchema = z.object({
   inventario: objectIdSchema,
   bemId: objectIdSchema,
   salaNova: objectIdSchema.optional(),
@@ -13,3 +11,7 @@ export const LevantamentoPayloadSchema = z.object({
   }),
   ocioso: z.boolean().default(false).optional(),
 });
+
+const LevantamentoUpdateSchema = LevantamentoSchema.partial();
+
+export { LevantamentoSchema, LevantamentoUpdateSchema };

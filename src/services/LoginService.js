@@ -6,13 +6,13 @@ import nodemailer from 'nodemailer';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 
-
 export class LoginService {
-    constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', loginRepository) {
+    constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
         this.jwtSecret = jwtSecret;
         this.jwtExpireIn = jwtExpireIn;
         this.jwtRefreshSecret = jwtRefreshSecret;
         this.jwtRefreshExpireIn = jwtRefreshExpireIn;
+        this.jwtPasswordResetSecret = jwtPasswordResetSecret
         this.loginRepository = loginRepository;
     }
 
@@ -101,13 +101,13 @@ export class LoginService {
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
         if (!usuario) {
-            throw new AuthenticationError("E-mail não existe.");
+            throw new AuthenticationError("Se este e-mail estiver cadastrado, uma mensagem foi enviada.");
         }
 
         const token = jwt.sign(
             { id: usuario._id },
-            this.jwtSecret,
-            { expiresIn: this.jwtExpireIn }
+            this.jwtPasswordResetSecret,
+            { expiresIn: '1hr' }
         );
 
         await this.enviarEmailRecuperacao(usuario, token);
@@ -118,7 +118,8 @@ export class LoginService {
     }
 
     async enviarEmailRecuperacao(usuario, token) {
-        const urlRecuperacao = `http://localhost:3001/redefinir-senha?token=${token}`;
+        const baseUrl = process.env.RECUPERACAO_URL;
+        const urlRecuperacao = `${baseUrl}?token=${token}`;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -143,16 +144,33 @@ export class LoginService {
     }
 
     async redefinirSenha(token, novaSenha) {
-        const payload = jwt.verify(token, this.jwtSecret);
+        const payload = jwt.verify(token, this.jwtPasswordResetSecret);
         const usuario = await this.loginRepository.buscarPorId(payload.id);
 
         if (!usuario) {
             throw new AuthenticationError("Usuário não encontrado.");
         }
 
-        usuario.senha = novaSenha;
-        await this.loginRepository.atualizarSenha(usuario._id, novaSenha);
+        const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (!senhaRegex.test(novaSenha)) {
+            throw new AuthenticationError("A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e no mínimo 8 caracteres.")
+        }
+
+        const hash = await bcrypt.hash(novaSenha, 10);
+        await this.loginRepository.atualizarSenha(usuario._id, hash);
 
         return { mensagem: "Senha alterada com sucesso." };
     }
+
+    // async confirmarEmail(token) {
+    //     const payload = jwt.verify(token, this.jwtPasswordResetSecret);
+    //     const usuario = await this.loginRepository.buscarPorId(payload.id);
+
+    //     if (!usuario) {
+    //         throw new AuthenticationError("Usuário não econtrado.");
+    //     }
+
+    //     return { mesagem: "E-mail confirmado com sucesso." };
+    // }
 }

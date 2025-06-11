@@ -162,15 +162,4 @@ export class LoginService {
 
         return { mensagem: "Senha alterada com sucesso." };
     }
-
-    // async confirmarEmail(token) {
-    //     const payload = jwt.verify(token, this.jwtPasswordResetSecret);
-    //     const usuario = await this.loginRepository.buscarPorId(payload.id);
-
-    //     if (!usuario) {
-    //         throw new AuthenticationError("Usuário não econtrado.");
-    //     }
-
-    //     return { mesagem: "E-mail confirmado com sucesso." };
-    // }
 }

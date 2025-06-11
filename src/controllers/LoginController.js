@@ -61,17 +61,6 @@ class LoginController {
             recebido: { email, token, novaSenha }
         });
     }
-
-    // async confirmarEmail(req, res, next) {
-    //     const { token } = req.query;
-
-    //     if (!token) {
-    //         return res.status(400).json({ erro: "Token não fornecido." });
-    //     }
-
-    //     const resultado = await this.service.confirmarEmail(token);
-    //     return res.status(200).json(resultado);
-    // }
 }
 
 export default LoginController;

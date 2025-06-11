@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
+import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
 
 export class LoginService {
     constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
@@ -17,16 +18,15 @@ export class LoginService {
     }
 
     async autenticar(email, senha) {
-        // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
-        const resultado = LoginSchema.safeParse({ email, senha });
+        // // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
+        // const resultado = LoginSchema.safeParse({ email, senha });
 
-        if (!resultado.success) {
-            // Captura o primeiro erro de validação e cria um erro de autenticação
-
-            const erro = resultado.error.errors[0];
-            // Aqui está passando o erro para o middleware de tratamento de erros
-            throw new AuthenticationError(erro.message);
-        }
+        // if (!resultado.success) {
+        //     // Captura o primeiro erro de validação e cria um erro de autenticação
+        //     const erro = resultado.error.errors[0];
+        //     // Aqui está passando o erro para o middleware de tratamento de erros
+        //     throw new AuthenticationError(erro.message);
+        // }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
@@ -151,13 +151,9 @@ export class LoginService {
             throw new AuthenticationError("Usuário não encontrado.");
         }
 
-        const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const senhaValidada = NovaSenhaSchema.parse(novaSenha)
 
-        if (!senhaRegex.test(novaSenha)) {
-            throw new AuthenticationError("A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e no mínimo 8 caracteres.")
-        }
-
-        const hash = await bcrypt.hash(novaSenha, 10);
+        const hash = await bcrypt.hash(senhaValidada, 10);
         await this.loginRepository.atualizarSenha(usuario._id, hash);
 
         return { mensagem: "Senha alterada com sucesso." };

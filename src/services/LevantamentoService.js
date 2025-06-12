@@ -19,12 +19,20 @@ class LevantamentoService {
 
         console.log("Estou no criar em LevantamentoService");
 
+        console.log(parsedData);
         await this.inventarioService.ensureInvExists(parsedData.inventario);
         await this.bemService.ensureBemExists(parsedData.bemId);
-        //pegar o usuatio do token JWT e adicionar ao parsedData
-        
-        
         await this.ensureLevantamentoUnico(parsedData.inventario, parsedData.bemId);
+
+        //ESPERAR ROTA SALA SER IMPLEMENTADA
+        /*
+         if(parsedData.salaNova){
+            await this.salaService.ensureSalaExists(parsedData.salaNova);
+         }*/
+
+        
+        
+        
         
         // Adicionar outros dados que o service é responsável por popular, como o usuário que fez a ação.
         // Ex: parsedData.usuario = req.user.id; (o ID do usuário viria do token JWT)

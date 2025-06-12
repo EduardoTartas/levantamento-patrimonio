@@ -30,6 +30,8 @@ class LevantamentoController {
 
         const parsedData = LevantamentoSchema.parse(req.body);
 
+        console.log(req.header);
+
         const data = await this.service.criar(parsedData);
         
         return CommonResponse.created(res, data);

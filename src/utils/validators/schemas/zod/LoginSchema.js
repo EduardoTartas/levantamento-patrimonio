@@ -13,10 +13,7 @@ const LoginSchema = z.object({
     senha: z
         .string()
         .min(8, 'A senha deve ter pelo menos 8 caracteres.')
-        .refine((senha) => {
-            if (!senha) return true; // Senha é opcional
-            return senhaRegex.test(senha);
-        }, {
+        .refine((senha) => senhaRegex.test(senha), {
             message: 'A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e no mínimo 8 caracteres.',
         }),
 });

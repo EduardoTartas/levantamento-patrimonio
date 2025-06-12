@@ -52,11 +52,11 @@ class Levantamento{
                 required: true,
                 enum: {
                     values: ["Em condições de uso", "Inservível", "Danificado"]
-                },
+                }
+            },
             ocioso: {
                 type: Boolean,
-                default: "false",
-            },
+                default: false
             }
         }, {
             timestamps: true,

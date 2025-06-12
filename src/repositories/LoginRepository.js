@@ -14,4 +14,8 @@ export class LoginRepository {
   async atualizarSenha(id, novaSenha) {
     return Usuario.findByIdAndUpdate(id, { senha: novaSenha });
   }
+
+  async salvarRefreshToken(id, refreshToken) {
+    return Usuario.findByIdAndUpdate(id, { refreshToken });
+  }
 }

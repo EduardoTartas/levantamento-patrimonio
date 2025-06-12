@@ -9,5 +9,6 @@ const loginController = new LoginController();
 router
     .post('/login', asyncWrapper(loginController.login.bind(loginController)))
     .post('/refresh', asyncWrapper(loginController.refreshToken.bind(loginController)))
-    
+    .post('/recover', asyncWrapper(loginController.recover.bind(loginController)))
+
 export default router;

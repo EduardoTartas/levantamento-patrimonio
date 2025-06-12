@@ -10,10 +10,11 @@ class LoginController {
     constructor() {
         this.repository = new LoginRepository();
         this.service = new LoginService(
-            process.env.JWT_SECRET, 
-            process.env.JWT_EXPIRES_IN, 
+            process.env.JWT_SECRET,
+            process.env.JWT_EXPIRES_IN,
             process.env.JWT_REFRESH_SECRET,
             process.env.JWT_REFRESH_EXPIRE_IN,
+            process.env.JWT_PASSWORD_RESET_SECRET,
             this.repository
         );
     }
@@ -28,20 +29,37 @@ class LoginController {
             mensagem: 'Login realizado com sucesso.',
             ...usuario
         });
-
-        next()
     }
 
     async refreshToken(req, res, next) {
-        const { refresh_Token } = req.body;
+        const { refreshToken } = req.body;
 
-        if (!refresh_Token) {
+        if (!refreshToken) {
             throw new AuthenticationError('Token de atualização não fornecido.')
         }
 
-        const tokens = await this.service.refreshToken(refresh_Token);
+        const tokens = await this.service.refreshToken(refreshToken);
 
         res.status(200).json(tokens);
+    }
+
+    async recover(req, res, next) {
+        const { email, token, novaSenha } = req.body;
+
+        if (token && novaSenha) {
+            const resultado = await this.service.redefinirSenha(token, novaSenha);
+            return res.status(200).json(resultado);
+        }
+
+        if (email && !token && !novaSenha) {
+            const resultado = await this.service.solicitarRecuperacao(email);
+            return res.status(200).json(resultado);
+        }
+
+        return res.status(400).json({
+            erro: "Parâmetros inválidos para recuperação de senha.",
+            recebido: { email, token, novaSenha }
+        });
     }
 }
 

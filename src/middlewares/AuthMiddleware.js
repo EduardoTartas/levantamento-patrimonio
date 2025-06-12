@@ -3,9 +3,18 @@ import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
+import { CustomError } from '../utils/helpers/index.js';
+import { LoginService } from '../services/LoginService.js';
 
 class AuthMiddleware {
   constructor() {
+    this.service = new LoginService();
+
+    /**
+     * Vinculação para grantir ao método handle o contexto 'this' correto
+     * Ao usar bind(this) no método handle garantimos independentemente de como ou onde o método é chamado, 
+     * this sempre se referirá à instância atual de AuthMiddleware.
+     */
     this.handle = this.handle.bind(this);
   }
 

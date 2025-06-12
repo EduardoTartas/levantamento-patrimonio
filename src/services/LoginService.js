@@ -1,31 +1,32 @@
 //src/services/LoginService.js
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
-
+import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
 
 export class LoginService {
-    constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', loginRepository) {
+    constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
         this.jwtSecret = jwtSecret;
         this.jwtExpireIn = jwtExpireIn;
         this.jwtRefreshSecret = jwtRefreshSecret;
         this.jwtRefreshExpireIn = jwtRefreshExpireIn;
+        this.jwtPasswordResetSecret = jwtPasswordResetSecret
         this.loginRepository = loginRepository;
     }
 
     async autenticar(email, senha) {
-        // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
-        const resultado = LoginSchema.safeParse({ email, senha });
+        // // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
+        // const resultado = LoginSchema.safeParse({ email, senha });
 
-        if (!resultado.success) {
-            // Captura o primeiro erro de validação e cria um erro de autenticação
-
-            const erro = resultado.error.errors[0];
-            // Aqui está passando o erro para o middleware de tratamento de erros
-            throw new AuthenticationError(erro.message);
-        }
+        // if (!resultado.success) {
+        //     // Captura o primeiro erro de validação e cria um erro de autenticação
+        //     const erro = resultado.error.errors[0];
+        //     // Aqui está passando o erro para o middleware de tratamento de erros
+        //     throw new AuthenticationError(erro.message);
+        // }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
@@ -66,7 +67,6 @@ export class LoginService {
 
     async refreshToken(token) {
         const dataToken = jwt.verify(token, this.jwtRefreshSecret);
-        
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
         const nowDate = Date.now();
@@ -89,10 +89,71 @@ export class LoginService {
             this.jwtRefreshSecret,
             { expiresIn: this.jwtRefreshExpireIn }
         );
-        
         return {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken
         };
+    }
+
+    async solicitarRecuperacao(email) {
+        const usuario = await this.loginRepository.buscarPorEmail(email);
+
+        if (!usuario) {
+            throw new AuthenticationError("Se este e-mail estiver cadastrado, uma mensagem foi enviada.");
+        }
+
+        const token = jwt.sign(
+            { id: usuario._id },
+            this.jwtPasswordResetSecret,
+            { expiresIn: '1hr' }
+        );
+
+        await this.enviarEmailRecuperacao(usuario, token);
+
+        return {
+            mensagem: "E-mail de recuperação enviado."
+        };
+    }
+
+    async enviarEmailRecuperacao(usuario, token) {
+        const baseUrl = process.env.RECUPERACAO_URL;
+        const urlRecuperacao = `${baseUrl}?token=${token}`;
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: usuario.email,
+            subject: 'Recuperação de senha',
+            html: `
+            <h1>Recuperação de senha</h1>
+            <p>Olá ${usuario.nome},</p>
+            <p>Clique no link abaixo para redefinir sua senha:</p>
+            <a href="${urlRecuperacao}">Redefinir senha</a>
+            <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
+        `
+        });
+    }
+
+    async redefinirSenha(token, novaSenha) {
+        const payload = jwt.verify(token, this.jwtPasswordResetSecret);
+        const usuario = await this.loginRepository.buscarPorId(payload.id);
+
+        if (!usuario) {
+            throw new AuthenticationError("Usuário não encontrado.");
+        }
+
+        const senhaValidada = NovaSenhaSchema.parse(novaSenha)
+
+        const hash = await bcrypt.hash(senhaValidada, 10);
+        await this.loginRepository.atualizarSenha(usuario._id, hash);
+
+        return { mensagem: "Senha alterada com sucesso." };
     }
 }

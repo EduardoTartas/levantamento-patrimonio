@@ -9,7 +9,7 @@ export default async function usuarioSeed() {
     const campusList = await Campus.find({});
 
     // Deleta todos os usuários existentes no banco de dados
-    await Usuario.deleteMany({});
+    await Usuario.deleteMany({ nome: { $ne: "admin" } });
 
     // Gera 50 usuários
     for(let i = 0; i < 50; i++) {

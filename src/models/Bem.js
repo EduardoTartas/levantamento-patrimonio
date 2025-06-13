@@ -47,6 +47,6 @@ const bemSchema = new mongoose.Schema({
 
 bemSchema.plugin(mongoosePaginate);
 
-const Bem = mongoose.model('ben', bemSchema);
+const Bem = mongoose.model('bens', bemSchema);
 
 export default Bem;

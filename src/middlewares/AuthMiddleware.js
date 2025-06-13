@@ -3,13 +3,9 @@ import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
-import { CustomError } from '../utils/helpers/index.js';
-import { LoginService } from '../services/LoginService.js';
 
 class AuthMiddleware {
   constructor() {
-    this.service = new LoginService();
-
     /**
      * Vinculação para grantir ao método handle o contexto 'this' correto
      * Ao usar bind(this) no método handle garantimos independentemente de como ou onde o método é chamado, 
@@ -37,19 +33,6 @@ class AuthMiddleware {
 
       if (!decoded) { // Se não ocorrer a decodificação do token
         throw new TokenExpiredError("O token JWT está expirado!");
-      }
-
-      // Verifica se o refreshtoken está presente no banco de dados e se é válido
-      const tokenData = await this.service.carregatokens(decoded.id);
-
-      if (!tokenData?.data?.refreshtoken) {
-        throw new CustomError({
-          statusCode: 401,
-          errorType: 'unauthorized',
-          field: 'Token',
-          details: [],
-          customMessage: 'Refresh token inválido, autentique novamente!'
-        });
       }
 
       // Se o token for válido, anexa o user_id à requisição

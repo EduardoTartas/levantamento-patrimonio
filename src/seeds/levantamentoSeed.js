@@ -30,11 +30,11 @@ export default async function levantamentoSeed() {
                 salaId: randomBem.sala || randomSala._id,
                 nome: randomBem.nome || fakerbr.commerce.productName(),
                 tombo: randomBem.tombo || fakerbr.random.alphaNumeric(6),
-                descricao: randomBem.descricao || `${fakerbr.commerce.productName()}. ${fakerbr.lorem.sentence()}`
-            },
-            responsavel: {
-                nome: randomBem.responsavel?.nome || fakerbr.name.findName(),
-                cpf: randomBem.responsavel?.cpf || fakerbr.br.cpf()
+                descricao: randomBem.descricao || `${fakerbr.commerce.productName()}. ${fakerbr.lorem.sentence()}`,
+                responsavel: {
+                    nome: randomBem.responsavel?.nome || fakerbr.name.findName(),
+                    cpf: randomBem.responsavel?.cpf || fakerbr.br.cpf()
+                }
             },
             usuario: randomUsuario._id,
             estado: fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),

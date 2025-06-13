@@ -80,6 +80,7 @@ export class LoginService {
 
     async refreshToken(token) {
         const dataToken = jwt.verify(token, this.jwtRefreshSecret);
+
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
         const nowDate = Date.now();
@@ -106,6 +107,7 @@ export class LoginService {
             this.jwtRefreshSecret,
             { expiresIn: this.jwtRefreshExpireIn }
         );
+
         return {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken

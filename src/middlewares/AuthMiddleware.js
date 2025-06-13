@@ -6,6 +6,11 @@ import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
 
 class AuthMiddleware {
   constructor() {
+    /**
+     * Vinculação para grantir ao método handle o contexto 'this' correto
+     * Ao usar bind(this) no método handle garantimos independentemente de como ou onde o método é chamado, 
+     * this sempre se referirá à instância atual de AuthMiddleware.
+     */
     this.handle = this.handle.bind(this);
   }
 
@@ -31,6 +36,10 @@ class AuthMiddleware {
        * - Se o token for válido, ele retorna os dados codificados no token (payload).
        */
       const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+      if (!decoded) { // Se não ocorrer a decodificação do token
+        throw new TokenExpiredError("O token JWT está expirado!");
+      }
 
       // Se o token for válido, anexa o user_id à requisição
       req.user_id = decoded.id;

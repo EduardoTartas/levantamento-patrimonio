@@ -61,7 +61,7 @@ class UsuarioController {
       res,
       data,
       200,
-      "Usuário atualizado com sucesso. Porém, o e-mail é ignorado em tentativas de atualização, pois é opração proibida."
+      "Usuário atualizado com sucesso. Porém, o e-mail e senha são ignorado em tentativas de atualização, pois é opração proibida."
     );
   }
 

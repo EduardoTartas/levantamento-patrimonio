@@ -1,13 +1,14 @@
 import LevantamentoRepository from "../repositories/LevantamentoRepository.js";
-import InventarioService from "./InventarioService.js"; // Dependência para validar o inventário
-import BemService from "./BemService.js"; // Dependência para validar o bem
+import InventarioService from "./InventarioService.js";
+import BemService from "./BemService.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
+import { parse } from "path";
 
 class LevantamentoService {
     constructor() {
         this.repository = new LevantamentoRepository();
-        this.inventarioService = new InventarioService(); // Instancia o serviço de inventário
-        this.bemService = new BemService(); // Instancia o serviço de bem
+        this.inventarioService = new InventarioService();
+        this.bemService = new BemService();
     }
 
     async listar(req) {
@@ -19,43 +20,36 @@ class LevantamentoService {
 
         console.log("Estou no criar em LevantamentoService");
 
-        console.log(parsedData);
         await this.inventarioService.ensureInvExists(parsedData.inventario);
-        await this.bemService.ensureBemExists(parsedData.bemId);
         await this.ensureLevantamentoUnico(parsedData.inventario, parsedData.bemId);
-
-        //ESPERAR ROTA SALA SER IMPLEMENTADA
+         //ESPERAR ROTA SALA SER IMPLEMENTADA
         /*
          if(parsedData.salaNova){
             await this.salaService.ensureSalaExists(parsedData.salaNova);
          }*/
+        const bem = await this.bemService.ensureBemExists(parsedData.bemId);
+        
+        const nomeResponsavel = bem.responsavel?.nome || '';
+        const cpfResponsavel = bem.responsavel?.cpf || '';
 
-        
-        
-        
-        
-        // Adicionar outros dados que o service é responsável por popular, como o usuário que fez a ação.
-        // Ex: parsedData.usuario = req.user.id; (o ID do usuário viria do token JWT)
-
+        parsedData.bem = {
+            responsavel:{
+                nome: nomeResponsavel,
+                cpf: cpfResponsavel
+            },
+            tombo: bem.tombo,
+            nome: bem.nome,
+            descricao: bem.descricao,
+            salaId: bem.sala,
+            id: bem.id
+        };
+       
         return this.repository.criar(parsedData);
     }
 
-    /**
-     * Garante que o levantamento existe e atualiza seus dados.
-     */
     async atualizar(id, parsedData) {
         console.log("Estou no atualizar em LevantamentoService");
-
-        // 1. Garante que o levantamento que se deseja atualizar realmente existe
         await this.ensureLevantamentoExists(id);
-
-        // 2. Se um novo bem ou inventário for fornecido, valida se eles existem
-        if (parsedData.inventario) {
-            await this.inventarioService.ensureInventarioExists(parsedData.inventario);
-        }
-        if (parsedData.bemId) {
-            await this.bemService.ensureBemExists(parsedData.bemId);
-        }
 
         return this.repository.atualizar(id, parsedData);
     }
@@ -66,9 +60,6 @@ class LevantamentoService {
         return this.repository.deletar(id);
     }
     
-    /**
-     * Adiciona uma foto a um levantamento existente.
-     */
     async adicionarFoto(id, file) {
         console.log("Estou no adicionarFoto em LevantamentoService");
         await this.ensureLevantamentoExists(id);

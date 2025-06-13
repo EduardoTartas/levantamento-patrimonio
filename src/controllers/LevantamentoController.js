@@ -1,6 +1,6 @@
 import LevantamentoService from "../services/LevantamentoService.js";
 import {LevantamentoQuerySchema, LevantamentoIdSchema} from "../utils/validators/schemas/zod/querys/LevantamentoQuerySchema.js";
-import {LevantamentoSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
+import {LevantamentoSchema, LevantamentoUpdateSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
 import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
 class LevantamentoController {
@@ -29,8 +29,7 @@ class LevantamentoController {
         console.log("Estou no criar em LevantamentoController");
 
         const parsedData = LevantamentoSchema.parse(req.body);
-
-        console.log(req.header);
+        parsedData.usuario = req.user_id
 
         const data = await this.service.criar(parsedData);
         
@@ -52,8 +51,8 @@ class LevantamentoController {
         return CommonResponse.success(
             res,
             data,
-            HttpStatusCodes.OK,
-            "Levantamento atualizado com sucesso."
+            HttpStatusCodes.OK.code,
+            "Levantamento atualizado com sucesso. Porém, novos id de bens e invenatarios são ignorado em tentativas de atualização, pois é opração proibida."
         );
     }
 
@@ -84,7 +83,7 @@ class LevantamentoController {
         return CommonResponse.success(
             res,
             data,
-            HttpStatusCodes.OK,
+            HttpStatusCodes.OK.code,
             "Foto adicionada com sucesso."
         );
     }

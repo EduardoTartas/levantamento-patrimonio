@@ -12,6 +12,6 @@ const LevantamentoSchema = z.object({
   ocioso: z.boolean().default(false).optional(),
 });
 
-const LevantamentoUpdateSchema = LevantamentoSchema.partial();
+const LevantamentoUpdateSchema = LevantamentoSchema.omit({ bemId: true, inventario: true }).partial();
 
 export { LevantamentoSchema, LevantamentoUpdateSchema };

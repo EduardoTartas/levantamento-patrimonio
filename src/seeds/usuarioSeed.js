@@ -16,12 +16,12 @@ export default async function usuarioSeed() {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
 
         const usuario = {
-            campus: randomCampus._id,
+            campus: randomCampus._id.toString(),
             nome: `${fakerbr.name.firstName()} ${fakerbr.name.lastName()}`,
             cpf: fakerbr.br.cpf(),
             email: fakerbr.internet.email(),
             senha: fakerbr.internet.password(8),
-            cargo: fakerbr.random.arrayElement(["Comissario", "Funcionário Cpalm"]),
+            cargo: fakerbr.random.arrayElement(["Comissionado", "Funcionario Cpalm"]),
             status: fakerbr.random.boolean()
         };
 
@@ -31,5 +31,5 @@ export default async function usuarioSeed() {
     console.log("Usuários implementadas com sucesso.");
 }
 
-//await DbConnect.conectar();
-//await usuarioSeed();
+// await DbConnect.conectar();
+// await usuarioSeed();

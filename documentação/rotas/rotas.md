@@ -276,7 +276,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 ## 5. /levantamentos 
  - Gerenciamento de levantamentos: cadastro, listagem, edição e exclusão
 
-### 5.1 POST /levantamentos/:idBem
+### 5.1 POST /levantamentos
 
 **Caso de Uso**  
  - Cadastrar novo levantamento para registro das informaçoes dos bens.  
@@ -319,7 +319,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 
 **Regras de Negócio**  
 - **Paginação**: Permite especificar `page` e `limite` para controle de resultados.
-- **Filtros**: Filtra levantamentos polo `tombo` do bem, `sala` e `inventario` . 
+- **Filtros**: Filtra levantamentos por `tombo` do bem, `sala`, `inventario` e `estado` do bem (ex: Em condições de uso, Inservível, Danificado).
 
 **Resposta**  
 - Retorno de uma lista de levantamentos conforme os filtros aplicados.

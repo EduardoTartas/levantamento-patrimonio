@@ -19,16 +19,22 @@ class AuthMiddleware {
       const authHeader = req.headers.authorization;
 
       if (!authHeader) {
-        throw new AuthenticationError("O token de autenticação não existe!");
+        throw new AuthenticationError("Acesso negado, o token de autenticação não existe!");
       }
 
+      // Separa o tipo do token ("Bearer") do valor real do token
       const [scheme, token] = authHeader.split(' ');
 
+      // Garante que o esquema seja 'Bearer' e que o token exista
       if (scheme !== 'Bearer' || !token) {
         throw new AuthenticationError("Formato do token de autenticação inválido!");
       }
 
-      // Verifica e decodifica o token
+      /**
+       * Verifica e decodifica o token usando a chave secreta.
+       * - A função 'jwt.verify' é transformada em 'promise' para usar com 'await'.
+       * - Se o token for válido, ele retorna os dados codificados no token (payload).
+       */
       const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
       if (!decoded) { // Se não ocorrer a decodificação do token
@@ -45,11 +51,10 @@ class AuthMiddleware {
       } else if (err.name === 'TokenExpiredError') {
         next(new TokenExpiredError("O token JWT está expirado!"));
       } else {
-        next(err); // Passa outros erros para o errorHandler
+        next(err);
       }
     }
   }
 }
 
-// Instanciar e exportar apenas o método 'handle' como função de middleware
 export default new AuthMiddleware().handle;

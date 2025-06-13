@@ -33,17 +33,11 @@ class Levantamento{
                 responsavel: {
                     type: String,
                     required: true,
-                },
-                ocioso: {
-                    type: Boolean,
-                    default: "false",
-                },
-                
+                }
             },
-            sala: {
+            salaNova: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "sala",
-                required: true,
             },
             usuario: {
                 type: mongoose.Schema.Types.ObjectId,
@@ -58,11 +52,11 @@ class Levantamento{
                 required: true,
                 enum: {
                     values: ["Em condições de uso", "Inservível", "Danificado"]
-                }
+                },
+            ocioso: {
+                type: Boolean,
+                default: "false",
             },
-            data: {
-                type: Date,
-                required: true,
             }
         }, {
             timestamps: true,

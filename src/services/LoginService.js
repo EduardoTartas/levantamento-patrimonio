@@ -6,6 +6,10 @@ import nodemailer from 'nodemailer';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
 import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
+import TokenExpiredError from "../utils/errors/TokenExpiredError.js";
+import TokenInvalidError from "../utils/errors/TokenInvalidError.js";
+import PasswordResetToken from "../models/PassResetToken.js";
+import CustomError from "../utils/helpers/CustomError.js";
 
 export class LoginService {
     constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
@@ -18,25 +22,34 @@ export class LoginService {
     }
 
     async autenticar(email, senha) {
-        // // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
-        // const resultado = LoginSchema.safeParse({ email, senha });
+        // Valida os dados enviados no corpo da requisição usando o esquema LoginSchema
+        const resultado = LoginSchema.safeParse({ email, senha });
 
-        // if (!resultado.success) {
-        //     // Captura o primeiro erro de validação e cria um erro de autenticação
-        //     const erro = resultado.error.errors[0];
-        //     // Aqui está passando o erro para o middleware de tratamento de erros
-        //     throw new AuthenticationError(erro.message);
-        // }
+        if (!resultado.success) {
+            // Captura o primeiro erro de validação e cria um erro de autenticação
+            const erro = resultado.error.errors[0];
+            // Aqui está passando o erro para o middleware de tratamento de erros
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: erro.path?.[0] || null,
+                details: resultado.error.errors,
+                customMessage: erro.message
+            });
+        }
 
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
         if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
-            throw new AuthenticationError('Email ou senha inválidos');
+            throw new AuthenticationError('Email ou senha inválidos', 'email');
         };
 
         // gera o token jwt
         const accessToken = this._gerarAccessToken(usuario);
         const refreshToken = this._gerarRefreshToken(usuario);
+
+        // Salva o refresh token no banco
+        await this.loginRepository.salvarRefreshToken(usuario._id, refreshToken)
 
         return {
             usuario: {
@@ -74,7 +87,11 @@ export class LoginService {
         const maxSessionTime = 7 * 24 * 60 * 60 * 1000;// Tempo máximo do refresh token(7d)
 
         if (nowDate - tokenIat > maxSessionTime) {
-            throw new AuthenticationError('Sessão expirada, faça login novamente');
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'sessionExpired',
+                customMessage: 'Sessão expirada, faça login novamente'
+            });
         };
 
         const newAccessToken = jwt.sign(
@@ -99,14 +116,27 @@ export class LoginService {
         const usuario = await this.loginRepository.buscarPorEmail(email);
 
         if (!usuario) {
-            throw new AuthenticationError("Se este e-mail estiver cadastrado, uma mensagem foi enviada.");
+            throw new CustomError({
+                statusCode: 200, // Sim, pois isso é um comportamento de segurança (não revela existência do e-mail)
+                errorType: 'emailNotFound',
+                customMessage: "Se este e-mail estiver cadastrado, uma mensagem foi enviada."
+            });
         }
 
+        const expiresInMs = 60 * 60 * 1000;
+        const expiresAt = new Date(Date.now() + expiresInMs);
+        
         const token = jwt.sign(
             { id: usuario._id },
             this.jwtPasswordResetSecret,
             { expiresIn: '1hr' }
         );
+        
+        await PasswordResetToken.create({
+            usuario: usuario._id,
+            token,
+            expiresAt
+        });
 
         await this.enviarEmailRecuperacao(usuario, token);
 
@@ -142,17 +172,50 @@ export class LoginService {
     }
 
     async redefinirSenha(token, novaSenha) {
-        const payload = jwt.verify(token, this.jwtPasswordResetSecret);
-        const usuario = await this.loginRepository.buscarPorId(payload.id);
+        let payload;
 
-        if (!usuario) {
-            throw new AuthenticationError("Usuário não encontrado.");
+        try {
+            payload = jwt.verify(token, this.jwtPasswordResetSecret);
+        } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                throw new TokenExpiredError("O link de recuperação expirou. Solicite um novo.");
+            } else if (err.name === 'JsonWebTokenError') {
+                throw new TokenExpiredError("Token inválido.");
+            } else {
+                throw new TokenInvalidError("Não foi possível verificar o token.");
+            }
         }
 
-        const senhaValidada = NovaSenhaSchema.parse(novaSenha)
+        const resetTokenDoc = await PasswordResetToken.findOne({ token });
 
+        if (!resetTokenDoc || resetTokenDoc.used) {
+            throw new TokenInvalidError("Token inválido, ou já ultilizado.");
+        }
+
+        if (resetTokenDoc.expiresAt < new Date()) {
+            throw new TokenExpiredError("O link de recuperação expirou.");
+        }
+
+        const usuario = await this.loginRepository.buscarPorId(payload.id);
+        console.log(usuario);
+        
+
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'userNotFound',
+                customMessage: "Usuário não encontrado."
+            });
+        }
+
+        const senhaValidada = NovaSenhaSchema.parse(novaSenha);
         const hash = await bcrypt.hash(senhaValidada, 10);
+        
         await this.loginRepository.atualizarSenha(usuario._id, hash);
+
+        // Marcando o token como usado
+        resetTokenDoc.used = true;
+        await resetTokenDoc.save();
 
         return { mensagem: "Senha alterada com sucesso." };
     }

@@ -15,7 +15,7 @@ class Levantamento{
                     ref: "bem",
                     required: true,
                 },
-                salaID:{
+                salaId:{
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "sala",
                     required: true,
@@ -31,6 +31,16 @@ class Levantamento{
                     unique: true,
                 },
                 responsavel: {
+                    nome: {
+                        type: String,
+                        required: true,
+                    },
+                    cpf: {
+                        type: String,
+                        required: true,
+                    }
+                },
+                descricao: {
                     type: String,
                     required: true,
                 }
@@ -52,11 +62,11 @@ class Levantamento{
                 required: true,
                 enum: {
                     values: ["Em condições de uso", "Inservível", "Danificado"]
-                },
+                }
+            },
             ocioso: {
                 type: Boolean,
-                default: "false",
-            },
+                default: false
             }
         }, {
             timestamps: true,

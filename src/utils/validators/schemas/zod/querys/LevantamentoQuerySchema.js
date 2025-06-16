@@ -1,6 +1,11 @@
 import { z } from "zod";
 import mongoose from 'mongoose';
 
+export const LevantamentoIdSchema = z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
+    message: "ID inválido",
+});
+
+
 export const LevantamentoQuerySchema = z.object({
   tombo: z
     .string()

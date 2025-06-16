@@ -16,7 +16,7 @@ export default async function levantamentoSeed() {
     // Deleta todos os levantamentos existentes no banco de dados
     await Levantamento.deleteMany({});
 
-    // Gera 100 levantamentos
+    // Gera 800 levantamentos
     for (let i = 0; i < 800; i++) {
         const randomInventario = inventarioList[Math.floor(Math.random() * inventarioList.length)];
         const randomSala = salaList[Math.floor(Math.random() * salaList.length)];
@@ -26,20 +26,22 @@ export default async function levantamentoSeed() {
         const levantamento = {
             inventario: randomInventario._id,
             bem: {
-                id: randomBem._id, // Referência ao ObjectId do Bem
-                salaID: randomBem.sala || randomSala._id, // Usa o salaID do Bem ou um aleatório
+                id: randomBem._id,
+                salaId: randomBem.sala || randomSala._id,
                 nome: randomBem.nome || fakerbr.commerce.productName(),
-                tombo: randomBem.tombo || fakerbr.random.alphaNumeric(10),
-                responsavel: randomBem.responsavel || fakerbr.name.findName(),
-                ocioso: randomBem.ocioso || fakerbr.random.boolean(),
+                tombo: randomBem.tombo || fakerbr.random.alphaNumeric(6),
+                descricao: randomBem.descricao || `${fakerbr.commerce.productName()}. ${fakerbr.lorem.sentence()}`,
+                responsavel: {
+                    nome: randomBem.responsavel?.nome || fakerbr.name.findName(),
+                    cpf: randomBem.responsavel?.cpf || fakerbr.br.cpf()
+                }
             },
-            sala: randomSala._id,
             usuario: randomUsuario._id,
-            imagem: fakerbr.image.imageUrl(),
             estado: fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
-            data: fakerbr.date.past(),
+            ocioso: fakerbr.random.boolean(),
+            createdAt: fakerbr.date.past(),
+            updatedAt: fakerbr.date.recent()
         };
-
 
         await Levantamento.create(levantamento);
     }

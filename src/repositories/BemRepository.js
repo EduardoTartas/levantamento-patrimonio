@@ -12,6 +12,21 @@ class BemRepository {
         }
     }
 
+    async buscarPorId(id) {
+        const bem = await this.model.findById(id);
+
+        if (!bem) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Bem',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Bem'),
+            });
+        }
+        return bem;
+    }
+
     async listar(req) {
         const id = req.params.id || null;
 

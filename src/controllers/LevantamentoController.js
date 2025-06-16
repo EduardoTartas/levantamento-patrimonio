@@ -65,7 +65,7 @@ class LevantamentoController {
         }
         
         const data = await this.service.deletar(id);
-        return CommonResponse.success(res, data, HttpStatusCodes.OK, "Levantamento excluído com sucesso.");
+        return CommonResponse.success(res, data, HttpStatusCodes.OK.code, "Levantamento excluído com sucesso.");
     }
 
     async adicionarFoto(req, res) {

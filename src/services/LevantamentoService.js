@@ -2,7 +2,6 @@ import LevantamentoRepository from "../repositories/LevantamentoRepository.js";
 import InventarioService from "./InventarioService.js";
 import BemService from "./BemService.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
-import { parse } from "path";
 
 class LevantamentoService {
     constructor() {
@@ -49,7 +48,8 @@ class LevantamentoService {
 
     async atualizar(id, parsedData) {
         console.log("Estou no atualizar em LevantamentoService");
-        await this.ensureLevantamentoExists(id);
+        const levantamento = await this.ensureLevantamentoExists(id);
+        await this.inventarioService.ensureInvExists(levantamento.inventario._id);
 
         return this.repository.atualizar(id, parsedData);
     }
@@ -57,6 +57,8 @@ class LevantamentoService {
     async deletar(id) {
         console.log("Estou no deletar em LevantamentoService");
         await this.ensureLevantamentoExists(id);
+        const levantamento = await this.ensureLevantamentoExists(id);
+        await this.inventarioService.ensureInvExists(levantamento.inventario._id);
         return this.repository.deletar(id);
     }
     
@@ -65,7 +67,6 @@ class LevantamentoService {
         await this.ensureLevantamentoExists(id);
 
         // Lógica de negócio para tratar o arquivo:
-        // Ex: fazer upload para um serviço de nuvem (AWS S3, Google Cloud Storage, etc.)
         // e obter a URL final.
         // Por enquanto, vamos simular que a URL é o caminho do arquivo.
         const imageUrl = file.path; // Em produção, seria a URL do serviço de armazenamento

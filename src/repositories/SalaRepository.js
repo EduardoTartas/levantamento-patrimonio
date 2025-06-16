@@ -1,29 +1,29 @@
-import BemFilterBuilder from './filters/BemFilterBuild.js';
+import SalaFilterBuilder from './filters/SalaFilterBuild.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
-import Bem from '../models/Bem.js';
+import Sala from '../models/Sala.js';
 
-class BemRepository {
+class SalaRepository {
     constructor() {
-        this.model = Bem;
+        this.model = Sala;
 
-        if (!Bem || typeof Bem.paginate !== "function") {
+        if (!Sala || typeof Sala.paginate !== "function") {
             throw new Error("The Bem model must include the paginate method. Ensure mongoose-paginate-v2 is applied.");
         }
     }
 
     async buscarPorId(id) {
-        const bem = await this.model.findById(id);
+        const sala = await this.model.findById(id);
 
-        if (!bem) {
+        if (!sala) {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
-                field: 'Bem',
+                field: 'Sala',
                 details: [],
-                customMessage: messages.error.resourceNotFound('Bem'),
+                customMessage: messages.error.resourceNotFound('Sala'),
             });
         }
-        return bem;
+        return sala;
     }
 
     async listar(req) {
@@ -32,7 +32,7 @@ class BemRepository {
         if (id) {
             const data = await this.model.findById(id)
             .populate({
-                path: 'sala',
+                path: 'campus',
                 select: 'nome _id',
             });
 
@@ -40,32 +40,30 @@ class BemRepository {
                 throw new CustomError({
                     statusCode: 404,
                     errorType: 'resourceNotFound',
-                    field: 'Bem',
+                    field: 'Sala',
                     details: [],
-                    customMessage: messages.error.resourceNotFound('Bem'),
+                    customMessage: messages.error.resourceNotFound('Sala'),
                 });
             }
             
             return data;
         }
 
-        const { nome, tombo, responsavel, auditado = false, sala, page } = req.query || {};
+        const { nome, campus, bloco, page } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
         
-        const filterBuilder = new BemFilterBuilder()
+        const filterBuilder = new SalaFilterBuilder()
             .comNome(nome || "")
-            .comTombo(tombo || "")
-            .comResponsavel(responsavel || "")
-            .comSala(sala || "")
-            .comAuditado(auditado);
+            .comCampus(campus || "")
+            .comBloco(bloco || "");
 
         if (typeof filterBuilder.build !== 'function') {
             throw new CustomError({
                 statusCode: 500,
                 errorType: 'internalServerError',
-                field: 'Bem',
+                field: 'Sala',
                 details: [],
-                customMessage: messages.error.internalServerError('Bem'),
+                customMessage: messages.error.internalServerError('Sala'),
             });
         }
 
@@ -73,7 +71,7 @@ class BemRepository {
         const options = {
             page: parseInt(page, 10) || 1,
             populate:{
-                path: 'sala',
+                path: 'campus',
                 select: 'nome _id',
             },
             limit: limite,
@@ -84,4 +82,4 @@ class BemRepository {
     }
 }
 
-export default BemRepository;
+export default SalaRepository;

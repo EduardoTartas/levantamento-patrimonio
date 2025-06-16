@@ -18,7 +18,10 @@ export default async function bemSeed() {
             sala: randomSala._id,
             nome: fakerbr.commerce.productName(),
             tombo: fakerbr.random.number({ min: 100000, max: 999999 }).toString(),
-            responsavel: fakerbr.name.findName(),
+            responsavel: {
+            nome: fakerbr.name.findName(),
+            cpf: fakerbr.br.cpf(), 
+            },
             descricao: fakerbr.lorem.sentence(),
             valor: parseFloat(fakerbr.commerce.price()),
             auditado: fakerbr.random.boolean(),

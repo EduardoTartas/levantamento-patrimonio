@@ -1,15 +1,13 @@
-// src/controllers/UsuarioController.js
 import InventarioService from "../services/InventarioService.js";
 import {InventarioQuerySchema, InventarioIdSchema} from "../utils/validators/schemas/zod/querys/InventarioQuerySchema.js";
 import {InventarioSchema, InventarioUpdateSchema} from "../utils/validators/schemas/zod/InventarioSchema.js";
-import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
+import {CommonResponse} from "../utils/helpers/index.js";
 
 class InventarioController {
   constructor() {
     this.service = new InventarioService();
   }
 
-  // Lista usuários. Se um ID é fornecido, retorna um único objeto.
   async listar(req, res) {
     console.log("Estou no listar em InventarioController");
 
@@ -40,7 +38,6 @@ class InventarioController {
   
   }
 
-  // Atualiza um usuário existente.
   async atualizar(req, res) {
     console.log("Estou no atualizar em InventarioController");
 

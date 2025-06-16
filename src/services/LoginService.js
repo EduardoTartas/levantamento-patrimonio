@@ -79,8 +79,24 @@ export class LoginService {
     };
 
     async refreshToken(token) {
+        // Verificando se o token existe
+        const tokenValido = await this.loginRepository.validarRefreshToken?.(token);
+        
+        if (!tokenValido) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'invalidToken',
+                customMessage: 'Refresh token inválido ou expirado.' 
+            })
+        }
 
-        let dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        let dataToken;
+        
+        try {
+            dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        } catch (err) {
+            throw new TokenInvalidError("Token inválido");
+        }
 
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
@@ -227,5 +243,5 @@ export class LoginService {
         return { mensagem: "Senha alterada com sucesso." };
     }
 
-
+    
 }

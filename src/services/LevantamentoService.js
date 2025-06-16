@@ -1,5 +1,6 @@
 import LevantamentoRepository from "../repositories/LevantamentoRepository.js";
 import InventarioService from "./InventarioService.js";
+import SalaService from "./SalaService.js";
 import BemService from "./BemService.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
 
@@ -8,6 +9,7 @@ class LevantamentoService {
         this.repository = new LevantamentoRepository();
         this.inventarioService = new InventarioService();
         this.bemService = new BemService();
+        this.salaService = new SalaService();
     }
 
     async listar(req) {
@@ -21,11 +23,9 @@ class LevantamentoService {
 
         await this.inventarioService.ensureInvExists(parsedData.inventario);
         await this.ensureLevantamentoUnico(parsedData.inventario, parsedData.bemId);
-         //ESPERAR ROTA SALA SER IMPLEMENTADA
-        /*
-         if(parsedData.salaNova){
+        if(parsedData.salaNova){
             await this.salaService.ensureSalaExists(parsedData.salaNova);
-         }*/
+        }
         const bem = await this.bemService.ensureBemExists(parsedData.bemId);
         
         const nomeResponsavel = bem.responsavel?.nome || '';

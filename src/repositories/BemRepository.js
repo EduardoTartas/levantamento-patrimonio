@@ -1,7 +1,6 @@
 import BemFilterBuilder from './filters/BemFilterBuild.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
 import Bem from '../models/Bem.js';
-import { populate } from 'dotenv';
 
 class BemRepository {
     constructor() {

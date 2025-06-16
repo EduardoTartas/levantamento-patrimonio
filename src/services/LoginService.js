@@ -243,5 +243,7 @@ export class LoginService {
         return { mensagem: "Senha alterada com sucesso." };
     }
 
-    
+    async deletarRefreshToken(refreshToken) {
+        return this.loginRepository.deleteRefreshToken(refreshToken);
+    }
 }

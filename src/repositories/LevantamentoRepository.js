@@ -28,7 +28,7 @@ class LevantamentoRepository {
                 },
                 {
                     path: 'usuario',
-                    select: 'nome email _id'
+                    select: 'nome cpf _id'
                 }
             ]);
             console.log(levantamento)
@@ -100,7 +100,7 @@ class LevantamentoRepository {
             },
             {
                 path: 'usuario',
-                select: 'nome email _id'
+                select: 'nome cpf _id'
             }
             ],
             sort: { createdAt: -1 },
@@ -132,7 +132,7 @@ class LevantamentoRepository {
                 },
                 {
                     path: 'usuario',
-                    select: 'nome email _id'
+                    select: 'nome cpf _id'
                 }
             ]);
 

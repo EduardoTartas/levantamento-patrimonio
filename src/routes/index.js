@@ -17,6 +17,7 @@ import relatorio from './relatorioRoutes.js';
 import campus from './campusRoutes.js';
 import inventario from './inventarioRoutes.js';
 import bem from './bemRoutes.js';
+import sala from './salaRoutes.js';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ const routes = (app) => {
         relatorio,
         campus,
         bem,
+        sala,
         inventario,
        
     );

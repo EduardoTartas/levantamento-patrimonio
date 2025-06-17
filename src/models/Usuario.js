@@ -36,10 +36,6 @@ class Usuario{
                 type: Boolean,
                 default: true,
             },
-            refreshToken: { 
-                type: String,
-                select: false
-            }
         }, {
             timestamps: true,
             versionKey: false

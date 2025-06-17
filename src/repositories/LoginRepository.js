@@ -1,3 +1,4 @@
+import RefreshToken from '../models/RefreshToken.js'
 import Usuario from '../models/Usuario.js';
 
 export class LoginRepository {
@@ -16,6 +17,19 @@ export class LoginRepository {
   }
 
   async salvarRefreshToken(id, refreshToken) {
-    return Usuario.findByIdAndUpdate(id, { refreshToken });
+    await RefreshToken.deleteMany({ user: id });
+
+    return RefreshToken.create({
+      token: refreshToken,
+      user: id
+    })
   }
+
+  async deleteRefreshToken(refreshToken) {
+    return RefreshToken.deleteOne({ token: refreshToken });
+  }
+
+  async validarRefreshToken(token) {
+    return RefreshToken.findOne({ token });
 }
+} 

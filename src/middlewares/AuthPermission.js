@@ -17,7 +17,7 @@ class AuthPermission {
   async handle(req, res, next) {
     try {
       // 1. Verifica se o user_id está presente (deve ter sido definido pelo AuthMiddleware)
-      const userId = req.user_id?.id;
+      const userId = req.user?.id;
       if (!userId) {
         throw new CustomError({
           statusCode: 401,
@@ -33,10 +33,11 @@ class AuthPermission {
          * Remove barras iniciais e finais, remove query strings e pega a primeira parte da URL
          */
         const rotaReq = req.url.split('/').filter(Boolean)[0].split('?')[0];
-        const dominioReq = `localhost`; // domínio foi colocado como localhost para fins de teste
+        const dominioReq = req.hostname || `localhost`; // domínio foi colocado como localhost para fins de teste
 
         // 3. Busca a rota atual no banco de dados
         const rotaDB = await this.Rota.findOne({ rota: rotaReq, dominio: dominioReq });
+        
         if (!rotaDB) {
           throw new CustomError({
             statusCode: 404,
@@ -67,8 +68,10 @@ class AuthPermission {
           });
         }
 
-        // 5. Verifica se a rota está ativa e suporta o método
-        if (!rotaDB.ativo || !rotaDB[metodo]) {
+        console.log('Verificando rota:', rotaReq, 'domínio:', dominioReq, 'método:', metodo);
+
+        // 5. Verifica se a rota está ativa
+        if (!rotaDB.ativo) {
           throw new CustomError({
             statusCode: 403,
             errorType: 'forbidden',

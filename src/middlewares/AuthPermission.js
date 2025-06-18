@@ -37,7 +37,6 @@ class AuthPermission {
 
         // 3. Busca a rota atual no banco de dados
         const rotaDB = await this.Rota.findOne({ rota: rotaReq, dominio: dominioReq });
-        
         if (!rotaDB) {
           throw new CustomError({
             statusCode: 404,
@@ -68,7 +67,6 @@ class AuthPermission {
           });
         }
 
-        console.log('Verificando rota:', rotaReq, 'domínio:', dominioReq, 'método:', metodo);
 
         // 5. Verifica se a rota está ativa
         if (!rotaDB.ativo) {

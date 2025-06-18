@@ -12,9 +12,9 @@ const UsuarioController = new usuarioController();
 router
     .get("/usuarios", /*AuthMiddleware, *authPermission,*/ asyncWrapper(UsuarioController.listar.bind(UsuarioController)))
     .get("/usuarios/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(UsuarioController.listar.bind(UsuarioController)))
-    .post("/usuarios", /*AuthMiddleware,*/ AuthPermission, asyncWrapper(UsuarioController.criar.bind(UsuarioController)))
-    .patch("/usuarios/:id", /*AuthMiddleware,*/ AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
-    .put("/usuarios/:id",/*AuthMiddleware,*/ /*leware,*/ AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
-    .delete("/usuarios/:id", /*AuthMiddleware,*/ AuthPermission, asyncWrapper(UsuarioController.deletar.bind(UsuarioController)))
+    .post("/usuarios", AuthMiddleware, AuthPermission, asyncWrapper(UsuarioController.criar.bind(UsuarioController)))
+    .patch("/usuarios/:id", AuthMiddleware, AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
+    .put("/usuarios/:id",AuthMiddleware, /*leware,*/ AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
+    .delete("/usuarios/:id", AuthMiddleware, AuthPermission, asyncWrapper(UsuarioController.deletar.bind(UsuarioController)))
 
 export default router;

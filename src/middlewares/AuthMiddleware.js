@@ -50,7 +50,7 @@ class AuthMiddleware {
       }
 
       // Se o token for válido, anexa o user_id à requisição
-      req.user_id = {
+      req.user = {
         id: usuario._id,
         cargo: usuario.cargo,
         nome: usuario.nome,

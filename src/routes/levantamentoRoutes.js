@@ -2,7 +2,7 @@ import express from "express";
 import LevantamentoController from "../controllers/LevantamentoController.js";
 import AuthMiddleware from '../middlewares/AuthMiddleware.js';
 import { asyncWrapper } from '../utils/helpers/index.js';
-
+import AuthPermission from "../middlewares/AuthPermission.js";
 
 const router = express.Router();
 
@@ -25,6 +25,6 @@ router
   .patch("/levantamentos/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(levantamentoController.atualizar.bind(levantamentoController)))
   
   // Rota para excluir um levantamento
-  .delete("/levantamentos/:id",  /*AuthMiddleware, authPermission,*/asyncWrapper(levantamentoController.deletar.bind(levantamentoController)));
+  .delete("/levantamentos/:id", AuthMiddleware, AuthPermission, asyncWrapper(levantamentoController.deletar.bind(levantamentoController)));
 
 export default router;

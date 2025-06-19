@@ -1,7 +1,6 @@
 import * as Minio from 'minio';
 import 'dotenv/config';
 
-// Valida se as variáveis de ambiente essenciais para o MinIO estão definidas
 const requiredMinioVars = [
     'MINIO_ENDPOINT',
     'MINIO_PORT',
@@ -15,7 +14,6 @@ for (const varName of requiredMinioVars) {
     }
 }
 
-// Cria a instância do cliente MinIO com as credenciais do seu .env
 const minioClient = new Minio.Client({
     endPoint: process.env.MINIO_ENDPOINT,
     port: parseInt(process.env.MINIO_PORT, 10),

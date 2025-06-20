@@ -60,6 +60,22 @@ class LoginController {
             recebido: { email, token, novaSenha }
         });
     }
+
+    async logout(req, res, next) {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(400).json({ message: "Token de refresh não fornecido." });
+        }
+
+        const result = await this.service.deletarRefreshToken(refreshToken);
+
+        if (result.deletedCount === 0) {
+            return res.status(400).json({ message: "Token não encontrado." });
+        }
+
+        return res.status(200).json({ message: "Logout realizado com sucesso." });
+    }
 }
 
 export default LoginController;

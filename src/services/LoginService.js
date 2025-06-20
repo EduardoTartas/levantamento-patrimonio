@@ -88,7 +88,24 @@ export class LoginService {
     };
 
     async refreshToken(token) {
-        const dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        // Verificando se o token existe
+        const tokenValido = await this.loginRepository.validarRefreshToken?.(token);
+        
+        if (!tokenValido) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'invalidToken',
+                customMessage: 'Refresh token inválido ou expirado.' 
+            })
+        }
+
+        let dataToken;
+        
+        try {
+            dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        } catch (err) {
+            throw new TokenInvalidError("Token inválido");
+        }
 
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
@@ -117,6 +134,10 @@ export class LoginService {
             { expiresIn: this.jwtRefreshExpireIn }
         );
 
+        // Aqui deleta o antigo e salva o novo token
+        await this.loginRepository.deleteRefreshToken(token);
+        await this.loginRepository.salvarRefreshToken(dataToken.id, newRefreshToken);
+
         return {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken
@@ -136,13 +157,13 @@ export class LoginService {
 
         const expiresInMs = 60 * 60 * 1000;
         const expiresAt = new Date(Date.now() + expiresInMs);
-        
+
         const token = jwt.sign(
             { id: usuario._id },
             this.jwtPasswordResetSecret,
             { expiresIn: '1hr' }
         );
-        
+
         await PasswordResetToken.create({
             usuario: usuario._id,
             token,
@@ -209,7 +230,7 @@ export class LoginService {
 
         const usuario = await this.loginRepository.buscarPorId(payload.id);
         console.log(usuario);
-        
+
 
         if (!usuario) {
             throw new CustomError({
@@ -221,7 +242,7 @@ export class LoginService {
 
         const senhaValidada = NovaSenhaSchema.parse(novaSenha);
         const hash = await bcrypt.hash(senhaValidada, 10);
-        
+
         await this.loginRepository.atualizarSenha(usuario._id, hash);
 
         // Marcando o token como usado
@@ -229,5 +250,9 @@ export class LoginService {
         await resetTokenDoc.save();
 
         return { mensagem: "Senha alterada com sucesso." };
+    }
+
+    async deletarRefreshToken(refreshToken) {
+        return this.loginRepository.deleteRefreshToken(refreshToken);
     }
 }

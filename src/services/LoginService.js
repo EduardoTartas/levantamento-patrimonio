@@ -55,7 +55,8 @@ export class LoginService {
             usuario: {
                 id: usuario._id,
                 nome: usuario.nome,
-                email: usuario.email
+                email: usuario.email,
+                cargo: usuario.cargo
             },
             accessToken,
             refreshToken
@@ -64,7 +65,11 @@ export class LoginService {
 
     _gerarAccessToken(usuario) {
         return jwt.sign(
-            { id: usuario._id, email: usuario.email },
+            { 
+                id: usuario._id, 
+                email: usuario.email, 
+                cargo: usuario.cargo
+            },
             this.jwtSecret,
             { expiresIn: this.jwtExpireIn }
         );
@@ -72,7 +77,11 @@ export class LoginService {
 
     _gerarRefreshToken(usuario) {
         return jwt.sign(
-            { id: usuario._id, email: usuario.email },
+            { 
+                id: usuario._id, 
+                email: usuario.email, 
+                cargo: usuario.cargo
+            },
             this.jwtRefreshSecret,
             { expiresIn: this.jwtRefreshExpireIn }
         );

@@ -1,7 +1,9 @@
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
 import UsuarioRepository from "../repositories/UsuarioRepository.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
 import CampusService from "./CampusService.js";
+import { enviarEmail } from "../utils/email.js"
 
 class UsuarioService {
     constructor() {
@@ -21,13 +23,34 @@ class UsuarioService {
         await this.validateCpf(parsedData.cpf);
         await this.campusService.ensureCampExists(parsedData.campus);
 
-        if (parsedData.senha) {
-            const saltRounds = 10;
-            parsedData.senha = await bcrypt.hash(parsedData.senha, saltRounds);
-        }
+        // Isso irá fazer com que nenhuma senha seja registrada
+        delete parsedData.senha;
 
-        console.log(`Estou processando o schema em UsuarioService ${parsedData}`);
-        return this.repository.criar(parsedData);
+        // Para maior segurança um token temporário será gerado
+        const token = jwt.sign(
+            { email: parsedData.email }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: "1hr" }
+        );
+
+        parsedData.senhaToken = token;
+        parsedData.senhaTokenExpira = new Date(Date.now() + 3600000);
+
+        const novoUsuario = await this.repository.criar(parsedData);
+        
+        // Irá enviar o email com link para criação de senha
+        const url = `${process.env.CADASTRAR_SENHA_URL}?token=${token}`;
+        await enviarEmail({
+            to: parsedData.email,
+            subject: "Criação de senha",
+            html: `
+                <p>Olá, ${parsedData.nome}!</p>
+                <p>Para criar sua senha, clique no link abaixo:</p>
+                <a href="${url}">Criar senha
+            `
+        });
+
+        return novoUsuario;
     }
 
     async atualizar(id, parsedData) {

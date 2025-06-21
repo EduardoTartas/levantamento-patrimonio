@@ -10,6 +10,6 @@ const router = express.Router();
 const importacaoController = new ImportacaoController();
 
 router
-   .post("/csv/:campusId", upload.single('csvFile'), asyncWrapper(importacaoController.importarCSV.bind(importacaoController)));
+   .post("/csv/:campusId", upload.single('csv'), asyncWrapper(importacaoController.importarCSV.bind(importacaoController)));
 
 export default router;

@@ -40,9 +40,7 @@ class LevantamentoController {
         console.log("Estou no atualizar em LevantamentoController");
 
         const { id } = req.params;
-        if (id) {
-            LevantamentoIdSchema.parse(id);
-        }
+        LevantamentoIdSchema.parse(id);
 
         const parsedData = LevantamentoUpdateSchema.parse(req.body);
 
@@ -60,9 +58,7 @@ class LevantamentoController {
         console.log("Estou no deletar em LevantamentoController");
 
         const { id } = req.params;
-        if (id) {
-            LevantamentoIdSchema.parse(id);
-        }
+        LevantamentoIdSchema.parse(id);
         
         const data = await this.service.deletar(id);
         return CommonResponse.success(res, data, HttpStatusCodes.OK.code, "Levantamento excluído com sucesso.");
@@ -93,6 +89,22 @@ class LevantamentoController {
             data,
             HttpStatusCodes.OK.code,
             "Foto adicionada com sucesso."
+        );
+    }
+
+     async deletarFoto(req, res) {
+        console.log("Estou no deletarFoto em LevantamentoController");
+
+        const { id } = req.params;
+        LevantamentoIdSchema.parse(id);
+
+        const data = await this.service.deletarFoto(id);
+
+        return CommonResponse.success(
+            res,
+            data,
+            HttpStatusCodes.OK.code,
+            "Fotos removidas com sucesso."
         );
     }
 }

@@ -28,6 +28,9 @@ router
   .patch("/levantamentos/:id", /*AuthMiddleware, authPermission,*/ asyncWrapper(levantamentoController.atualizar.bind(levantamentoController)))
   
   // Rota para excluir um levantamento
-  .delete("/levantamentos/:id",  /*AuthMiddleware, authPermission,*/asyncWrapper(levantamentoController.deletar.bind(levantamentoController)));
+  .delete("/levantamentos/:id",  /*AuthMiddleware, authPermission,*/asyncWrapper(levantamentoController.deletar.bind(levantamentoController)))
+
+  // Rota para excluir as fotos de um levantamento
+  .delete("/levantamentos/fotos/:id",  /*AuthMiddleware, authPermission,*/asyncWrapper(levantamentoController.deletarFoto.bind(levantamentoController)));
 
 export default router;

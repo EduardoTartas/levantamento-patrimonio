@@ -62,6 +62,7 @@ class LevantamentoService {
         await this.inventarioService.ensureInvExists(levantamento.inventario._id);
         
         const  deletado = await this.repository.deletar(id);
+
         deletado.imagem.forEach(async (fileName) => {
                 await this.deletarMinio(fileName);
         });
@@ -81,6 +82,27 @@ class LevantamentoService {
         
         return resultado;
         
+    }
+
+    async deletarFoto(id) {
+        console.log("Estou no deletarFoto em LevantamentoService");
+        const levantamento = await this.ensureLevantamentoExists(id);
+         
+        if (levantamento.imagem.length > 0) {
+            levantamento.imagem.forEach(async (fileName) => {
+                await this.deletarMinio(fileName);
+            });
+            levantamento.imagem = [];
+        } else {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.NOT_FOUND.code,
+                customMessage: "Nenhuma imagem encontrada no levantamento",
+            });
+        }
+        
+        const resultado = await this.repository.atualizar(id, { imagem: levantamento.imagem });
+        
+        return resultado;
     }
     
     // --- MÉTODOS AUXILIARES ---

@@ -55,7 +55,8 @@ class Levantamento{
                 required: true,
             },
             imagem: {
-                type: String,
+                type: [String],
+                default: []
             },
             estado: {
                 type: String,

@@ -3,6 +3,8 @@ import InventarioService from "./InventarioService.js";
 import SalaService from "./SalaService.js";
 import BemService from "./BemService.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
+import minioClient from '../config/minioConnect.js';
+import 'dotenv/config';
 
 class LevantamentoService {
     constructor() {
@@ -18,7 +20,6 @@ class LevantamentoService {
     }
 
     async criar(parsedData) {
-
         console.log("Estou no criar em LevantamentoService");
 
         await this.inventarioService.ensureInvExists(parsedData.inventario);
@@ -59,30 +60,75 @@ class LevantamentoService {
         await this.ensureLevantamentoExists(id);
         const levantamento = await this.ensureLevantamentoExists(id);
         await this.inventarioService.ensureInvExists(levantamento.inventario._id);
-        return this.repository.deletar(id);
+        
+        const  deletado = await this.repository.deletar(id);
+        deletado.imagem.forEach(async (fileName) => {
+                await this.deletarMinio(fileName);
+        });
+
+        return deletado;
     }
     
     async adicionarFoto(id, file) {
         console.log("Estou no adicionarFoto em LevantamentoService");
-        await this.ensureLevantamentoExists(id);
-
-        // Lógica de negócio para tratar o arquivo:
-        // e obter a URL final.
-        // Por enquanto, vamos simular que a URL é o caminho do arquivo.
-        const imageUrl = file.path; // Em produção, seria a URL do serviço de armazenamento
-
-        // Atualiza o levantamento com o caminho da imagem
-        const dataToUpdate = { imagem: imageUrl };
+        const levantamento = await this.ensureLevantamentoExists(id);
         
-        return this.repository.atualizar(id, dataToUpdate);
+        const imagemInfo = await this.enviarMinio(file);
+         
+        levantamento.imagem.push(imagemInfo.fileName);
+        
+        const resultado = await this.repository.atualizar(id, { imagem: levantamento.imagem });
+        
+        return resultado;
+        
     }
-
+    
     // --- MÉTODOS AUXILIARES ---
-
-    /**
-     * Garante que um levantamento com o ID fornecido exista no banco de dados.
-     * Caso não exista, lança um erro.
-     */
+    
+    async enviarMinio(file) {
+        const bucket = process.env.MINIO_BUCKET_FOTOS;
+        
+        const targetName = `${Date.now()}-${file.originalname}`;
+        
+        const uploaded = await minioClient.putObject(
+            bucket,
+            targetName,
+            file.buffer,
+            file.size,
+            file.mimetype
+        );
+        
+         if (!uploaded){
+             throw new CustomError({
+                statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
+                customMessage: `Erro ao enviar arquivo: ${error.message}`,
+            });
+        }
+        
+        return {
+            bucket,
+            fileName: targetName,
+            originalName: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype,
+        };
+    }
+    
+    async deletarMinio(fileName) {
+        const bucket = process.env.MINIO_BUCKET_FOTOS;
+        
+        //necessario o uso do try/catch para tratar erros de remoção
+        try {
+            await minioClient.removeObject(bucket, fileName);
+            return true;
+        } catch (error) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
+                customMessage: `Erro ao remover arquivo ${fileName}: ${error.message}`,
+            });
+        }
+    }
+    
     async ensureLevantamentoExists(id) {
         const levantamentoExistente = await this.repository.buscarPorId(id);
         if (!levantamentoExistente) {
@@ -94,9 +140,6 @@ class LevantamentoService {
         return levantamentoExistente;
     }
     
-    /**
-     * Garante que não há um levantamento duplicado para o mesmo bem no mesmo inventário.
-     */
     async ensureLevantamentoUnico(inventarioId, bemId) {
         const levantamentoExistente = await this.repository.buscarPorInventarioEBem(inventarioId, bemId);
         if (levantamentoExistente) {

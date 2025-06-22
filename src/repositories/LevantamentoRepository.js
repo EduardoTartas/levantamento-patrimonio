@@ -12,27 +12,7 @@ class LevantamentoRepository {
     }
 
     async buscarPorId(id) {
-        const levantamento = await this.model.findById(id)
-            .populate([
-                {
-                    path: 'inventario',
-                    select: 'nome _id'
-                },
-                {
-                    path: 'bem',
-                    select: 'nome tombo _id'
-                },
-                {
-                    path: 'salaNova',
-                    select: 'nome _id'
-                },
-                {
-                    path: 'usuario',
-                    select: 'nome cpf _id'
-                }
-            ]);
-            console.log(levantamento)
-
+        const levantamento = await this.model.findById(id);
         if (!levantamento) {
             throw new CustomError({
                 statusCode: 404,

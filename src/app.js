@@ -8,17 +8,12 @@ import setupMinio from './config/setupMinio.js';
 import errorHandler from './utils/helpers/errorHandler.js';
 import logger from './utils/logger.js';
 import CommonResponse from './utils/helpers/CommonResponse.js';
-import { uploadTestFileToMinio } from './test.js';
 
 const app = express();
-
-// Configura o middleware express-fileupload
-
 
 // Conectando ao banco de dados
 await setupMinio();
 await DbConnect.conectar();
-uploadTestFileToMinio();
 
 // Middlewares de segurança
 app.use(helmet());

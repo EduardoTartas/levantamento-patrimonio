@@ -1,6 +1,6 @@
 import LevantamentoService from "../services/LevantamentoService.js";
 import {LevantamentoQuerySchema, LevantamentoIdSchema} from "../utils/validators/schemas/zod/querys/LevantamentoQuerySchema.js";
-import {LevantamentoSchema, LevantamentoUpdateSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
+import {LevantamentoSchema, LevantamentoUpdateSchema, fotoUploadValidationSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
 import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
 class LevantamentoController {
@@ -75,8 +75,16 @@ class LevantamentoController {
         LevantamentoIdSchema.parse(id);
 
         if (!req.file) {
-            throw new CustomError("Nenhum arquivo de foto foi enviado.", HttpStatusCodes.BAD_REQUEST);
+            throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: "validationError",
+            field: "foto",
+            customMessage:
+                "Nenhum arquivo enviado. Por favor, inclua um arquivo.",
+            });
         }
+
+        fotoUploadValidationSchema.parse(req.file);
 
         const data = await this.service.adicionarFoto(id, req.file);
 

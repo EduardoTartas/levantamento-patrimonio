@@ -73,27 +73,27 @@ class LevantamentoRepository {
             page: parseInt(page, 10) || 1,
             limit: limit,            
             populate: [
-            {
-                path: 'inventario',
-                select: 'nome _id'
-            },
-            {
-                path: 'bem',
-                select: 'nome tombo _id'
-            },
-            {
-                path: 'salaNova',
-                select: 'nome _id'
-            },
-            {
-                path: 'usuario',
-                select: 'nome cpf _id'
-            }
+                {
+                    path: 'inventario',
+                    select: 'nome _id'
+                },
+                {
+                    path: 'bem',
+                    select: 'nome tombo _id'
+                },
+                {
+                    path: 'salaNova',
+                    select: 'nome _id'
+                },
+                {
+                    path: 'usuario',
+                    select: 'nome cpf _id'
+                }
             ],
             sort: { createdAt: -1 },
         };
 
-       return await this.model.paginate(filtros, options); 
+        return await this.model.paginate(filtros, options); 
     }
 
     async criar(parsedData) {

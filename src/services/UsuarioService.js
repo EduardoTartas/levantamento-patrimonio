@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken';
 import UsuarioRepository from "../repositories/UsuarioRepository.js";
 import { CustomError, HttpStatusCodes, messages } from "../utils/helpers/index.js";
 import CampusService from "./CampusService.js";
-import { enviarEmail } from "../utils/email.js"
+import SendMail from "../utils/SendMail.js";
+import Usuario from "../models/Usuario.js";
 
 class UsuarioService {
     constructor() {
@@ -28,8 +29,8 @@ class UsuarioService {
 
         // Para maior segurança um token temporário será gerado
         const token = jwt.sign(
-            { email: parsedData.email }, 
-            process.env.JWT_SECRET, 
+            { email: parsedData.email },
+            process.env.JWT_SECRET,
             { expiresIn: "1hr" }
         );
 
@@ -37,10 +38,10 @@ class UsuarioService {
         parsedData.senhaTokenExpira = new Date(Date.now() + 3600000);
 
         const novoUsuario = await this.repository.criar(parsedData);
-        
+
         // Irá enviar o email com link para criação de senha
         const url = `${process.env.CADASTRAR_SENHA_URL}?token=${token}`;
-        await enviarEmail({
+        await SendMail.enviaEmail({
             to: parsedData.email,
             subject: "Criação de senha",
             html: `
@@ -51,6 +52,50 @@ class UsuarioService {
         });
 
         return novoUsuario;
+    }
+
+    async cadastrarSenha(token, senha) {
+        try {
+            // Verifica se o token é válido
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            // Busca o usuário com o e-mail do token
+            const usuario = await Usuario.findOne({ email: decoded.email }).select("+senhaToken +senhaTokenExpira");
+
+            if (!usuario) {
+                throw new CustomError({
+                    statusCode: 404,
+                    customMessage: "Usuário não encontrado."
+                });
+            }
+
+            // Verifica se o token confere e não expirou
+            if (usuario.senhaToken !== token || usuario.senhaTokenExpira < new Date()) {
+                throw new CustomError({
+                    statusCode: 400,
+                    customMessage: "Token inválido ou expirado."
+                });
+            }
+
+            // Criptografa a nova senha
+            const senhaHash = await bcrypt.hash(senha, 10);
+            usuario.senha = senhaHash;
+
+            // Limpa os campos de token
+            usuario.senhaToken = undefined;
+            usuario.senhaTokenExpira = undefined;
+
+            await usuario.save();
+
+            return { mensagem: "Senha cadastrada com sucesso!" };
+
+        } catch (err) {
+            console.error("Erro ao cadastrar senha:", err);
+            throw new CustomError({
+                statusCode: 400,
+                customMessage: "Erro ao cadastrar senha."
+            });
+        }
     }
 
     async atualizar(id, parsedData) {
@@ -76,7 +121,7 @@ class UsuarioService {
         delete dataToUpdate.email;
 
         return this.repository.atualizar(id, dataToUpdate);
-}
+    }
 
     async deletar(id) {
         console.log("Estou no deletar em UsuarioService");
@@ -85,7 +130,7 @@ class UsuarioService {
     }
 
     // Métodos auxiliares
-    
+
     async validateEmail(email, id = null) {
         const usuarioExistente = await this.repository.buscarPorEmail(email, id);
         if (usuarioExistente) {

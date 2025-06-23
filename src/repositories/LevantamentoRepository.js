@@ -1,6 +1,32 @@
 import Levantamento from '../models/Levantamento.js';
 import LevantamentoFilterBuilder from './filters/LevantamentoFilterBuild.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
+import minioClient from '../config/minioConnect.js';
+import 'dotenv/config';
+
+async function _gerarUrlsAssinadas(doc) { 
+    if (!doc || !doc.imagem || doc.imagem.length === 0) {
+        if (doc) doc.imagemUrls = [];
+        return doc;
+    }
+
+    const bucketName = process.env.MINIO_BUCKET_FOTOS;
+    const promises = doc.imagem.map(fileName =>
+        minioClient.presignedGetObject(bucketName, fileName, 3600)
+    );
+    
+    doc.imagemUrls = await Promise.all(promises).catch(() => {
+        throw new CustomError({
+            statusCode: 500,
+            errorType: 'internalServerError',
+            field: 'Levantamento',
+            customMessage: messages.error.internalServerError('Erro ao gerar URLs de imagens'),
+        });
+    });
+
+    return doc;
+}
+
 
 class LevantamentoRepository {
     constructor() {
@@ -12,17 +38,24 @@ class LevantamentoRepository {
     }
 
     async buscarPorId(id) {
-        const levantamento = await this.model.findById(id);
+        // CORREÇÃO: Adicionando as chamadas .populate() que estavam faltando
+        const levantamento = await this.model.findById(id)
+            .populate([
+                { path: 'inventario', select: 'nome _id' },
+                { path: 'salaNova', select: 'nome _id' },
+                { path: 'usuario', select: 'nome cpf _id' }
+            ])
+            .lean(); // .lean() continua sendo importante
+
         if (!levantamento) {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
                 field: 'Levantamento',
-                details: [],
                 customMessage: messages.error.resourceNotFound('Levantamento'),
             });
         }
-        return levantamento;
+        return _gerarUrlsAssinadas(levantamento);
     }
 
     async buscarPorInventarioEBem(inventarioId, bemId) {
@@ -86,7 +119,11 @@ class LevantamentoRepository {
             sort: { createdAt: -1 },
         };
 
-        return await this.model.paginate(filtros, options);
+       const result = await this.model.paginate(filtros, options);
+
+        // Mapeia os resultados para adicionar as URLs
+        result.docs = await Promise.all(result.docs.map(_gerarUrlsAssinadas));
+        return result;
     }
 
     async criar(parsedData) {

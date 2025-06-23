@@ -3,6 +3,7 @@ import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginRepository } from '../repositories/LoginRepository.js';
 import { LoginService } from '../services/LoginService.js';
 import dotenv from 'dotenv';
+import { NovaSenhaSchema } from '../utils/validators/schemas/zod/NovaSenhaSchema.js';
 
 dotenv.config();
 
@@ -44,9 +45,10 @@ class LoginController {
 
     async recover(req, res, next) {
         const { email, token, novaSenha } = req.body;
+        const senhaValidada = NovaSenhaSchema.parse(novaSenha);
 
         if (token && novaSenha) {
-            const resultado = await this.service.redefinirSenha(token, novaSenha);
+            const resultado = await this.service.redefinirSenha(token, senhaValidada);
             return res.status(200).json(resultado);
         }
 

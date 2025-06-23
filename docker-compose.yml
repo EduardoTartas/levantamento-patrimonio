@@ -11,6 +11,8 @@ services:
       - ./.env
     depends_on:
       - minio
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # Serviço do MinIO para armazenamento das fotos
   minio:

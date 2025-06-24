@@ -44,7 +44,12 @@ class UsuarioController {
   }
 
   async cadastrarSenha(req, res) {
-    const { token, senha } = req.body;
+    const { senha } = req.body;
+    const token = req.query.token
+    
+    if (!token) {
+      return CommonResponse.error(res, 400, "Token não informado.");
+    }
 
     const senhaValid = NovaSenhaSchema.parse(senha);
 

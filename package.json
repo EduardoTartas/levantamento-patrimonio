@@ -10,10 +10,10 @@
     "node": "20.14.0"
   },
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "docker-compose -f docker-compose.dev.yml up --build",
     "seed": "node src/seeds/seeds.js",
     "test": "jest --watchAll --coverage --detectOpenHandles",
-    "start": "node server.js"
+    "start": "docker-compose -f docker-compose.yml up --build"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

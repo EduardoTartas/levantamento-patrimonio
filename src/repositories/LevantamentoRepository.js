@@ -1,6 +1,7 @@
 import Levantamento from '../models/Levantamento.js';
 import LevantamentoFilterBuilder from './filters/LevantamentoFilterBuild.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
+import 'dotenv/config';
 
 class LevantamentoRepository {
     constructor() {
@@ -14,31 +15,17 @@ class LevantamentoRepository {
     async buscarPorId(id) {
         const levantamento = await this.model.findById(id)
             .populate([
-                {
-                    path: 'inventario',
-                    select: 'nome _id'
-                },
-                {
-                    path: 'bem',
-                    select: 'nome tombo _id'
-                },
-                {
-                    path: 'salaNova',
-                    select: 'nome _id'
-                },
-                {
-                    path: 'usuario',
-                    select: 'nome cpf _id'
-                }
-            ]);
-            console.log(levantamento)
+                { path: 'inventario', select: 'nome _id' },
+                { path: 'salaNova', select: 'nome _id' },
+                { path: 'usuario', select: 'nome cpf _id' }
+            ])
+            .lean();
 
         if (!levantamento) {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
                 field: 'Levantamento',
-                details: [],
                 customMessage: messages.error.resourceNotFound('Levantamento'),
             });
         }
@@ -86,27 +73,27 @@ class LevantamentoRepository {
             page: parseInt(page, 10) || 1,
             limit: limit,            
             populate: [
-            {
-                path: 'inventario',
-                select: 'nome _id'
-            },
-            {
-                path: 'bem',
-                select: 'nome tombo _id'
-            },
-            {
-                path: 'salaNova',
-                select: 'nome _id'
-            },
-            {
-                path: 'usuario',
-                select: 'nome cpf _id'
-            }
+                {
+                    path: 'inventario',
+                    select: 'nome _id'
+                },
+                {
+                    path: 'bem',
+                    select: 'nome tombo _id'
+                },
+                {
+                    path: 'salaNova',
+                    select: 'nome _id'
+                },
+                {
+                    path: 'usuario',
+                    select: 'nome cpf _id'
+                }
             ],
             sort: { createdAt: -1 },
         };
 
-        return await this.model.paginate(filtros, options);
+        return await this.model.paginate(filtros, options); 
     }
 
     async criar(parsedData) {

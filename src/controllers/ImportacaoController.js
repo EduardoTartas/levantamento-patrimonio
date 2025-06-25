@@ -22,7 +22,7 @@ class ImportacaoController {
       throw new CustomError({
         statusCode: HttpStatusCodes.BAD_REQUEST.code,
         errorType: "validationError",
-        field: "csvFile",
+        field: "csv",
         customMessage:
           "Nenhum arquivo CSV enviado. Por favor, inclua um arquivo.",
       });

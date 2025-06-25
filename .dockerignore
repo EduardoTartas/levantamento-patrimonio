@@ -1,0 +1,5 @@
+# node_modules: Diretório que contém todas as dependências do Node.js.
+node_modules
+# npm-debug.log: Arquivo de log gerado pelo npm quando ocorrem erros.
+npm-debug.log
+.env

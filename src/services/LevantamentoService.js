@@ -81,7 +81,7 @@ class LevantamentoService {
         console.log("Estou no adicionarFoto em LevantamentoService");
         const levantamento = await this.ensureLevantamentoExists(id);
 
-        const imagemInfo = await this.enviarMinio(file);
+        const imagemInfo = await this.enviarMinio(id, file);
 
         levantamento.imagem.push(imagemInfo.fileName);
 
@@ -117,9 +117,9 @@ class LevantamentoService {
 
     // --- MÉTODOS AUXILIARES ---
 
-    async enviarMinio(file) {
+    async enviarMinio(id, file) {
         const bucket = process.env.MINIO_BUCKET_FOTOS;
-        const targetName = `${Date.now()}-${file.originalname}`;
+        const targetName = `${id}-${file.originalname}`;
 
         const metaData = {
             "Content-Type": file.mimetype,
@@ -165,22 +165,32 @@ class LevantamentoService {
     }
 
     async gerarUrlsAssinadas(doc) {
-        if (!doc) return null;
-
-        doc.imagemUrls = [];
-
-        if (doc.imagem && doc.imagem.length > 0) {
-            //necessario o uso do try/catch para tratar erros de geração de URLs
-            try {
-                const bucketName = process.env.MINIO_BUCKET_FOTOS;
-                const promises = doc.imagem.map(fileName =>
-                    minioClient.presignedGetObject(bucketName, fileName, 3600)
-                );
-                doc.imagemUrls = await Promise.all(promises);
-            } catch (error) {
-                console.error(`Falha ao gerar URL para o documento ${doc._id}:`, error);
-            }
+        if (!doc || !doc.imagem || doc.imagem.length === 0) {
+            if (doc) doc.imagemUrls = [];
+            return doc;
         }
+
+        const originalHost = minioClient.host;
+        const originalPort = minioClient.port;
+
+        //necessario o uso do try/catch para o funcionamento correto da geração de URLs assinadas
+        try {
+            minioClient.host = 'localhost';
+            minioClient.port = parseInt(process.env.MINIO_PORT, 10);
+
+            const promises = doc.imagem.map(fileName =>
+                minioClient.presignedGetObject(process.env.MINIO_BUCKET_FOTOS, fileName, 3600)
+            );
+            doc.imagemUrls = await Promise.all(promises);
+
+        } catch (error) {
+            console.error(`Falha ao gerar URL assinada para o documento ${doc._id}:`, error);
+            doc.imagemUrls = [];
+        } finally {
+            minioClient.host = originalHost;
+            minioClient.port = originalPort;
+        }
+
         return doc;
     }
 

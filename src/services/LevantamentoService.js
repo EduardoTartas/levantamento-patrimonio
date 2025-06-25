@@ -80,6 +80,7 @@ class LevantamentoService {
     async adicionarFoto(id, file) {
         console.log("Estou no adicionarFoto em LevantamentoService");
         const levantamento = await this.ensureLevantamentoExists(id);
+        await this.inventarioService.ensureInvExists(levantamento.inventario._id);
 
         const imagemInfo = await this.enviarMinio(id, file);
 
@@ -95,6 +96,7 @@ class LevantamentoService {
     async deletarFoto(id) {
         console.log("Estou no deletarFoto em LevantamentoService");
         const levantamento = await this.ensureLevantamentoExists(id);
+        await this.inventarioService.ensureInvExists(levantamento.inventario._id);
 
         if (levantamento.imagem.length > 0) {
             levantamento.imagem.forEach(async (fileName) => {

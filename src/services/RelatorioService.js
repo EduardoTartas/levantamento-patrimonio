@@ -39,7 +39,7 @@ class RelatorioService {
             bens_danificados: () => ({ ...filtro, estado: "Danificado" }),
             bens_inserviveis: () => ({ ...filtro, estado: "Inservível" }),
             bens_ociosos: () => ({ ...filtro, ocioso: true }),
-            bens_nao_encontrados: () => ({ ...filtro, imagem: null }),
+            bens_nao_encontrados: () => ({ ...filtro, ocioso: false }),
             bens_sem_etiqueta: () => ({ ...filtro, "bem.tombo": { $in: [null, ""] } }),
         };
 
@@ -63,30 +63,69 @@ class RelatorioService {
 
     async _gerarPDF(levantamentos, tipoRelatorio) {
         return new Promise((resolve, reject) => {
-            const doc = new PDFDocument();
+            const doc = new PDFDocument({ margin: 50 });
             const buffers = [];
 
             doc.on("data", buffers.push.bind(buffers));
             doc.on("end", () => resolve(Buffer.concat(buffers)));
 
-            doc.fontSize(16).text(`Relatório: ${tipoRelatorio.replaceAll("_", " ")}`, { align: "center" });
-            doc.moveDown();
+            // Título do Relatório
+            doc.fontSize(20)
+                .font("Helvetica-Bold")
+                .fillColor("#000")
+                .text(`Relatório: ${tipoRelatorio.replaceAll("_", " ")}`, {
+                    align: "center",
+                });
 
-            /* Problema a serem corrigidos com sala, a filtragem de sala não retorna nada */
+            doc.moveDown(2);
+
+            // Verifica se há dados
             if (!levantamentos.length) {
-                doc.text("Nenhum levantamento encontrado para este filtro.");
+                doc.fontSize(14)
+                    .font("Helvetica")
+                    .fillColor("red")
+                    .text("Nenhum levantamento encontrado para este filtro.", {
+                        align: "center"
+                    });
             } else {
+                // Itera sobre os levantamentos
                 levantamentos.forEach((l, index) => {
-                   const bem = l.bem
+                    const bem = l.bem;
 
-                   doc.fontSize(12).text(
-                    `${index + 1}. Nome: ${bem.nome} | 
-                    Tombo: ${bem.tombo || "Sem etiqueta"} | 
-                    Estado: ${l.estado} | 
-                    Ocioso: ${l.ocioso ? "Sim" : "Não"} | 
-                    Sala Nova: ${l.salaNova?.nome || "-"} | 
-                    Usuário: ${l.usuario?.nome || "-"}`
-                   )
+                    doc.fontSize(14)
+                        .font("Helvetica-Bold")
+                        .fillColor("#000")
+                        .text(`Item ${index + 1}`);
+
+                    doc.moveDown(0.5);
+
+                    doc.fontSize(12).font("Helvetica").fillColor("#333");
+
+                    doc.text(`Nome do Bem: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${bem.nome}`);
+
+                    doc.font("Helvetica").text(`Número do Tombo: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${bem.tombo || "Sem etiqueta"}`);
+
+                    doc.font("Helvetica").text(`Estado Atual: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${l.estado}`);
+
+                    doc.font("Helvetica").text(`Está Ocioso?: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${l.ocioso ? "Sim" : "Não"}`);
+
+                    doc.font("Helvetica").text(`Nova Sala: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${l.salaNova?.nome || "Não informado"}`);
+
+                    doc.font("Helvetica").text(`Usuário Responsável: `, { continued: true })
+                        .font("Helvetica-Bold").text(`${l.usuario?.nome || "Não informado"}`);
+
+                    // Linha separadora
+                    doc.moveDown(1);
+                    doc.strokeColor("#CCCCCC")
+                        .moveTo(doc.x, doc.y)
+                        .lineTo(doc.page.width - 50, doc.y)
+                        .stroke();
+                    doc.moveDown(1);
                 });
             }
 

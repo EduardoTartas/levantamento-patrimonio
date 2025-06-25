@@ -44,10 +44,12 @@ class LoginController {
     }
 
     async recover(req, res, next) {
-        const { email, token, novaSenha } = req.body;
-        const senhaValidada = NovaSenhaSchema.parse(novaSenha);
-
+        const { email, novaSenha } = req.body;
+        const token = req.query.token;
+//MUDAR O LINK QUE ENVIA O EMAIL PARA RECOVER
+        console.log(token)
         if (token && novaSenha) {
+            const senhaValidada = NovaSenhaSchema.parse(novaSenha);
             const resultado = await this.service.redefinirSenha(token, senhaValidada);
             return res.status(200).json(resultado);
         }

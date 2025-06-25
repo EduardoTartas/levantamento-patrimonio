@@ -1,15 +1,15 @@
 //src/services/LoginService.js
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
-import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
 import TokenExpiredError from "../utils/errors/TokenExpiredError.js";
 import TokenInvalidError from "../utils/errors/TokenInvalidError.js";
 import PasswordResetToken from "../models/PassResetToken.js";
 import CustomError from "../utils/helpers/CustomError.js";
+import SendMail from "../utils/SendMail.js";
+import TokenUtil from "../utils/TokenUtil.js";
 
 export class LoginService {
     constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
@@ -45,8 +45,8 @@ export class LoginService {
         };
 
         // gera o token jwt
-        const accessToken = this._gerarAccessToken(usuario);
-        const refreshToken = this._gerarRefreshToken(usuario);
+        const accessToken = TokenUtil.generateAccessToken(usuario);
+        const refreshToken = TokenUtil.generateRefreshToken(usuario);
 
         // Salva o refresh token no banco
         await this.loginRepository.salvarRefreshToken(usuario._id, refreshToken)
@@ -55,36 +55,37 @@ export class LoginService {
             usuario: {
                 id: usuario._id,
                 nome: usuario.nome,
-                email: usuario.email
+                email: usuario.email,
+                cargo: usuario.cargo
             },
             accessToken,
             refreshToken
         };
     };
 
-    _gerarAccessToken(usuario) {
-        return jwt.sign(
-            { id: usuario._id, email: usuario.email },
-            this.jwtSecret,
-            { expiresIn: this.jwtExpireIn }
-        );
-    };
-
-    _gerarRefreshToken(usuario) {
-        return jwt.sign(
-            { id: usuario._id, email: usuario.email },
-            this.jwtRefreshSecret,
-            { expiresIn: this.jwtRefreshExpireIn }
-        );
-    };
-
     async refreshToken(token) {
-        const dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        // Verificando se o token existe
+        const tokenValido = await this.loginRepository.validarRefreshToken?.(token);
+
+        if (!tokenValido) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'invalidToken',
+                customMessage: 'Refresh token inválido ou expirado.'
+            })
+        }
+
+        let dataToken;
+
+        try {
+            dataToken = jwt.verify(token, this.jwtRefreshSecret);
+        } catch (err) {
+            throw new TokenInvalidError("Token inválido");
+        }
 
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
         const nowDate = Date.now();
-
         const maxSessionTime = 7 * 24 * 60 * 60 * 1000;// Tempo máximo do refresh token(7d)
 
         if (nowDate - tokenIat > maxSessionTime) {
@@ -95,18 +96,23 @@ export class LoginService {
             });
         };
 
-        const newAccessToken = jwt.sign(
-            { id: dataToken.id, email: dataToken.email },
-            this.jwtSecret,
-            { expiresIn: this.jwtExpireIn }
-        );
+        const usuario = await this.loginRepository.buscarPorId(dataToken.id);
 
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'userNotFound',
+                customMessage: 'Usuário não encontrado.'
+            });
+        }
+
+        const newAccessToken = TokenUtil.generateAccessToken(usuario);
         // Aqui irá ser gerado um novo refresh_token que ira rotacionar com o access_token
-        const newRefreshToken = jwt.sign(
-            { id: dataToken.id, email: dataToken.email },
-            this.jwtRefreshSecret,
-            { expiresIn: this.jwtRefreshExpireIn }
-        );
+        const newRefreshToken = TokenUtil.generateRefreshToken(usuario);
+
+        // Aqui deleta o antigo e salva o novo token
+        await this.loginRepository.deleteRefreshToken(token);
+        await this.loginRepository.salvarRefreshToken(dataToken.id, newRefreshToken);
 
         return {
             accessToken: newAccessToken,
@@ -127,13 +133,13 @@ export class LoginService {
 
         const expiresInMs = 60 * 60 * 1000;
         const expiresAt = new Date(Date.now() + expiresInMs);
-        
+
         const token = jwt.sign(
             { id: usuario._id },
             this.jwtPasswordResetSecret,
             { expiresIn: '1hr' }
         );
-        
+
         await PasswordResetToken.create({
             usuario: usuario._id,
             token,
@@ -151,26 +157,19 @@ export class LoginService {
         const baseUrl = process.env.RECUPERACAO_URL;
         const urlRecuperacao = `${baseUrl}?token=${token}`;
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        const infoEmail = {
             to: usuario.email,
-            subject: 'Recuperação de senha',
+            subject: "Recuperação de senha",
             html: `
-            <h1>Recuperação de senha</h1>
-            <p>Olá ${usuario.nome},</p>
-            <p>Clique no link abaixo para redefinir sua senha:</p>
-            <a href="${urlRecuperacao}">Redefinir senha</a>
-            <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
-        `
-        });
+                <h1>Recuperação de senha</h1>
+                <p>Olá ${usuario.nome},</p>
+                <p>Clique no link abaixo para redefinir sua senha:</p>
+                <a href="${urlRecuperacao}">Redefinir senha</a>
+                <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
+            `,
+        };
+
+        await SendMail.enviaEmail(infoEmail);
     }
 
     async redefinirSenha(token, novaSenha) {
@@ -200,7 +199,7 @@ export class LoginService {
 
         const usuario = await this.loginRepository.buscarPorId(payload.id);
         console.log(usuario);
-        
+
 
         if (!usuario) {
             throw new CustomError({
@@ -210,9 +209,8 @@ export class LoginService {
             });
         }
 
-        const senhaValidada = NovaSenhaSchema.parse(novaSenha);
-        const hash = await bcrypt.hash(senhaValidada, 10);
-        
+        const hash = await bcrypt.hash(novaSenha, 10);
+
         await this.loginRepository.atualizarSenha(usuario._id, hash);
 
         // Marcando o token como usado
@@ -220,5 +218,9 @@ export class LoginService {
         await resetTokenDoc.save();
 
         return { mensagem: "Senha alterada com sucesso." };
+    }
+
+    async deletarRefreshToken(refreshToken) {
+        return this.loginRepository.deleteRefreshToken(refreshToken);
     }
 }

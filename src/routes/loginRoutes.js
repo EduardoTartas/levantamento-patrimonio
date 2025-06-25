@@ -10,5 +10,6 @@ router
     .post('/login', asyncWrapper(loginController.login.bind(loginController)))
     .post('/refresh', asyncWrapper(loginController.refreshToken.bind(loginController)))
     .post('/recover', asyncWrapper(loginController.recover.bind(loginController)))
+    .post('/logout', asyncWrapper(loginController.logout.bind(loginController)))
 
 export default router;

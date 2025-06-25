@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-class Usuario{
+class Usuario {
     constructor() {
         const usuarioSchema = new mongoose.Schema({
             campus: {
@@ -28,6 +28,14 @@ class Usuario{
                 type: String,
                 select: false
             },
+            senhaToken: {
+                type: String,
+                select: false,
+            },
+            senhaTokenExpira: {
+                type: Date,
+                select: false,
+            },
             cargo: {
                 type: String,
                 required: true,
@@ -35,10 +43,6 @@ class Usuario{
             status: {
                 type: Boolean,
                 default: true,
-            },
-            refreshToken: { 
-                type: String,
-                select: false
             }
         }, {
             timestamps: true,

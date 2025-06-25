@@ -1,9 +1,9 @@
 import express from "express";
 import LevantamentoController from "../controllers/LevantamentoController.js";
 import AuthMiddleware from '../middlewares/AuthMiddleware.js';
+//import AuthPermission from "../middlewares/AuthPermission.js";
 import { asyncWrapper } from '../utils/helpers/index.js';
 import multer from 'multer';
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 

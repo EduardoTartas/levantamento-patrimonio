@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
+import Usuario from '../models/Usuario.js';
 
 class AuthMiddleware {
   constructor() {
@@ -41,8 +42,21 @@ class AuthMiddleware {
         throw new TokenExpiredError("O token JWT está expirado!");
       }
 
+      // Buscando o usuário no bd e injeta o cargo
+      const usuario = await Usuario.findById(decoded.id).select("cargo nome email");
+
+      if (!usuario) {
+        throw new AuthenticationError("Usuário não encontrado.")
+      }
+
       // Se o token for válido, anexa o user_id à requisição
-      req.user_id = decoded.id;
+      req.user = {
+        id: usuario._id,
+        cargo: usuario.cargo,
+        nome: usuario.nome,
+        email: usuario.email
+      };
+
       next();
 
     } catch (err) {

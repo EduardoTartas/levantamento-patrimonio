@@ -38,6 +38,7 @@ class LevantamentoService {
         const nomeResponsavel = bem.responsavel?.nome || "";
         const cpfResponsavel = bem.responsavel?.cpf || "";
 
+        parsedData.imagem = [];
         parsedData.bem = {
             responsavel: {
                 nome: nomeResponsavel,

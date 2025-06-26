@@ -45,10 +45,41 @@ class UsuarioService {
             to: parsedData.email,
             subject: "Criação de senha",
             html: `
-                <p>Olá, ${parsedData.nome}!</p>
-                <p>Para criar sua senha, clique no link abaixo:</p>
-                <a href="${url}">Criar senha
-            `
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Criação de Senha</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5; color: #333333;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+            <div style="text-align: center; border-bottom: 2px solid #004d40; padding-bottom: 15px; margin-bottom: 20px;">
+            <h1 style="color: #004d40; font-size: 24px; margin: 0;">Criação de Senha</h1>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Olá <strong>${parsedData.nome}</strong>,</p>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px;">Bem-vindo ao nosso sistema! Para finalizar seu cadastro, crie uma senha usando o link abaixo:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+            <a href="${url}" style="background-color: #004d40; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Criar Senha</a>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Se o botão acima não funcionar, copie e cole o link abaixo em seu navegador:</p>
+            
+            <p style="font-size: 14px; background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">${url}</p>
+            
+            <p style="font-size: 14px; color: #666666; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 15px;">Este link expirará em 1 hora por motivos de segurança.</p>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666666; font-size: 12px;">
+            <p>Este é um e-mail automático, por favor não responda.</p>
+            <p style="margin-top: 10px; color: #004d40;">IFRO Patrimônio - Campus Vilhena</p>
+            </div>
+            </div>
+            </body>
+            </html>
+            `,
         });
 
         return novoUsuario;

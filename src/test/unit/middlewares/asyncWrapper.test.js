@@ -1,4 +1,4 @@
-import asyncWrapper from '../../middlewares/asyncWrapper';
+import asyncWrapper from '../../../middlewares/asyncWrapper.js';
 
 describe('asyncWrapper', () => {
     let req, res, next;

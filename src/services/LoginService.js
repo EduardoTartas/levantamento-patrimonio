@@ -1,15 +1,15 @@
 //src/services/LoginService.js
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 
 import AuthenticationError from '../utils/errors/AuthenticationError.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
-import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
 import TokenExpiredError from "../utils/errors/TokenExpiredError.js";
 import TokenInvalidError from "../utils/errors/TokenInvalidError.js";
 import PasswordResetToken from "../models/PassResetToken.js";
 import CustomError from "../utils/helpers/CustomError.js";
+import SendMail from "../utils/SendMail.js";
+import TokenUtil from "../utils/TokenUtil.js";
 
 export class LoginService {
     constructor(jwtSecret, jwtExpireIn = '15m', jwtRefreshSecret, jwtRefreshExpireIn = '7d', jwtPasswordResetSecret, loginRepository) {
@@ -45,8 +45,8 @@ export class LoginService {
         };
 
         // gera o token jwt
-        const accessToken = this._gerarAccessToken(usuario);
-        const refreshToken = this._gerarRefreshToken(usuario);
+        const accessToken = TokenUtil.generateAccessToken(usuario);
+        const refreshToken = TokenUtil.generateRefreshToken(usuario);
 
         // Salva o refresh token no banco
         await this.loginRepository.salvarRefreshToken(usuario._id, refreshToken)
@@ -63,44 +63,20 @@ export class LoginService {
         };
     };
 
-    _gerarAccessToken(usuario) {
-        return jwt.sign(
-            { 
-                id: usuario._id, 
-                email: usuario.email, 
-                cargo: usuario.cargo
-            },
-            this.jwtSecret,
-            { expiresIn: this.jwtExpireIn }
-        );
-    };
-
-    _gerarRefreshToken(usuario) {
-        return jwt.sign(
-            { 
-                id: usuario._id, 
-                email: usuario.email, 
-                cargo: usuario.cargo
-            },
-            this.jwtRefreshSecret,
-            { expiresIn: this.jwtRefreshExpireIn }
-        );
-    };
-
     async refreshToken(token) {
         // Verificando se o token existe
         const tokenValido = await this.loginRepository.validarRefreshToken?.(token);
-        
+
         if (!tokenValido) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'invalidToken',
-                customMessage: 'Refresh token inválido ou expirado.' 
+                customMessage: 'Refresh token inválido ou expirado.'
             })
         }
 
         let dataToken;
-        
+
         try {
             dataToken = jwt.verify(token, this.jwtRefreshSecret);
         } catch (err) {
@@ -110,7 +86,6 @@ export class LoginService {
         /*Esse código limita a vida total da sessão, mesmo que os tokens estejam sendo renovados a cada acesso. */
         const tokenIat = dataToken.iat * 1000;// Converte para ms
         const nowDate = Date.now();
-
         const maxSessionTime = 7 * 24 * 60 * 60 * 1000;// Tempo máximo do refresh token(7d)
 
         if (nowDate - tokenIat > maxSessionTime) {
@@ -121,18 +96,19 @@ export class LoginService {
             });
         };
 
-        const newAccessToken = jwt.sign(
-            { id: dataToken.id, email: dataToken.email },
-            this.jwtSecret,
-            { expiresIn: this.jwtExpireIn }
-        );
+        const usuario = await this.loginRepository.buscarPorId(dataToken.id);
 
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'userNotFound',
+                customMessage: 'Usuário não encontrado.'
+            });
+        }
+
+        const newAccessToken = TokenUtil.generateAccessToken(usuario);
         // Aqui irá ser gerado um novo refresh_token que ira rotacionar com o access_token
-        const newRefreshToken = jwt.sign(
-            { id: dataToken.id, email: dataToken.email },
-            this.jwtRefreshSecret,
-            { expiresIn: this.jwtRefreshExpireIn }
-        );
+        const newRefreshToken = TokenUtil.generateRefreshToken(usuario);
 
         // Aqui deleta o antigo e salva o novo token
         await this.loginRepository.deleteRefreshToken(token);
@@ -181,26 +157,48 @@ export class LoginService {
         const baseUrl = process.env.RECUPERACAO_URL;
         const urlRecuperacao = `${baseUrl}?token=${token}`;
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        const infoEmail = {
             to: usuario.email,
-            subject: 'Recuperação de senha',
+            subject: "Recuperação de senha",
             html: `
-            <h1>Recuperação de senha</h1>
-            <p>Olá ${usuario.nome},</p>
-            <p>Clique no link abaixo para redefinir sua senha:</p>
-            <a href="${urlRecuperacao}">Redefinir senha</a>
-            <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
-        `
-        });
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Recuperação de Senha</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5; color: #333333;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+            <div style="text-align: center; border-bottom: 2px solid #004d40; padding-bottom: 15px; margin-bottom: 20px;">
+                <h1 style="color: #004d40; font-size: 24px; margin: 0;">Recuperação de Senha</h1>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Olá <strong>${usuario.nome}</strong>,</p>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px;">Recebemos uma solicitação para redefinir sua senha. Se você não fez esta solicitação, ignore este e-mail.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${urlRecuperacao}" style="background-color: #004d40; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Redefinir Senha</a>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Se o botão acima não funcionar, copie e cole o link abaixo em seu navegador:</p>
+            
+            <p style="font-size: 14px; background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">${urlRecuperacao}</p>
+            
+            <p style="font-size: 14px; color: #666666; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 15px;">Este link expirará em 1 hora por motivos de segurança.</p>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666666; font-size: 12px;">
+                <p>Este é um e-mail automático, por favor não responda.</p>
+                <p style="margin-top: 10px; color: #004d40;">IFRO Patrimônio - Campus Vilhena</p>
+            </div>
+            </div>
+            </body>
+            </html>
+            `,
+        };
+
+        await SendMail.enviaEmail(infoEmail);
     }
 
     async redefinirSenha(token, novaSenha) {
@@ -240,8 +238,7 @@ export class LoginService {
             });
         }
 
-        const senhaValidada = NovaSenhaSchema.parse(novaSenha);
-        const hash = await bcrypt.hash(senhaValidada, 10);
+        const hash = await bcrypt.hash(novaSenha, 10);
 
         await this.loginRepository.atualizarSenha(usuario._id, hash);
 

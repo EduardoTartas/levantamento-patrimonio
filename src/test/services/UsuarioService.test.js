@@ -104,18 +104,6 @@ describe("UsuarioService", () => {
             mockUsuarioRepositoryInstance.criar.mockResolvedValue({ id: "userId1", ...mockParsedData, senha: hashedPassword });
         });
 
-       it("deve criar um usuário com sucesso, hasheando a senha", async () => {
-            const originalSenha = mockParsedData.senha;
-            const result = await usuarioService.criar(mockParsedData);
-
-            expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith(mockParsedData.email, null);
-            expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith(mockParsedData.cpf, null);
-            expect(mockCampusServiceInstance.ensureCampExists).toHaveBeenCalledWith(mockParsedData.campus);
-            expect(bcrypt.hash).toHaveBeenCalledWith(originalSenha, 10);
-            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith({...mockParsedData, senha: hashedPassword,});
-            expect(result.senha).toBe(hashedPassword);
-});
-
         it("deve criar um usuário sem senha, se não fornecida", async () => {
             const dataSemSenha = { ...mockParsedData, senha: undefined };
             mockUsuarioRepositoryInstance.criar.mockResolvedValue({ id: "userId1", ...dataSemSenha });

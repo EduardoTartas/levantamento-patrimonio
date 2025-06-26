@@ -26,8 +26,8 @@ class DbConnect{
             // Configurações condicional para autoIndex e debug
             if (process.env.NODE_ENV === 'development') {
                 mongoose.set('autoIndex', true); // Cria índices automaticamente
-                mongoose.set('debug', true); // Ativa logs de debug
-                logger.info('Configurações de desenvolvimento ativadas: autoIndex e debug.');
+                mongoose.set('debug', false); // Desativa logs de debug no console
+                logger.info('Configurações de desenvolvimento ativadas: autoIndex ativado e debug desativado.');
             } else {
                 mongoose.set('autoIndex', false); // Desativa criação automática de índices
                 mongoose.set('debug', false); // Desativa logs de debug

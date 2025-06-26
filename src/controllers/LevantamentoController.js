@@ -1,6 +1,6 @@
 import LevantamentoService from "../services/LevantamentoService.js";
 import {LevantamentoQuerySchema, LevantamentoIdSchema} from "../utils/validators/schemas/zod/querys/LevantamentoQuerySchema.js";
-import {LevantamentoSchema, LevantamentoUpdateSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
+import {LevantamentoSchema, LevantamentoUpdateSchema, fotoUploadValidationSchema} from "../utils/validators/schemas/zod/LevantamentoSchema.js";
 import {CommonResponse, CustomError, HttpStatusCodes} from "../utils/helpers/index.js";
 
 class LevantamentoController {
@@ -41,9 +41,7 @@ class LevantamentoController {
         console.log("Estou no atualizar em LevantamentoController");
 
         const { id } = req.params;
-        if (id) {
-            LevantamentoIdSchema.parse(id);
-        }
+        LevantamentoIdSchema.parse(id);
 
         const parsedData = LevantamentoUpdateSchema.parse(req.body);
 
@@ -61,9 +59,7 @@ class LevantamentoController {
         console.log("Estou no deletar em LevantamentoController");
 
         const { id } = req.params;
-        if (id) {
-            LevantamentoIdSchema.parse(id);
-        }
+        LevantamentoIdSchema.parse(id);
         
         const data = await this.service.deletar(id);
         return CommonResponse.success(res, data, HttpStatusCodes.OK.code, "Levantamento excluído com sucesso.");
@@ -76,8 +72,16 @@ class LevantamentoController {
         LevantamentoIdSchema.parse(id);
 
         if (!req.file) {
-            throw new CustomError("Nenhum arquivo de foto foi enviado.", HttpStatusCodes.BAD_REQUEST);
+            throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: "validationError",
+            field: "foto",
+            customMessage:
+                "Nenhum arquivo enviado. Por favor, inclua um arquivo.",
+            });
         }
+
+        fotoUploadValidationSchema.parse(req.file);
 
         const data = await this.service.adicionarFoto(id, req.file);
 
@@ -86,6 +90,22 @@ class LevantamentoController {
             data,
             HttpStatusCodes.OK.code,
             "Foto adicionada com sucesso."
+        );
+    }
+
+     async deletarFoto(req, res) {
+        console.log("Estou no deletarFoto em LevantamentoController");
+
+        const { id } = req.params;
+        LevantamentoIdSchema.parse(id);
+
+        const data = await this.service.deletarFoto(id);
+
+        return CommonResponse.success(
+            res,
+            data,
+            HttpStatusCodes.OK.code,
+            "Fotos removidas com sucesso."
         );
     }
 }

@@ -40,3 +40,6 @@ temp/
 
 # teste
 coverage/
+
+# Docker data volumes
+#minio-data/

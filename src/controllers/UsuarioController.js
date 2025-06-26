@@ -3,6 +3,7 @@ import UsuarioService from "../services/UsuarioService.js";
 import { UsuarioQuerySchema, UsuarioIdSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
 import { UsuarioSchema, UsuarioUpdateSchema } from "../utils/validators/schemas/zod/UsuarioSchema.js";
 import { CommonResponse } from "../utils/helpers/index.js";
+import { NovaSenhaSchema } from "../utils/validators/schemas/zod/NovaSenhaSchema.js";
 
 //const getDirname = () => path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,12 +36,26 @@ class UsuarioController {
     const parsedData = UsuarioSchema.parse(req.body);
 
     let data = await this.service.criar(parsedData);
-    
+
     let usuarioLimpo = data.toObject();
     delete usuarioLimpo.senha;
-   
+
     return CommonResponse.created(res, usuarioLimpo);
-  
+  }
+
+  async cadastrarSenha(req, res) {
+    const { senha } = req.body;
+    const token = req.query.token
+    
+    if (!token) {
+      return CommonResponse.error(res, 400, "Token não informado.");
+    }
+
+    const senhaValid = NovaSenhaSchema.parse(senha);
+
+    const resultado = await this.service.cadastrarSenha(token, senhaValid);
+
+    return CommonResponse.success(res, resultado, 200, "Senha definida com sucesso.");
   }
 
   // Atualiza um usuário existente.
@@ -48,7 +63,7 @@ class UsuarioController {
     console.log("Estou no atualizar em UsuarioController");
 
     const { id } = req.params;
-    if(id){
+    if (id) {
       UsuarioIdSchema.parse(id);
     }
 
@@ -69,10 +84,10 @@ class UsuarioController {
     console.log("Estou no deletar em UsuarioController");
 
     const { id } = req.params;
-    if(id){
+    if (id) {
       UsuarioIdSchema.parse(id);
     }
-    
+
     const data = await this.service.deletar(id);
     return CommonResponse.success(res, data, 200, "Usuário excluído com sucesso.");
   }

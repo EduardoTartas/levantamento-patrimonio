@@ -16,5 +16,5 @@ router
     .patch("/usuarios/:id", AuthMiddleware, AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
     .put("/usuarios/:id",AuthMiddleware, /*leware,*/ AuthPermission, asyncWrapper(UsuarioController.atualizar.bind(UsuarioController)))
     .delete("/usuarios/:id", AuthMiddleware, AuthPermission, asyncWrapper(UsuarioController.deletar.bind(UsuarioController)))
-
+    .post("/cadastrar-senha", asyncWrapper(UsuarioController.cadastrarSenha.bind(UsuarioController)))
 export default router;

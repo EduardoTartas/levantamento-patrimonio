@@ -1,4 +1,8 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import SendMail from "@utils/SendMail";
+
+import Usuario from "@models/Usuario";
 import UsuarioService from "@services/UsuarioService.js";
 import UsuarioRepository from "@repositories/UsuarioRepository.js";
 import CampusService from "@services/CampusService.js";
@@ -7,31 +11,35 @@ import { CustomError, HttpStatusCodes, messages } from "@utils/helpers/index.js"
 jest.mock("@repositories/UsuarioRepository.js");
 jest.mock("@services/CampusService.js");
 jest.mock("bcrypt");
+jest.mock("jsonwebtoken");
+jest.mock("@utils/SendMail.js");
 
 const mockCustomError = jest.fn();
-jest.mock("@utils/helpers/index.js", () => {
-    const originalHelpers = jest.requireActual("@utils/helpers/index.js");
-    return {
-        ...originalHelpers,
-        CustomError: jest.fn().mockImplementation(function(args) {
-            const instance = new Error(args.customMessage || 'Erro Customizado');
-            Object.assign(instance, args);
-            instance.name = 'CustomError';
-            mockCustomError(args);
-            return instance;
-        }),
-        HttpStatusCodes: { // Garanta que estes são os valores que seu código usa
-            BAD_REQUEST: { code: 400, reason: "Bad Request" },
-            NOT_FOUND: { code: 404, reason: "Not Found" },
-        },
-        messages: { // Garanta que esta estrutura corresponde ao seu objeto messages
-            error: {
-                resourceNotFound: jest.fn(resource => `${resource} não encontrado.`),
-            },
-        },
-    };
-});
+class MockCustomError extends Error {
+  constructor(args) {
+    super(args.customMessage || "Erro Customizado");
+    Object.assign(this, args);
+    this.name = "CustomError";
+    mockCustomError(args);
+  }
+}
 
+jest.mock("@utils/helpers/index.js", () => {
+  const originalHelpers = jest.requireActual("@utils/helpers/index.js");
+  return {
+    ...originalHelpers,
+    CustomError: MockCustomError,
+    HttpStatusCodes: {
+      BAD_REQUEST: { code: 400, reason: "Bad Request" },
+      NOT_FOUND: { code: 404, reason: "Not Found" },
+    },
+    messages: {
+      error: {
+        resourceNotFound: jest.fn(resource => `${resource} não encontrado.`),
+      },
+    },
+  };
+});
 
 describe("UsuarioService", () => {
     let usuarioService;
@@ -58,6 +66,9 @@ describe("UsuarioService", () => {
         usuarioService = new UsuarioService();
         mockCustomError.mockClear();
         bcrypt.hash.mockClear();
+        jwt.sign.mockClear();
+        jwt.verify.mockClear();
+        SendMail.enviaEmail.mockClear();
     });
 
     afterEach(() => {
@@ -88,6 +99,7 @@ describe("UsuarioService", () => {
     describe("criar", () => {
         let mockParsedData;
         const hashedPassword = "senhaHasheadaSuperSegura";
+        const fakeToken = "token.jwt.falso";
 
         beforeEach(() => {
             mockParsedData = {
@@ -102,6 +114,7 @@ describe("UsuarioService", () => {
             mockCampusServiceInstance.ensureCampExists.mockResolvedValue(true);
             bcrypt.hash.mockResolvedValue(hashedPassword);
             mockUsuarioRepositoryInstance.criar.mockResolvedValue({ id: "userId1", ...mockParsedData, senha: hashedPassword });
+            jwt.sign.mockReturnValue(fakeToken);
         });
 
         it("deve criar um usuário sem senha, se não fornecida", async () => {
@@ -111,13 +124,44 @@ describe("UsuarioService", () => {
             const result = await usuarioService.criar(dataSemSenha);
 
             expect(bcrypt.hash).not.toHaveBeenCalled();
-            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith(dataSemSenha);
+            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith(expect.not.objectContaining({
+                senha: expect.anything(),
+            }));
             expect(result.senha).toBeUndefined();
+        });
+
+        it("deve remover a senha antes de criar usuário, mesmo que enviada", async () => {
+            const result = await usuarioService.criar(mockParsedData);
+            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith(expect.not.objectContaining({
+                senha: expect.anything(),
+            }));
+        });
+
+        it("deve gerar token JWT no criar com email e segredo", async () => {
+            await usuarioService.criar(mockParsedData);
+            expect(jwt.sign).toHaveBeenCalledWith(
+                { email: mockParsedData.email },
+                process.env.JWT_SECRET,
+                { expiresIn: "1hr" }
+            );
+        });
+
+        it("deve enviar email para criação de senha no criar", async () => {
+            await usuarioService.criar(mockParsedData);
+
+            expect(SendMail.enviaEmail).toHaveBeenCalledWith(expect.objectContaining({
+                to: mockParsedData.email,
+                subject: "Criação de senha",
+                html: expect.stringContaining(process.env.CADASTRAR_SENHA_URL),
+            }));
+
+            // Confirmar se o token está presente no html do email
+            const callArgs = SendMail.enviaEmail.mock.calls[0][0];
+            expect(callArgs.html).toContain(fakeToken);
         });
 
         it("deve lançar CustomError se o email já existir", async () => {
             mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroUser", email: mockParsedData.email });
-
             await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(Error);
             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -128,7 +172,6 @@ describe("UsuarioService", () => {
 
         it("deve lançar CustomError se o CPF já existir", async () => {
             mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue({ id: "outroUser", cpf: mockParsedData.cpf });
-
             await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(Error);
             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -142,6 +185,94 @@ describe("UsuarioService", () => {
             mockCampusServiceInstance.ensureCampExists.mockRejectedValue(erroCampus);
 
             await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(erroCampus);
+        });
+    });
+
+    describe("cadastrarSenha", () => {
+        const token = "tokenValido";
+        const senhaNova = "novaSenha123";
+        const emailUsuario = "usuario@exemplo.com";
+
+        let mockUsuarioFindOne;
+
+        beforeEach(() => {
+            mockUsuarioFindOne = jest.fn();
+            // Mock do findOne do model Usuario
+            jest.spyOn(Usuario, "findOne").mockImplementation(mockUsuarioFindOne);
+        });
+
+        it("deve cadastrar senha com token válido e usuário existente", async () => {
+            jwt.verify.mockReturnValue({ email: emailUsuario });
+
+            const mockUsuario = {
+                email: emailUsuario,
+                senhaToken: token,
+                senhaTokenExpira: new Date(Date.now() + 3600000),
+                save: jest.fn(),
+            };
+            mockUsuarioFindOne.mockResolvedValue(mockUsuario);
+            bcrypt.hash.mockResolvedValue("senhaHasheada");
+
+            const resultado = await usuarioService.cadastrarSenha(token, senhaNova);
+
+            expect(jwt.verify).toHaveBeenCalledWith(token, process.env.JWT_SECRET);
+            expect(mockUsuarioFindOne).toHaveBeenCalledWith({ email: emailUsuario });
+            expect(bcrypt.hash).toHaveBeenCalledWith(senhaNova, 10);
+            expect(mockUsuario.senha).toBe("senhaHasheada");
+            expect(mockUsuario.senhaToken).toBeUndefined();
+            expect(mockUsuario.senhaTokenExpira).toBeUndefined();
+            expect(mockUsuario.save).toHaveBeenCalled();
+            expect(resultado).toEqual({ mensagem: "Senha cadastrada com sucesso!" });
+        });
+
+        it("deve lançar CustomError se token for inválido", async () => {
+            jwt.verify.mockImplementation(() => { throw new Error("Token inválido"); });
+
+            await expect(usuarioService.cadastrarSenha(token, senhaNova)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: 400,
+                customMessage: "Erro ao cadastrar senha."
+            }));
+        });
+
+        it("deve lançar CustomError se usuário não for encontrado", async () => {
+            jwt.verify.mockReturnValue({ email: emailUsuario });
+            mockUsuarioFindOne.mockResolvedValue(null);
+
+            await expect(usuarioService.cadastrarSenha(token, senhaNova)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: 404,
+                customMessage: "Usuário não encontrado."
+            }));
+        });
+
+        it("deve lançar CustomError se token no usuário não corresponder ou expirado", async () => {
+            jwt.verify.mockReturnValue({ email: emailUsuario });
+
+            const mockUsuario = {
+                email: emailUsuario,
+                senhaToken: "tokenDiferente",
+                senhaTokenExpira: new Date(Date.now() - 3600000), // Expirado
+                save: jest.fn(),
+            };
+            mockUsuarioFindOne.mockResolvedValue(mockUsuario);
+
+            await expect(usuarioService.cadastrarSenha(token, senhaNova)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: 400,
+                customMessage: "Token inválido ou expirado."
+            }));
+        });
+
+        it("deve lançar CustomError genérico se erro inesperado acontecer", async () => {
+            jwt.verify.mockReturnValue({ email: emailUsuario });
+            mockUsuarioFindOne.mockImplementation(() => { throw new Error("Erro inesperado"); });
+
+            await expect(usuarioService.cadastrarSenha(token, senhaNova)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: 400,
+                customMessage: "Erro ao cadastrar senha."
+            }));
         });
     });
 
@@ -211,7 +342,7 @@ describe("UsuarioService", () => {
             mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroUserId", email: mockUpdateData.email });
 
             await expect(usuarioService.atualizar(userId, mockUpdateData)).rejects.toThrow(Error);
-             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
                 field: "email"
             }));
@@ -256,7 +387,7 @@ describe("UsuarioService", () => {
                 }
                 return Promise.resolve({ id: "outroId" });
             });
-            
+
             const dadosEnviadosParaRepo = { ...dadosParaAtualizar };
             delete dadosEnviadosParaRepo.email;
             delete dadosEnviadosParaRepo.senha;
@@ -271,7 +402,7 @@ describe("UsuarioService", () => {
     describe("deletar", () => {
         const userIdValido = "idParaDeletar";
 
-        beforeEach(()=> {
+        beforeEach(() => {
             mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue({ id: userIdValido });
             mockUsuarioRepositoryInstance.deletar.mockResolvedValue({ "message": "Usuário deletado" });
         })
@@ -307,14 +438,14 @@ describe("UsuarioService", () => {
             mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroId" });
             await expect(usuarioService.validateEmail("email.existente@teste.com", "idAtual")).rejects.toThrow(Error);
             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
-                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                 field: "email",
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                field: "email",
             }));
             expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith("email.existente@teste.com", "idAtual");
         });
     });
 
-     describe("validateCpf (auxiliar)", () => {
+    describe("validateCpf (auxiliar)", () => {
         it("não deve lançar erro se CPF não estiver em uso", async () => {
             mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue(null);
             await expect(usuarioService.validateCpf("12345678900")).resolves.not.toThrow();
@@ -341,7 +472,7 @@ describe("UsuarioService", () => {
             mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(null);
             await expect(usuarioService.ensureUserExists("idInexistente")).rejects.toThrow(Error);
             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
-                 customMessage: messages.error.resourceNotFound("Usuário")
+                customMessage: messages.error.resourceNotFound("Usuário")
             }));
         });
     });

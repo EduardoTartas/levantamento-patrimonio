@@ -29,7 +29,8 @@ class LevantamentoController {
         console.log("Estou no criar em LevantamentoController");
 
         const parsedData = LevantamentoSchema.parse(req.body);
-        parsedData.usuario = req.user_id
+        parsedData.usuario = req.user._id
+        console.log(parsedData.usuario);
 
         const data = await this.service.criar(parsedData);
         

@@ -161,11 +161,39 @@ export class LoginService {
             to: usuario.email,
             subject: "Recuperação de senha",
             html: `
-                <h1>Recuperação de senha</h1>
-                <p>Olá ${usuario.nome},</p>
-                <p>Clique no link abaixo para redefinir sua senha:</p>
-                <a href="${urlRecuperacao}">Redefinir senha</a>
-                <p>Se você não solicitou essa recuperação, ignore este e-mail.</p>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Recuperação de Senha</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5; color: #333333;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                <div style="text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 20px;">
+                    <h1 style="color: #007bff; font-size: 24px; margin: 0;">Recuperação de Senha</h1>
+                </div>
+                
+                <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Olá <strong>${usuario.nome}</strong>,</p>
+                
+                <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px;">Recebemos uma solicitação para redefinir sua senha. Se você não fez esta solicitação, ignore este e-mail.</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${urlRecuperacao}" style="background-color: #007bff; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Redefinir Senha</a>
+                </div>
+                
+                <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">Se o botão acima não funcionar, copie e cole o link abaixo em seu navegador:</p>
+                
+                <p style="font-size: 14px; background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">${urlRecuperacao}</p>
+                
+                <p style="font-size: 14px; color: #666666; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 15px;">Este link expirará em 1 hora por motivos de segurança.</p>
+                
+                <div style="text-align: center; margin-top: 20px; color: #666666; font-size: 12px;">
+                    <p>Este é um e-mail automático, por favor não responda.</p>
+                </div>
+                </div>
+            </body>
+            </html>
             `,
         };
 

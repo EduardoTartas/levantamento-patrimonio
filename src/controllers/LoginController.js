@@ -46,7 +46,7 @@ class LoginController {
     async recover(req, res, next) {
         const { email, novaSenha } = req.body;
         const token = req.query.token;
-//MUDAR O LINK QUE ENVIA O EMAIL PARA RECOVER
+
         console.log(token)
         if (token && novaSenha) {
             const senhaValidada = NovaSenhaSchema.parse(novaSenha);

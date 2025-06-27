@@ -296,7 +296,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 
 ---  
 
-### 5.2 POST /levantamentos/:id/foto  
+### 5.2 POST /levantamentos/foto/:id  
 
 **Caso de Uso**  
  - Adicionar ou atualizar foto do bem.  

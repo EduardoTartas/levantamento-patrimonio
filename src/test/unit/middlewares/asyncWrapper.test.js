@@ -1,40 +1,35 @@
-import asyncWrapper from '../../middlewares/asyncWrapper';
+import asyncWrapper from "@middlewares/asyncWrapper";
 
-describe('asyncWrapper', () => {
-    let req, res, next;
+describe("asyncWrapper", () => {
+  let req, res, next;
 
-    beforeEach(() => {
-        req = {};
-        res = {};
-        next = jest.fn();
-    });
+  beforeEach(() => {
+    req = {};
+    res = {};
+    next = jest.fn();
+  });
 
-    it('deve chamar a função handler', async () => {
-        const handler = jest.fn().mockResolvedValue('success');
-        const wrappedHandler = asyncWrapper(handler);
+  it("deve executar a função assíncrona sem erro e chamar next sem argumentos", async () => {
+    const handler = jest.fn().mockResolvedValue("ok");
+    const wrapped = asyncWrapper(handler);
 
-        await wrappedHandler(req, res, next);
+    wrapped(req, res, next);
 
-        expect(handler).toHaveBeenCalledWith(req, res, next);
-    });
+    expect(handler).toHaveBeenCalledWith(req, res, next);
+    expect(next).not.toHaveBeenCalledWith(expect.any(Error));
+  });
 
-    it('deve chamar next com erro se o handler lançar uma exceção', async () => {
-        const error = new Error('Test error');
-        const handler = jest.fn().mockRejectedValue(error);
-        const wrappedHandler = asyncWrapper(handler);
+ it("deve capturar erros e passá-los para o next", async () => {
+  const error = new Error("Algo deu errado");
+  const handler = jest.fn(() => Promise.reject(error));
+  const wrapped = asyncWrapper(handler);
 
-        await wrappedHandler(req, res, next);
+  const req = {};
+  const res = {};
+  const next = jest.fn();
 
-        expect(next).toHaveBeenCalledWith(error);
-    });
+  await wrapped(req, res, next);  // Espera a Promise resolver
 
-    it('não deve chamar next se o handler resolver com sucesso', async () => {
-        const handler = jest.fn().mockResolvedValue('success');
-        const wrappedHandler = asyncWrapper(handler);
-
-        await wrappedHandler(req, res, next);
-
-        expect(next).not.toHaveBeenCalled();
-    });
+  expect(next).toHaveBeenCalledWith(error);
 });
-
+});

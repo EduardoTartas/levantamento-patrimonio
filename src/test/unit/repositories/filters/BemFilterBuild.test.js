@@ -58,10 +58,10 @@ describe('BemFilterBuilder', () => {
   });
 
   describe('comTombo()', () => {
-    it('deve adicionar filtro exato para tombo', () => {
+    it('deve adicionar filtro regex para tombo', () => {
       builder.comTombo('TOM123456');
       const filtros = builder.build();
-      expect(filtros.tombo).toBe('TOM123456');
+      expect(filtros.tombo).toEqual({ $regex: 'TOM123456', $options: 'i' });
     });
 
     it('não deve adicionar filtro se tombo for vazio', () => {
@@ -83,7 +83,7 @@ describe('BemFilterBuilder', () => {
     it('deve escapar caracteres especiais no tombo', () => {
       builder.comTombo('TOM.123(456)');
       const filtros = builder.build();
-      expect(filtros.tombo).toBe('TOM\\.123\\(456\\)');
+      expect(filtros.tombo).toEqual({ $regex: 'TOM\\.123\\(456\\)', $options: 'i' });
     });
 
     it('deve retornar this para encadeamento', () => {
@@ -284,7 +284,7 @@ describe('BemFilterBuilder', () => {
       
       expect(filtros).toMatchObject({
         nome: { $regex: 'Mesa', $options: 'i' },
-        tombo: 'TOM123',
+        tombo: { $regex: 'TOM123', $options: 'i' },
         sala: '507f1f77bcf86cd799439011',
         'responsavel.nome': { $regex: 'João\\ Silva', $options: 'i' },
         auditado: true

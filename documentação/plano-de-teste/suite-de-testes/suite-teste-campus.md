@@ -44,7 +44,7 @@
 | Erro para operações inválidas | Deve retornar um erro apropriado para operações em um campus inexistente. | Buscar, atualizar ou deletar um campus com um ID que não existe. | Deve lançar um `CustomError` com status 404. |
 | Remoção de campus inexistente | Deve lançar um erro ao tentar deletar um campus com um ID que não existe. | Tentar deletar um campus com um ID que não está no banco. | Deve lançar um `CustomError` com status 404. |
 
-# Plano de Teste Endpoints (Milestone 2 - Sprint 7)
+# Plano de Teste Endpoints (Milestone 3 - Sprint 7)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |

@@ -1,4 +1,5 @@
 import SalaRepository from '../repositories/SalaRepository.js';
+import { CustomError, messages, HttpStatusCodes } from '@utils/helpers/index.js';
 
 class SalaService {
     constructor() {

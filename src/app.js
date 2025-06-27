@@ -11,9 +11,18 @@ import CommonResponse from './utils/helpers/CommonResponse.js';
 
 const app = express();
 
-// Conectando ao banco de dados
-await setupMinio();
-await DbConnect.conectar();
+async function initializeApp() {
+    await setupMinio();
+    await DbConnect.conectar();
+}
+
+if (process.env.NODE_ENV !== 'test') {
+    initializeApp().catch(error => {
+        logger.error('Erro na inicialização da aplicação:', error);
+        process.exit(1);
+    });
+}
+
 
 // Middlewares de segurança
 app.use(helmet());

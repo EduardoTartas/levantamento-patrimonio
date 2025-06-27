@@ -1,4 +1,4 @@
-# Plano de Teste para Model (Sprint 3)
+# Plano de Teste para Model (Milestone 2 - Sprint 3)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |
@@ -12,7 +12,7 @@
 | Atualização de campos | Deve ser possível atualizar campos como `nome` e `cidade`. | Buscar um campus, atualizar `nome` e `cidade` e salvar. | O campus atualizado reflete as alterações e `updatedAt` é mais recente. |
 | Remoção de campus | Um campus existente pode ser removido do sistema. | Cadastrar um campus, depois usar `Campus.deleteOne()` para removê-lo. | A operação retorna `deletedCount: 1` e o campus não é mais encontrado com `findById`. |
 
-# Plano de Teste Controller (Sprint 3)
+# Plano de Teste Controller (Milestone 2 - Sprint 3)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |
@@ -23,7 +23,7 @@
 | Mensagens padronizadas | Mensagens de sucesso e erro devem ser claras e padronizadas. | Realizar operações de sucesso e erro e verificar o campo `message`. | Mensagens seguem o padrão definido em `CommonResponse`. |
 | Falha inesperada | Deve retornar erro 500 para falhas inesperadas no controller. | Simular um erro inesperado em qualquer operação do controller. | Deve retornar erro 500 e mensagem padronizada. |
 
-# Plano de Teste Service (Sprint 3)
+# Plano de Teste Service (Milestone 2 - Sprint 3)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |
@@ -33,7 +33,7 @@
 | Remoção com vínculo | Deve lançar erro ao tentar remover um campus vinculado a um usuário. | Tentar remover um campus que está vinculado a pelo menos um usuário. | Deve lançar um `CustomError` de recurso em uso (conflito). |
 | Falha inesperada do repository | Deve propagar o erro se o `repository` lançar uma exceção em qualquer operação. | Simular um erro sendo lançado por um método do `CampusRepository`. | O método do serviço deve lançar o mesmo erro e não comprometer a integridade dos dados. |
 
-# Plano de Teste Repository (Sprint 3)
+# Plano de Teste Repository (Milestone 2 - Sprint 3)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |
@@ -44,7 +44,7 @@
 | Erro para operações inválidas | Deve retornar um erro apropriado para operações em um campus inexistente. | Buscar, atualizar ou deletar um campus com um ID que não existe. | Deve lançar um `CustomError` com status 404. |
 | Remoção de campus inexistente | Deve lançar um erro ao tentar deletar um campus com um ID que não existe. | Tentar deletar um campus com um ID que não está no banco. | Deve lançar um `CustomError` com status 404. |
 
-# Plano de Teste Endpoints (Sprint 7)
+# Plano de Teste Endpoints (Milestone 2 - Sprint 7)
 
 | Funcionalidade | Comportamento Esperado | Verificações | Critérios de Aceite |
 | :--- | :--- | :--- | :--- |

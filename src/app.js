@@ -12,8 +12,8 @@ import CommonResponse from './utils/helpers/CommonResponse.js';
 const app = express();
 
 async function initializeApp() {
-    await DbConnect.conectar();
     await setupMinio();
+    await DbConnect.conectar();
 }
 
 if (process.env.NODE_ENV !== 'test') {

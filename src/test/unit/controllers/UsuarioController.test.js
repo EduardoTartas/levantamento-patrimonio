@@ -10,10 +10,8 @@ import {
 } from "@utils/validators/schemas/zod/UsuarioSchema.js";
 import { CommonResponse } from "@utils/helpers/index.js";
 
-// Mocka o serviço
 jest.mock("@services/UsuarioService.js");
 
-// Mocka os schemas Zod
 jest.mock("@utils/validators/schemas/zod/querys/UsuarioQuerySchema.js", () => ({
   UsuarioIdSchema: {
     parse: jest.fn(),
@@ -41,6 +39,12 @@ jest.mock("@utils/helpers/index.js", () => ({
   HttpStatusCodes: {},
 }));
 
+jest.mock("@utils/validators/schemas/zod/NovaSenhaSchema.js", () => ({
+  NovaSenhaSchema: {
+    parse: jest.fn(),
+  },
+}));
+
 describe("UsuarioController", () => {
   let usuarioController;
   let mockReq;
@@ -58,7 +62,7 @@ describe("UsuarioController", () => {
       body: {},
     };
 
- 
+
     mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
@@ -70,7 +74,7 @@ describe("UsuarioController", () => {
     it("deve listar todos os usuários quando nenhum ID ou query é fornecido (req.params e req.query são objetos vazios)", async () => {
       const mockUsers = [{ nome: "Usuário 1" }, { nome: "Usuário 2" }];
       mockReq.params = {};
-      mockReq.query = {}; 
+      mockReq.query = {};
 
       UsuarioService.prototype.listar.mockResolvedValue(mockUsers);
       UsuarioQuerySchema.parseAsync.mockResolvedValue({});
@@ -120,7 +124,7 @@ describe("UsuarioController", () => {
       const query = { nome: "Teste" };
       const mockUsers = [{ nome: "Usuário Teste" }];
       mockReq.query = query;
-    
+
 
       UsuarioQuerySchema.parseAsync.mockResolvedValue(query);
       UsuarioService.prototype.listar.mockResolvedValue(mockUsers);
@@ -155,7 +159,7 @@ describe("UsuarioController", () => {
 
     it("deve propagar erro do service.listar", async () => {
       const error = new Error("Erro no serviço");
-      mockReq.query = { nome: "Teste" }; 
+      mockReq.query = { nome: "Teste" };
       UsuarioQuerySchema.parseAsync.mockResolvedValue(mockReq.query);
       UsuarioService.prototype.listar.mockRejectedValue(error);
 
@@ -172,19 +176,19 @@ describe("UsuarioController", () => {
       cpf: "12345678900",
       cargo: "Funcionario",
     };
-    const mockSavedUserDocument = { 
+    const mockSavedUserDocument = {
       ...mockUserData,
       _id: "novo-id",
       toObject: jest.fn(),
     };
-    const mockPlainUserObject = { 
+    const mockPlainUserObject = {
       ...mockUserData,
       _id: "novo-id",
     };
     delete mockPlainUserObject.senha;
 
 
-    beforeEach(()=> {
+    beforeEach(() => {
       mockSavedUserDocument.toObject.mockReturnValue(mockPlainUserObject);
     });
 
@@ -231,8 +235,8 @@ describe("UsuarioController", () => {
       mockReq.params.id = userId;
       mockReq.body = mockUpdateData;
 
-      UsuarioIdSchema.parse.mockReturnValue({ id: userId }); 
-      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData); 
+      UsuarioIdSchema.parse.mockReturnValue({ id: userId });
+      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData);
       UsuarioService.prototype.atualizar.mockResolvedValue(mockUpdatedUser);
 
       await usuarioController.atualizar(mockReq, mockRes);
@@ -252,16 +256,16 @@ describe("UsuarioController", () => {
       mockReq.params = {};
       mockReq.body = mockUpdateData;
 
-      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData); 
+      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData);
       UsuarioService.prototype.atualizar.mockResolvedValue({ ...mockUpdatedUser, id: undefined });
 
 
       await usuarioController.atualizar(mockReq, mockRes);
 
-      expect(UsuarioIdSchema.parse).not.toHaveBeenCalled(); 
+      expect(UsuarioIdSchema.parse).not.toHaveBeenCalled();
       expect(UsuarioUpdateSchema.parse).toHaveBeenCalledWith(mockUpdateData);
       expect(UsuarioService.prototype.atualizar).toHaveBeenCalledWith(undefined, mockUpdateData);
-      expect(CommonResponse.success).toHaveBeenCalled(); 
+      expect(CommonResponse.success).toHaveBeenCalled();
     });
 
 
@@ -283,8 +287,8 @@ describe("UsuarioController", () => {
       mockReq.params.id = userId;
       mockReq.body = { nomeInvalido: 123 };
 
-      UsuarioIdSchema.parse.mockReturnValue({ id: userId }); 
-      UsuarioUpdateSchema.parse.mockImplementation(() => { 
+      UsuarioIdSchema.parse.mockReturnValue({ id: userId });
+      UsuarioUpdateSchema.parse.mockImplementation(() => {
         throw error;
       });
 
@@ -297,9 +301,9 @@ describe("UsuarioController", () => {
       mockReq.params.id = userId;
       mockReq.body = mockUpdateData;
 
-      UsuarioIdSchema.parse.mockReturnValue({ id: userId }); 
-      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData); 
-      UsuarioService.prototype.atualizar.mockRejectedValue(error); 
+      UsuarioIdSchema.parse.mockReturnValue({ id: userId });
+      UsuarioUpdateSchema.parse.mockReturnValue(mockUpdateData);
+      UsuarioService.prototype.atualizar.mockRejectedValue(error);
 
       await expect(usuarioController.atualizar(mockReq, mockRes)).rejects.toThrow(error);
     });
@@ -334,7 +338,7 @@ describe("UsuarioController", () => {
 
       await usuarioController.deletar(mockReq, mockRes);
 
-      expect(UsuarioIdSchema.parse).not.toHaveBeenCalled(); 
+      expect(UsuarioIdSchema.parse).not.toHaveBeenCalled();
       expect(UsuarioService.prototype.deletar).toHaveBeenCalledWith(undefined);
       expect(CommonResponse.success).toHaveBeenCalled();
     });
@@ -354,7 +358,7 @@ describe("UsuarioController", () => {
       const error = new Error("Erro no serviço ao deletar");
       mockReq.params.id = userId;
 
-      UsuarioIdSchema.parse.mockReturnValue({ id: userId }); 
+      UsuarioIdSchema.parse.mockReturnValue({ id: userId });
       UsuarioService.prototype.deletar.mockRejectedValue(error);
 
       await expect(usuarioController.deletar(mockReq, mockRes)).rejects.toThrow(error);

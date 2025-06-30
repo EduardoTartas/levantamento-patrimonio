@@ -1,35 +1,40 @@
-import asyncWrapper from "@middlewares/asyncWrapper";
+import asyncWrapper from '../../../middlewares/asyncWrapper.js';
 
-describe("asyncWrapper", () => {
-  let req, res, next;
+describe('asyncWrapper', () => {
+    let req, res, next;
 
-  beforeEach(() => {
-    req = {};
-    res = {};
-    next = jest.fn();
-  });
+    beforeEach(() => {
+        req = {};
+        res = {};
+        next = jest.fn();
+    });
 
-  it("deve executar a função assíncrona sem erro e chamar next sem argumentos", async () => {
-    const handler = jest.fn().mockResolvedValue("ok");
-    const wrapped = asyncWrapper(handler);
+    it('deve chamar a função handler', async () => {
+        const handler = jest.fn().mockResolvedValue('success');
+        const wrappedHandler = asyncWrapper(handler);
 
-    wrapped(req, res, next);
+        await wrappedHandler(req, res, next);
 
-    expect(handler).toHaveBeenCalledWith(req, res, next);
-    expect(next).not.toHaveBeenCalledWith(expect.any(Error));
-  });
+        expect(handler).toHaveBeenCalledWith(req, res, next);
+    });
 
- it("deve capturar erros e passá-los para o next", async () => {
-  const error = new Error("Algo deu errado");
-  const handler = jest.fn(() => Promise.reject(error));
-  const wrapped = asyncWrapper(handler);
+    it('deve chamar next com erro se o handler lançar uma exceção', async () => {
+        const error = new Error('Test error');
+        const handler = jest.fn().mockRejectedValue(error);
+        const wrappedHandler = asyncWrapper(handler);
 
-  const req = {};
-  const res = {};
-  const next = jest.fn();
+        await wrappedHandler(req, res, next);
 
-  await wrapped(req, res, next);  // Espera a Promise resolver
+        expect(next).toHaveBeenCalledWith(error);
+    });
 
-  expect(next).toHaveBeenCalledWith(error);
+    it('não deve chamar next se o handler resolver com sucesso', async () => {
+        const handler = jest.fn().mockResolvedValue('success');
+        const wrappedHandler = asyncWrapper(handler);
+
+        await wrappedHandler(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+    });
 });
-});
+

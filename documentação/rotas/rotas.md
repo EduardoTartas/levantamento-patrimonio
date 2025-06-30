@@ -296,7 +296,7 @@ Gerenciamento de campus: criação, listagem, edição e exclusão.
 
 ---  
 
-### 5.2 POST /levantamentos/:id/foto  
+### 5.2 POST /levantamentos/foto/:id  
 
 **Caso de Uso**  
  - Adicionar ou atualizar foto do bem.  
@@ -409,8 +409,8 @@ Geração de relatórios filtrados por inventário, sala e tipo.
 
 | Parâmetro     | Tipo   | Obrigatório | Descrição                                                                                                  |  
 |---------------|--------|-------------|------------------------------------------------------------------------------------------------------------|  
-| inventarioId  | string | Sim         | Filtra bens pelo inventário.                                                                                |  
-| sala          | string | Não         | Filtra bens pela sala.                                                                                      |  
+| inventarioId  | string | Sim         | Filtra levantamentos pelo inventário.                                                                                |  
+| sala          | string | Não         | Filtra levantamentos pela sala.                                                                                      |  
 | tipoRelatorio | string | Sim         | Tipo do relatório (ex: geral, bens_nao_encontrados, bens_danificados, bens_ociosos, bens_sem_etiqueta, bens_inserviveis). |  
 
 **Regras de Negócio**  

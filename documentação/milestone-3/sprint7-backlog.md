@@ -4,8 +4,8 @@
 
 
 **Início:** 15/06/2025  
-**Término:** 25/06/2025  
-**Duração da Sprint:** 10 dias 
+**Término:** 05/07/2025  
+**Duração da Sprint:** 20 dias 
 
 
 
@@ -20,3 +20,6 @@
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
+2. **Teste unitário das funcionalidades implementadas**  
+   - Explicação do teste do fluxo principal, demonstrar a cobertura de testes unitários.
+   - Responsáveis: Eduardo, Thiago e Gustavo

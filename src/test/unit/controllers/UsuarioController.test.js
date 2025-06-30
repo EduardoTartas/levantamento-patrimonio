@@ -1,20 +1,17 @@
 import UsuarioController from "@controllers/UsuarioController.js";
-import UsuarioService from "../../../services/UsuarioService.js";
+import UsuarioService from "@services/UsuarioService.js";
 import {
   UsuarioQuerySchema,
   UsuarioIdSchema,
-} from "../../../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
+} from "@utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
 import {
   UsuarioSchema,
   UsuarioUpdateSchema,
-} from "../../../utils/validators/schemas/zod/UsuarioSchema.js";
-import { CommonResponse } from "../../../utils/helpers/index.js";
-import { NovaSenhaSchema } from "@utils/validators/schemas/zod/NovaSenhaSchema.js";
+} from "@utils/validators/schemas/zod/UsuarioSchema.js";
+import { CommonResponse } from "@utils/helpers/index.js";
 
-// Mocka o serviço
 jest.mock("@services/UsuarioService.js");
 
-// Mocka os schemas Zod
 jest.mock("@utils/validators/schemas/zod/querys/UsuarioQuerySchema.js", () => ({
   UsuarioIdSchema: {
     parse: jest.fn(),

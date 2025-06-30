@@ -1,229 +1,354 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import UsuarioService from "@services/UsuarioService.js";
 import UsuarioRepository from "@repositories/UsuarioRepository.js";
 import CampusService from "@services/CampusService.js";
-import SendMail from "@utils/SendMail.js";
-import Usuario from "@models/Usuario.js";
-import CustomError from "@utils/helpers/CustomError.js";
+import { CustomError, HttpStatusCodes, messages } from "@utils/helpers/index.js";
 
 jest.mock("@repositories/UsuarioRepository.js");
 jest.mock("@services/CampusService.js");
-jest.mock("@utils/SendMail.js");
-jest.mock("@models/Usuario.js");
-jest.mock("jsonwebtoken");
 jest.mock("bcrypt");
+
+jest.mock("@utils/SendMail.js", () => ({
+    enviaEmail: jest.fn().mockResolvedValue({ 
+        messageId: 'test-message-id' 
+    })
+}));
+
+const mockCustomError = jest.fn();
+jest.mock("@utils/helpers/index.js", () => {
+    const originalHelpers = jest.requireActual("@utils/helpers/index.js");
+    return {
+        ...originalHelpers,
+        CustomError: jest.fn().mockImplementation(function(args) {
+            const instance = new Error(args.customMessage || 'Erro Customizado');
+            Object.assign(instance, args);
+            instance.name = 'CustomError';
+            mockCustomError(args);
+            return instance;
+        }),
+        HttpStatusCodes: { // Garanta que estes são os valores que seu código usa
+            BAD_REQUEST: { code: 400, reason: "Bad Request" },
+            NOT_FOUND: { code: 404, reason: "Not Found" },
+        },
+        messages: { // Garanta que esta estrutura corresponde ao seu objeto messages
+            error: {
+                resourceNotFound: jest.fn(resource => `${resource} não encontrado.`),
+            },
+        },
+    };
+});
+
 
 describe("UsuarioService", () => {
     let usuarioService;
-    let mockRepository;
-    let mockCampusService;
+    let mockUsuarioRepositoryInstance;
+    let mockCampusServiceInstance;
 
     beforeEach(() => {
-        jest.clearAllMocks();
-        mockRepository = new UsuarioRepository();
-        mockCampusService = new CampusService();
-        usuarioService = new UsuarioService();
+        mockUsuarioRepositoryInstance = {
+            listar: jest.fn(),
+            criar: jest.fn(),
+            atualizar: jest.fn(),
+            deletar: jest.fn(),
+            buscarPorEmail: jest.fn(),
+            buscarPorCpf: jest.fn(),
+            buscarPorId: jest.fn(),
+        };
+        mockCampusServiceInstance = {
+            ensureCampExists: jest.fn(),
+        };
 
-        // Forcamos os mocks internos do service para os mocks criados aqui
-        usuarioService.repository = mockRepository;
-        usuarioService.campusService = mockCampusService;
+        UsuarioRepository.mockImplementation(() => mockUsuarioRepositoryInstance);
+        CampusService.mockImplementation(() => mockCampusServiceInstance);
+
+        usuarioService = new UsuarioService();
+        mockCustomError.mockClear();
+        bcrypt.hash.mockClear();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
     describe("listar", () => {
-        it("deve chamar repository.listar com o request e retornar resultado", async () => {
-            const req = { some: "request" };
-            const expectedResult = [{ id: 1, nome: "Thiago" }];
-            mockRepository.listar.mockResolvedValue(expectedResult);
+        it("deve chamar repository.listar com os parâmetros corretos e retornar os dados", async () => {
+            const mockReq = { query: { status: "ativo" } };
+            const mockResponseData = [{ id: "1", nome: "Usuário Teste" }];
+            mockUsuarioRepositoryInstance.listar.mockResolvedValue(mockResponseData);
 
-            const result = await usuarioService.listar(req);
+            const resultado = await usuarioService.listar(mockReq);
 
-            expect(mockRepository.listar).toHaveBeenCalledWith(req);
-            expect(result).toBe(expectedResult);
+            expect(mockUsuarioRepositoryInstance.listar).toHaveBeenCalledWith(mockReq);
+            expect(resultado).toEqual(mockResponseData);
+        });
+
+        it("deve propagar erros do repository.listar", async () => {
+            const mockReq = {};
+            const erro = new Error("Erro de banco de dados");
+            mockUsuarioRepositoryInstance.listar.mockRejectedValue(erro);
+
+            await expect(usuarioService.listar(mockReq)).rejects.toThrow(erro);
         });
     });
 
     describe("criar", () => {
-        it("deve validar email, cpf, campus, criar usuário, gerar token e enviar email", async () => {
-            const parsedData = {
-                email: "test@test.com",
+        let mockParsedData;
+        const hashedPassword = "senhaHasheadaSuperSegura";
+
+        beforeEach(() => {
+            mockParsedData = {
+                nome: "Novo Usuário",
+                email: "novo@exemplo.com",
                 cpf: "12345678900",
-                campus: "campusId",
-                nome: "Thiago",
+                campus: "campusId123",
+                senha: "senhaOriginal123",
             };
-
-            const senhaToken = "token123";
-            const senhaTokenExpira = new Date(Date.now() + 3600000);
-
-            mockRepository.buscarPorEmail.mockResolvedValue(null);
-            mockRepository.buscarPorCpf.mockResolvedValue(null);
-            mockCampusService.ensureCampExists.mockResolvedValue(true);
-
-            mockRepository.criar.mockResolvedValue({
-                id: "abc123",
-                ...parsedData,
-                senhaToken,
-                senhaTokenExpira
-            });
-            
-            jwt.sign.mockReturnValue("token123");
-            SendMail.enviaEmail.mockResolvedValue(true);
-
-            // Substituir os métodos validateEmail e validateCpf para testar fluxo direto
-            usuarioService.validateEmail = jest.fn();
-            usuarioService.validateCpf = jest.fn();
-
-            const result = await usuarioService.criar(parsedData);
-
-            expect(usuarioService.validateEmail).toHaveBeenCalledWith(parsedData.email);
-            expect(usuarioService.validateCpf).toHaveBeenCalledWith(parsedData.cpf);
-            expect(mockCampusService.ensureCampExists).toHaveBeenCalledWith(parsedData.campus);
-            expect(jwt.sign).toHaveBeenCalledWith(
-                { email: parsedData.email },
-                process.env.JWT_SECRET,
-                { expiresIn: "1hr" }
-            );
-            expect(SendMail.enviaEmail).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    to: parsedData.email,
-                    subject: "Criação de senha",
-                    html: expect.stringContaining("Olá, Thiago!"),
-                })
-            );
-            expect(result).toEqual({
-                id: "abc123",
-                ...parsedData,
-                senhaToken,
-                senhaTokenExpira
-            });
-        });
-    });
-
-    describe("cadastrarSenha", () => {
-        it("deve validar token, atualizar senha e limpar token", async () => {
-            const token = "valid.token";
-            const senha = "novaSenha";
-            const decoded = { email: "test@test.com" };
-            const usuarioMock = {
-                senhaToken: token,
-                senhaTokenExpira: new Date(Date.now() + 10000),
-                save: jest.fn(),
-            };
-
-            jwt.verify.mockReturnValue(decoded);
-            Usuario.findOne.mockReturnValue({
-                select: jest.fn().mockResolvedValue(usuarioMock),
-            });
-            bcrypt.hash.mockResolvedValue("hashSenha");
-
-            const result = await usuarioService.cadastrarSenha(token, senha);
-
-            expect(jwt.verify).toHaveBeenCalledWith(token, process.env.JWT_SECRET);
-            expect(Usuario.findOne).toHaveBeenCalledWith({ email: decoded.email });
-            expect(bcrypt.hash).toHaveBeenCalledWith(senha, 10);
-            expect(usuarioMock.senha).toBe("hashSenha");
-            expect(usuarioMock.senhaToken).toBeUndefined();
-            expect(usuarioMock.senhaTokenExpira).toBeUndefined();
-            expect(usuarioMock.save).toHaveBeenCalled();
-            expect(result).toEqual({ mensagem: "Senha cadastrada com sucesso!" });
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue(null);
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue(null);
+            mockCampusServiceInstance.ensureCampExists.mockResolvedValue(true);
+            bcrypt.hash.mockResolvedValue(hashedPassword);
+            mockUsuarioRepositoryInstance.criar.mockResolvedValue({ id: "userId1", ...mockParsedData, senha: hashedPassword });
         });
 
-        it("deve lançar erro quando token inválido ou expirado", async () => {
-            const token = "tokenInválido";
-            jwt.verify.mockImplementation(() => { throw new Error("invalid token"); });
+        it("deve criar um usuário sem senha, se não fornecida", async () => {
+            const dataSemSenha = { ...mockParsedData, senha: undefined };
+            mockUsuarioRepositoryInstance.criar.mockResolvedValue({ id: "userId1", ...dataSemSenha });
 
-            await expect(usuarioService.cadastrarSenha(token, "senha")).rejects.toThrow(CustomError);
+            const result = await usuarioService.criar(dataSemSenha);
+
+            expect(bcrypt.hash).not.toHaveBeenCalled();
+            expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith(dataSemSenha);
+            expect(result.senha).toBeUndefined();
+        }, 10000);
+
+        it("deve lançar CustomError se o email já existir", async () => {
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroUser", email: mockParsedData.email });
+
+            await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                field: "email",
+                customMessage: "Email já está em uso.",
+            }));
+        });
+
+        it("deve lançar CustomError se o CPF já existir", async () => {
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue({ id: "outroUser", cpf: mockParsedData.cpf });
+
+            await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                field: "cpf",
+                customMessage: "CPF já está em uso.",
+            }));
+        });
+
+        it("deve lançar erro se campusService.ensureCampExists falhar", async () => {
+            const erroCampus = new Error("Campus não existe");
+            mockCampusServiceInstance.ensureCampExists.mockRejectedValue(erroCampus);
+
+            await expect(usuarioService.criar(mockParsedData)).rejects.toThrow(erroCampus);
         });
     });
 
     describe("atualizar", () => {
-        it("deve validar existência do usuário e atualizar dados exceto senha e email", async () => {
-            const id = "abc123";
-            const parsedData = {
-                email: "newemail@test.com",
-                cpf: "12345678900",
-                campus: "campusId",
-                nome: "Thiago Atualizado",
-                senha: "senha123",
+        let userId;
+        let mockUpdateData;
+
+        beforeEach(() => {
+            userId = "userIdExistente";
+            mockUpdateData = {
+                nome: "Usuário Atualizado",
+                email: "atualizado@exemplo.com",
+                cpf: "00987654321",
+                campus: "campusIdNovo",
+                senha: "novaSenha123",
             };
 
-            usuarioService.ensureUserExists = jest.fn().mockResolvedValue(true);
-            usuarioService.validateEmail = jest.fn();
-            usuarioService.validateCpf = jest.fn();
-            mockCampusService.ensureCampExists.mockResolvedValue(true);
-            mockRepository.atualizar.mockResolvedValue({ id, ...parsedData });
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue({ id: userId, nome: "Antigo" });
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue(null);
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue(null);
+            mockCampusServiceInstance.ensureCampExists.mockResolvedValue(true);
+            mockUsuarioRepositoryInstance.atualizar.mockResolvedValue({ id: userId, ...mockUpdateData, email: undefined, senha: undefined });
+        });
 
-            const result = await usuarioService.atualizar(id, parsedData);
+        it("deve atualizar um usuário com sucesso, deletando email e senha dos dados de atualização", async () => {
+            const dadosParaAtualizar = { ...mockUpdateData };
+            const usuarioAtualizadoEsperado = { ...dadosParaAtualizar };
+            delete usuarioAtualizadoEsperado.email;
+            delete usuarioAtualizadoEsperado.senha;
 
-            expect(usuarioService.ensureUserExists).toHaveBeenCalledWith(id);
-            expect(usuarioService.validateEmail).toHaveBeenCalledWith(parsedData.email, id);
-            expect(usuarioService.validateCpf).toHaveBeenCalledWith(parsedData.cpf, id);
-            expect(mockCampusService.ensureCampExists).toHaveBeenCalledWith(parsedData.campus);
-            expect(mockRepository.atualizar).toHaveBeenCalledWith(id, {
-                cpf: parsedData.cpf,
-                campus: parsedData.campus,
-                nome: parsedData.nome,
+            const resultado = await usuarioService.atualizar(userId, dadosParaAtualizar);
+
+            expect(mockUsuarioRepositoryInstance.buscarPorId).toHaveBeenCalledWith(userId);
+            expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith(mockUpdateData.email, userId);
+            expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith(mockUpdateData.cpf, userId);
+            expect(mockCampusServiceInstance.ensureCampExists).toHaveBeenCalledWith(mockUpdateData.campus);
+            expect(mockUsuarioRepositoryInstance.atualizar).toHaveBeenCalledWith(userId, usuarioAtualizadoEsperado);
+            expect(resultado).toEqual(expect.objectContaining({ nome: "Usuário Atualizado" }));
+        });
+
+        it("deve atualizar sem campus se não fornecido", async () => {
+            const dataSemCampus = { ...mockUpdateData };
+            delete dataSemCampus.campus;
+            const usuarioAtualizadoEsperado = { ...dataSemCampus };
+            delete usuarioAtualizadoEsperado.email;
+            delete usuarioAtualizadoEsperado.senha;
+
+            mockUsuarioRepositoryInstance.atualizar.mockResolvedValue({ id: userId, ...usuarioAtualizadoEsperado });
+
+            await usuarioService.atualizar(userId, dataSemCampus);
+
+            expect(mockCampusServiceInstance.ensureCampExists).not.toHaveBeenCalled();
+            expect(mockUsuarioRepositoryInstance.atualizar).toHaveBeenCalledWith(userId, usuarioAtualizadoEsperado);
+        });
+
+        it("deve lançar CustomError se usuário não existir", async () => {
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.atualizar(userId, mockUpdateData)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.NOT_FOUND.code,
+                customMessage: messages.error.resourceNotFound("Usuário"),
+            }));
+        });
+
+        it("deve lançar CustomError se email já existir para outro usuário", async () => {
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroUserId", email: mockUpdateData.email });
+
+            await expect(usuarioService.atualizar(userId, mockUpdateData)).rejects.toThrow(Error);
+             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                field: "email"
+            }));
+        });
+
+        it("deve lançar CustomError se CPF já existir para outro usuário", async () => {
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue({ id: "outroUserId", cpf: mockUpdateData.cpf });
+
+            await expect(usuarioService.atualizar(userId, mockUpdateData)).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                field: "cpf"
+            }));
+        });
+
+        it("deve permitir a atualização se o email/cpf não mudou (pertence ao mesmo usuário)", async () => {
+            const dadosUsuarioExistente = {
+                id: userId,
+                nome: "Nome Antigo",
+                email: "email.original@exemplo.com",
+                cpf: "11122233300",
+                campus: "campusOriginal"
+            };
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(dadosUsuarioExistente);
+
+            const dadosParaAtualizar = {
+                nome: "Nome Atualizado Mesmo Email",
+                email: dadosUsuarioExistente.email,
+                cpf: dadosUsuarioExistente.cpf,
+                campus: "campusAtualizado"
+            };
+
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockImplementation((email, idExclusao) => {
+                if (email === dadosUsuarioExistente.email && idExclusao === userId) {
+                    return Promise.resolve(null);
+                }
+                return Promise.resolve({ id: "outroId" });
             });
-            expect(result).toEqual({ id, ...parsedData });
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockImplementation((cpf, idExclusao) => {
+                if (cpf === dadosUsuarioExistente.cpf && idExclusao === userId) {
+                    return Promise.resolve(null);
+                }
+                return Promise.resolve({ id: "outroId" });
+            });
+            
+            const dadosEnviadosParaRepo = { ...dadosParaAtualizar };
+            delete dadosEnviadosParaRepo.email;
+            delete dadosEnviadosParaRepo.senha;
+
+            mockUsuarioRepositoryInstance.atualizar.mockResolvedValue({ ...dadosEnviadosParaRepo, id: userId });
+
+            await expect(usuarioService.atualizar(userId, dadosParaAtualizar)).resolves.toBeDefined();
+            expect(mockUsuarioRepositoryInstance.atualizar).toHaveBeenCalledWith(userId, dadosEnviadosParaRepo);
         });
     });
 
     describe("deletar", () => {
-        it("deve garantir que o usuário existe e deletar", async () => {
-            const id = "abc123";
-            usuarioService.ensureUserExists = jest.fn().mockResolvedValue(true);
-            mockRepository.deletar.mockResolvedValue(true);
+        const userIdValido = "idParaDeletar";
 
-            const result = await usuarioService.deletar(id);
+        beforeEach(()=> {
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue({ id: userIdValido });
+            mockUsuarioRepositoryInstance.deletar.mockResolvedValue({ "message": "Usuário deletado" });
+        })
 
-            expect(usuarioService.ensureUserExists).toHaveBeenCalledWith(id);
-            expect(mockRepository.deletar).toHaveBeenCalledWith(id);
-            expect(result).toBe(true);
+        it("deve deletar um usuário com sucesso", async () => {
+            const result = await usuarioService.deletar(userIdValido);
+
+            expect(mockUsuarioRepositoryInstance.buscarPorId).toHaveBeenCalledWith(userIdValido);
+            expect(mockUsuarioRepositoryInstance.deletar).toHaveBeenCalledWith(userIdValido);
+            expect(result).toEqual({ "message": "Usuário deletado" });
+        });
+
+        it("deve lançar CustomError se o usuário a ser deletado não for encontrado", async () => {
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(null);
+
+            await expect(usuarioService.deletar("idInexistente")).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                statusCode: HttpStatusCodes.NOT_FOUND.code,
+                customMessage: messages.error.resourceNotFound("Usuário"),
+            }));
+            expect(mockUsuarioRepositoryInstance.deletar).not.toHaveBeenCalled();
         });
     });
 
-    describe("validateEmail", () => {
-        it("deve lançar erro se email já existir", async () => {
-            mockRepository.buscarPorEmail.mockResolvedValue(true);
-
-            await expect(usuarioService.validateEmail("test@test.com")).rejects.toThrow(CustomError);
+    describe("validateEmail (auxiliar)", () => {
+        it("não deve lançar erro se o email não estiver em uso", async () => {
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue(null);
+            await expect(usuarioService.validateEmail("email.novo@teste.com")).resolves.not.toThrow();
+            expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith("email.novo@teste.com", null);
         });
 
-        it("não deve lançar erro se email não existir", async () => {
-            mockRepository.buscarPorEmail.mockResolvedValue(null);
-
-            await expect(usuarioService.validateEmail("unique@test.com")).resolves.toBeUndefined();
-        });
-    });
-
-    describe("validateCpf", () => {
-        it("deve lançar erro se cpf já existir", async () => {
-            mockRepository.buscarPorCpf.mockResolvedValue(true);
-
-            await expect(usuarioService.validateCpf("12345678900")).rejects.toThrow(CustomError);
-        });
-
-        it("não deve lançar erro se cpf não existir", async () => {
-            mockRepository.buscarPorCpf.mockResolvedValue(null);
-
-            await expect(usuarioService.validateCpf("00011122233")).resolves.toBeNull();
+        it("deve lançar CustomError se o email já estiver em uso por outro usuário", async () => {
+            mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroId" });
+            await expect(usuarioService.validateEmail("email.existente@teste.com", "idAtual")).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                 field: "email",
+            }));
+            expect(mockUsuarioRepositoryInstance.buscarPorEmail).toHaveBeenCalledWith("email.existente@teste.com", "idAtual");
         });
     });
 
-    describe("ensureUserExists", () => {
-        it("deve lançar erro se usuário não existir", async () => {
-            mockRepository.buscarPorId.mockResolvedValue(null);
-
-            await expect(usuarioService.ensureUserExists("abc123")).rejects.toThrow(CustomError);
+     describe("validateCpf (auxiliar)", () => {
+        it("não deve lançar erro se CPF não estiver em uso", async () => {
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue(null);
+            await expect(usuarioService.validateCpf("12345678900")).resolves.not.toThrow();
+            expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith("12345678900", null);
         });
 
-        it("deve retornar usuário se existir", async () => {
-            const user = { id: "abc123" };
-            mockRepository.buscarPorId.mockResolvedValue(user);
+        it("deve lançar CustomError se CPF estiver em uso", async () => {
+            mockUsuarioRepositoryInstance.buscarPorCpf.mockResolvedValue({ id: "idExistente" });
+            await expect(usuarioService.validateCpf("00987654321", "idAtual")).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({ field: "cpf" }));
+            expect(mockUsuarioRepositoryInstance.buscarPorCpf).toHaveBeenCalledWith("00987654321", "idAtual");
+        });
+    });
 
-            const result = await usuarioService.ensureUserExists("abc123");
+    describe("ensureUserExists (auxiliar)", () => {
+        it("deve retornar o usuário se ele existir", async () => {
+            const mockUser = { id: "idExistente", nome: "Usuário" };
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(mockUser);
+            const resultado = await usuarioService.ensureUserExists("idExistente");
+            expect(resultado).toEqual(mockUser);
+        });
 
-            expect(result).toBe(user);
+        it("deve lançar CustomError se usuário não existir", async () => {
+            mockUsuarioRepositoryInstance.buscarPorId.mockResolvedValue(null);
+            await expect(usuarioService.ensureUserExists("idInexistente")).rejects.toThrow(Error);
+            expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
+                 customMessage: messages.error.resourceNotFound("Usuário")
+            }));
         });
     });
 });

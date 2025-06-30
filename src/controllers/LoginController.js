@@ -47,11 +47,17 @@ class LoginController {
         const { email, novaSenha } = req.body;
         const token = req.query.token;
 
-        console.log(token)
         if (token && novaSenha) {
-            const senhaValidada = NovaSenhaSchema.parse(novaSenha);
-            const resultado = await this.service.redefinirSenha(token, senhaValidada);
-            return res.status(200).json(resultado);
+            try {
+                const senhaValidada = NovaSenhaSchema.parse(novaSenha);
+                const resultado = await this.service.redefinirSenha(token, senhaValidada);
+                return res.status(200).json(resultado);
+            } catch {
+                return res.status(400).json({
+                    erro: "Parâmetros inválidos para recuperação de senha.",
+                    recebido: { email, token, novaSenha }
+                });
+            }
         }
 
         if (email && !token && !novaSenha) {
@@ -64,6 +70,7 @@ class LoginController {
             recebido: { email, token, novaSenha }
         });
     }
+
 
     async logout(req, res, next) {
         const { refreshToken } = req.body;

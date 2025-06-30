@@ -56,13 +56,16 @@ describe('SalaFilterBuilder', () => {
   });
 
   test('build deve retornar todos os filtros acumulados', () => {
-    builder.comNome('Sala').comCampus('507f1f77bcf86cd799439011').comBloco('A');
+    builder
+      .comNome('Sala')
+      .comCampus('507f1f77bcf86cd799439011')
+      .comBloco('A');
     const filtros = builder.build();
 
     expect(filtros).toEqual({
       nome: { $regex: 'Sala', $options: 'i' },
       campus: '507f1f77bcf86cd799439011',
-      bloco: { $regex: 'A', $options: 'i' }
+      bloco: { $regex: 'A', $options: 'i' },
     });
   });
 });

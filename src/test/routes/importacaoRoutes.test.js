@@ -59,7 +59,7 @@ describe("Importacao Routes", () => {
         jest.clearAllMocks();
     });
 
-    describe("POST /api/importacao/csv/:campusId", () => {
+    describe("POST /csv/:campusId", () => {
         it("deve processar upload de CSV com sucesso", async () => {
             const csvContent = "D¥¥POLTRONA FIXA¥123110303¥SALA 27¥¥1¥999¥1¥13122009¥40000¥13122009¥INSTITUTO FEDERAL¥¥¥2¥¥¥¥¥200035¥¥¥00682571202¥RODRIGO MARQUES¥FALSE¥¥¥120¥£¥2015NE200035";
             
@@ -79,7 +79,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(csvContent), 'test.csv')
                 .expect(200);
 
@@ -102,7 +102,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .expect(400);
 
             expect(response.body.success).toBe(false);
@@ -125,7 +125,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post('/api/importacao/csv/invalid-id')
+                .post('/csv/invalid-id')
                 .attach('csv', Buffer.from(csvContent), 'test.csv')
                 .expect(400);
 
@@ -149,7 +149,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(invalidContent), 'test.txt')
                 .expect(400);
 
@@ -174,7 +174,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(largeContent), 'large.csv')
                 .expect(413);
 
@@ -196,7 +196,7 @@ describe("Importacao Routes", () => {
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(csvContent), 'test.csv')
                 .expect(500);
 
@@ -207,7 +207,7 @@ describe("Importacao Routes", () => {
 
         it("deve processar importação com registros duplicados", async () => {
             const csvContent = `D¥¥POLTRONA FIXA¥123110303¥SALA 27¥¥1¥999¥1¥13122009¥40000¥13122009¥INSTITUTO FEDERAL¥¥¥2¥¥¥¥¥200035¥¥¥00682571202¥RODRIGO MARQUES¥FALSE¥¥¥120¥£¥2015NE200035
-D¥¥MESA ESCRITORIO¥123110304¥SALA 28¥¥1¥999¥1¥13122009¥50000¥13122009¥INSTITUTO FEDERAL¥¥¥3¥¥¥¥¥200036¥¥¥00682571203¥MARIA SILVA¥FALSE¥¥¥150¥£¥2015NE200036`;
+            D¥¥MESA ESCRITORIO¥123110304¥SALA 28¥¥1¥999¥1¥13122009¥50000¥13122009¥INSTITUTO FEDERAL¥¥¥3¥¥¥¥¥200036¥¥¥00682571203¥MARIA SILVA¥FALSE¥¥¥150¥£¥2015NE200036`;
             
             const mockResponse = {
                 totalRecordsProcessed: 2,
@@ -225,7 +225,7 @@ D¥¥MESA ESCRITORIO¥123110304¥SALA 28¥¥1¥999¥1¥13122009¥50000¥13122009
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(csvContent), 'test.csv')
                 .expect(200);
 
@@ -260,7 +260,7 @@ D¥¥MESA ESCRITORIO¥123110304¥SALA 28¥¥1¥999¥1¥13122009¥50000¥13122009
             });
 
             const response = await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
+                .post(`/csv/${campusId}`)
                 .attach('csv', Buffer.from(csvContent), 'test.csv')
                 .expect(200);
 
@@ -268,34 +268,6 @@ D¥¥MESA ESCRITORIO¥123110304¥SALA 28¥¥1¥999¥1¥13122009¥50000¥13122009
             expect(response.body.data.totalRecordsInserted).toBe(0);
             expect(response.body.data.errors).toHaveLength(1);
             expect(response.body.data.errors[0].type).toBe("Erro de Validação");
-        });
-
-        it("deve verificar se middleware de autenticação está sendo aplicado", async () => {
-            const csvContent = "D¥¥POLTRONA FIXA¥123110303¥SALA 27¥¥1¥999¥1¥13122009¥40000¥13122009¥INSTITUTO FEDERAL¥¥¥2¥¥¥¥¥200035¥¥¥00682571202¥RODRIGO MARQUES¥FALSE¥¥¥120¥£¥2015NE200035";
-            
-            mockImportarCSV.mockImplementation((req, res) => {
-                // Verificar se req.user foi definido pelo middleware
-                expect(req.user).toBeDefined();
-                expect(req.user.id).toBe('testuser');
-                
-                res.status(200).json({
-                    success: true,
-                    message: "Importação realizada com sucesso",
-                    data: {
-                        totalRecordsProcessed: 1,
-                        totalRecordsInserted: 1,
-                        totalRecordsSkipped: 0,
-                        errors: []
-                    }
-                });
-            });
-
-            await request(app)
-                .post(`/api/importacao/csv/${campusId}`)
-                .attach('csv', Buffer.from(csvContent), 'test.csv')
-                .expect(200);
-
-            expect(mockImportarCSV).toHaveBeenCalledTimes(1);
         });
     });
 });

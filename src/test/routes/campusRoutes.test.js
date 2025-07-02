@@ -8,7 +8,6 @@ import Usuario from '@models/Usuario';
 
 dotenv.config();
 
-// Mock para os middlewares
 jest.mock('../../middlewares/AuthMiddleware', () => (req, res, next) => {
     req.user = { id: 'testuser' };
     next();
@@ -33,16 +32,13 @@ describe("Campus", () => {
     let adminUserId;
 
     beforeAll(async () => {
-        // Para testes, usamos um token mock já que os middlewares estão mockados
         token = 'mock-jwt-token';
 
-        // Se estiver usando banco de dados real, conecta
         if (mongoose.connection.readyState === 0) {
             const mongoUri = process.env.DB_URL_TESTE || process.env.DB_URL || 'mongodb://localhost:27017/levantamento_patrimonio_test';
             await mongoose.connect(mongoUri);
         }
 
-        // Cria um usuário admin para os testes
         try {
             const adminUser = await Usuario.create({
                 nome: 'Admin Campus Test',
@@ -53,7 +49,6 @@ describe("Campus", () => {
             });
             adminUserId = adminUser._id;
         } catch (error) {
-            // Se der erro, pode ser que já existe, tenta buscar
             const existingAdmin = await Usuario.findOne({ email: 'admincampus@test.com' });
             if (existingAdmin) {
                 adminUserId = existingAdmin._id;
@@ -62,7 +57,6 @@ describe("Campus", () => {
     }, 30000);
 
     afterAll(async () => {
-        // Limpa dados de teste
         try {
             await Campus.deleteMany({});
             await Usuario.deleteMany({});
@@ -75,7 +69,6 @@ describe("Campus", () => {
     });
 
     beforeEach(async () => {
-        // Limpa campus mas mantém o usuário admin
         await Campus.deleteMany({});
         await Usuario.deleteMany({ _id: { $ne: adminUserId } });
     });
@@ -98,7 +91,7 @@ describe("Campus", () => {
         const res = await request(app)
             .post("/campus")
             .set('Authorization', `Bearer ${token}`)
-            .send({ cidade: 'Cidade Teste' }); // 'nome' faltando
+            .send({ cidade: 'Cidade Teste' });
 
         expect([400, 422]).toContain(res.status);
     });
@@ -226,7 +219,6 @@ describe("Campus", () => {
         expect([200, 201]).toContain(createCampusRes.status);
         const campusId = createCampusRes.body.data._id;
 
-        // Cria um usuário associado ao campus
         await Usuario.create({
             campus: campusId,
             nome: 'Usuário Vinculado',

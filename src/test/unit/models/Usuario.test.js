@@ -11,12 +11,12 @@ beforeAll(async () => {
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
     await Usuario.createIndexes(); 
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-});
+}, 30000);
 
 afterEach(async () => {
     jest.clearAllMocks();

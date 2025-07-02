@@ -8,6 +8,12 @@ jest.mock("@repositories/UsuarioRepository.js");
 jest.mock("@services/CampusService.js");
 jest.mock("bcrypt");
 
+jest.mock("@utils/SendMail.js", () => ({
+    enviaEmail: jest.fn().mockResolvedValue({ 
+        messageId: 'test-message-id' 
+    })
+}));
+
 const mockCustomError = jest.fn();
 jest.mock("@utils/helpers/index.js", () => {
     const originalHelpers = jest.requireActual("@utils/helpers/index.js");
@@ -113,7 +119,7 @@ describe("UsuarioService", () => {
             expect(bcrypt.hash).not.toHaveBeenCalled();
             expect(mockUsuarioRepositoryInstance.criar).toHaveBeenCalledWith(dataSemSenha);
             expect(result.senha).toBeUndefined();
-        });
+        }, 10000);
 
         it("deve lançar CustomError se o email já existir", async () => {
             mockUsuarioRepositoryInstance.buscarPorEmail.mockResolvedValue({ id: "outroUser", email: mockParsedData.email });

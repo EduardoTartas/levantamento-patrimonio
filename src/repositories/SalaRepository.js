@@ -27,7 +27,7 @@ class SalaRepository {
     }
 
     async listar(req) {
-        const id = req.params.id || null;
+        const id = req.params?.id || null;
 
         if (id) {
             const data = await this.model.findById(id)
@@ -50,7 +50,18 @@ class SalaRepository {
         }
 
         const { nome, campus, bloco, page } = req.query || {};
-        const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
+        let limite = parseInt(req.query?.limite, 10) || 10;
+        let pageNumber = parseInt(page, 10) || 1;
+        
+        // Validar valores extremos
+        if (limite <= 0) {
+            limite = 10;
+        }
+        if (pageNumber <= 0) {
+            pageNumber = 1;
+        }
+        
+        limite = Math.min(limite, 100);
         
         const filterBuilder = new SalaFilterBuilder()
             .comNome(nome || "")
@@ -69,7 +80,7 @@ class SalaRepository {
 
         const filtros = filterBuilder.build();
         const options = {
-            page: parseInt(page, 10) || 1,
+            page: pageNumber,
             populate:{
                 path: 'campus',
                 select: 'nome _id',

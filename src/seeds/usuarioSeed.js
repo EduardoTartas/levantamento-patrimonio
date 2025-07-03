@@ -1,20 +1,24 @@
 import fakerbr from 'faker-br';
-import Campus  from '../models/Campus.js';
+import Campus from '../models/Campus.js';
 import Usuario from '../models/Usuario.js';
-//import DbConnect from '../config/dbConnect.js';
 
 export default async function usuarioSeed() {
      
     // Coleta os campus cadastrados no banco de dados
     const campusList = await Campus.find({});
 
-    // Deleta todos os usuários existentes no banco de dados
+    if (campusList.length === 0) {
+        console.log("Nenhum campus encontrado. Execute campusSeed primeiro.");
+        return;
+    }
+
+    // Deleta todos os usuários existentes no banco de dados (exceto admin)
     await Usuario.deleteMany({ nome: { $ne: "admin" } });
 
     // Gera 50 usuários
     for(let i = 0; i < 50; i++) {
         const randomCampus = campusList[Math.floor(Math.random() * campusList.length)];
-
+        
         const usuario = {
             campus: randomCampus._id.toString(),
             nome: `${fakerbr.name.firstName()} ${fakerbr.name.lastName()}`,
@@ -28,8 +32,5 @@ export default async function usuarioSeed() {
         await Usuario.create(usuario);
     }
 
-    console.log("Usuários implementadas com sucesso.");
+    console.log("Usuários implementados com sucesso.");
 }
-
-// await DbConnect.conectar();
-// await usuarioSeed();

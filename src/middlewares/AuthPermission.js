@@ -17,7 +17,7 @@ class AuthPermission {
   async handle(req, res, next) {
     try {
       // 1. Verifica se o user_id está presente (deve ter sido definido pelo AuthMiddleware)
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       if (!userId) {
         throw new CustomError({
           statusCode: 401,
@@ -97,7 +97,8 @@ class AuthPermission {
           });
         }
 
-        req.user = { id: userId };
+        // Mantém as informações do usuário já definidas pelo AuthMiddleware
+        req.user.id = userId; // Adiciona a propriedade id para compatibilidade
 
         next();
       } catch (error) {

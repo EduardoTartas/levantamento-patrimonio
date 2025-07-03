@@ -56,7 +56,7 @@ export async function generateExample(schema, key = null, mongooseSchema = null)
   if (schema.type === "object" && schema.properties) {
     const example = {};
     for (const [propKey, propertySchema] of Object.entries(schema.properties)) {
-      example[propKey] = await await generateExample(propertySchema, propKey, mongooseSchema);
+      example[propKey] = await generateExample(propertySchema, propKey, mongooseSchema);
     }
     return example;
   }
@@ -70,7 +70,7 @@ export async function generateExample(schema, key = null, mongooseSchema = null)
         { _id: new mongoose.Types.ObjectId().toString() }
       ];
     }
-    return [await await generateExample(schema.items, null, mongooseSchema)];
+    return [await generateExample(schema.items, null, mongooseSchema)];
   }
 
   // Valores padrão para tipos primitivos

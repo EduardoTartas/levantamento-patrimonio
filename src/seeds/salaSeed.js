@@ -1,4 +1,4 @@
-import fakerbr from 'faker-br';
+import { faker } from "@faker-js/faker";
 import Sala from '../models/Sala.js';
 import Campus from '../models/Campus.js';
 
@@ -21,8 +21,8 @@ export default async function salaSeed() {
 
         const sala = {
             campus: randomCampus._id,
-            nome: fakerbr.lorem.word(),
-            bloco: fakerbr.random.number({ min: 1, max: 10 }).toString(),
+            nome: `Sala ${faker.number.int({ min: 100, max: 999 })}`,
+            bloco: `Bloco ${faker.string.alpha({ length: 1, casing: 'upper' })}`,
         };
 
         await Sala.create(sala);

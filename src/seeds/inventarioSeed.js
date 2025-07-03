@@ -1,4 +1,4 @@
-import fakerbr from 'faker-br';
+import { faker } from "@faker-js/faker";
 import Inventario from '../models/Inventario.js';
 import Campus from '../models/Campus.js';
 
@@ -20,9 +20,9 @@ export default async function inventarioSeed() {
 
         const inventario = {
             campus: randomCampus._id,
-            nome: fakerbr.lorem.word(10),
-            data: fakerbr.date.past(),
-            status: fakerbr.random.boolean(),
+            nome: `Inventário ${faker.lorem.words(2)}`,
+            data: faker.date.past(),
+            status: faker.datatype.boolean(),
         };
 
         await Inventario.create(inventario);

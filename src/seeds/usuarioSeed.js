@@ -1,4 +1,4 @@
-import fakerbr from 'faker-br';
+import { faker } from "@faker-js/faker";
 import Campus from '../models/Campus.js';
 import Usuario from '../models/Usuario.js';
 
@@ -21,12 +21,12 @@ export default async function usuarioSeed() {
         
         const usuario = {
             campus: randomCampus._id.toString(),
-            nome: `${fakerbr.name.firstName()} ${fakerbr.name.lastName()}`,
-            cpf: fakerbr.br.cpf(),
-            email: fakerbr.internet.email(),
-            senha: fakerbr.internet.password(8),
-            cargo: fakerbr.random.arrayElement(["Comissionado", "Funcionario Cpalm"]),
-            status: fakerbr.random.boolean()
+            nome: `${faker.person.firstName()} ${faker.person.lastName()}`,
+            cpf: faker.string.numeric(11), // Gera CPF fictício
+            email: faker.internet.email(),
+            senha: faker.internet.password(8),
+            cargo: faker.helpers.arrayElement(["Comissionado", "Funcionario Cpalm"]),
+            status: faker.datatype.boolean()
         };
 
         await Usuario.create(usuario);

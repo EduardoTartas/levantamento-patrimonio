@@ -1,4 +1,4 @@
-import fakerbr from 'faker-br';
+import { faker } from "@faker-js/faker";
 import Inventario from '../models/Inventario.js';
 import Sala from '../models/Sala.js';
 import Usuario from '../models/Usuario.js';
@@ -37,16 +37,16 @@ export default async function levantamentoSeed() {
                 nome: randomBem.nome,
                 tombo: randomBem.tombo,
                 responsavel: {
-                    nome: randomBem.responsavel?.nome || fakerbr.name.findName(),
-                    cpf: randomBem.responsavel?.cpf || fakerbr.br.cpf()
+                    nome: randomBem.responsavel?.nome || faker.person.fullName(),
+                    cpf: randomBem.responsavel?.cpf || faker.string.numeric(11)
                 },
                 descricao: randomBem.descricao
             },
             salaNova: Math.random() > 0.7 ? randomSala._id : undefined, // 30% chance de ter nova sala
             usuario: randomUsuario._id,
-            imagem: [fakerbr.internet.url() + "/" + uuid() + ".jpg"],
-            estado: fakerbr.random.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
-            ocioso: fakerbr.random.boolean()
+            imagem: [faker.internet.url() + "/" + uuid() + ".jpg"],
+            estado: faker.helpers.arrayElement(["Em condições de uso", "Inservível", "Danificado"]),
+            ocioso: faker.datatype.boolean()
         };
 
         await Levantamento.create(levantamento);

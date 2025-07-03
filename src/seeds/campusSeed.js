@@ -1,4 +1,4 @@
-import fakerbr from "faker-br";
+import { faker } from "@faker-js/faker";
 import Campus from "../models/Campus.js";
 
 export default async function campusSeed() {
@@ -8,13 +8,13 @@ export default async function campusSeed() {
     // Gera 10 campus
     for (let i = 0; i < 10; i++) {
         const campus = {
-            nome: fakerbr.lorem.word(),
-            telefone: fakerbr.phone.phoneNumber().toString(),
-            cidade: fakerbr.address.city(),
-            bairro: fakerbr.address.neighborhood(),
-            rua: fakerbr.address.streetName().toString(),
-            numeroResidencia: fakerbr.address.streetAddress().toString(),
-            status: fakerbr.random.boolean(),
+            nome: faker.company.name(),
+            telefone: faker.phone.number(),
+            cidade: faker.location.city(),
+            bairro: faker.location.secondaryAddress(),
+            rua: faker.location.street(),
+            numeroResidencia: faker.location.streetAddress(),
+            status: faker.datatype.boolean(),
         };
 
         await Campus.create(campus);

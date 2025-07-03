@@ -1,4 +1,4 @@
-import fakerbr from 'faker-br';
+import { faker } from "@faker-js/faker";
 import Bem from '../models/Bem.js';
 import Sala from '../models/Sala.js';
 
@@ -21,15 +21,15 @@ export default async function bemSeed() {
         
         const bem = {
             sala: randomSala._id,
-            nome: fakerbr.commerce.productName(),
-            tombo: fakerbr.random.number({ min: 100000, max: 999999 }).toString(),
+            nome: faker.commerce.productName(),
+            tombo: faker.number.int({ min: 100000, max: 999999 }).toString(),
             responsavel: {
-                nome: fakerbr.name.findName(),
-                cpf: fakerbr.br.cpf(), 
+                nome: faker.person.fullName(),
+                cpf: faker.string.numeric(11), // CPF fictício
             },
-            descricao: fakerbr.lorem.sentence(),
-            valor: parseFloat(fakerbr.commerce.price()),
-            auditado: fakerbr.random.boolean(),
+            descricao: faker.lorem.sentence(),
+            valor: parseFloat(faker.commerce.price()),
+            auditado: faker.datatype.boolean(),
         };
 
         await Bem.create(bem);

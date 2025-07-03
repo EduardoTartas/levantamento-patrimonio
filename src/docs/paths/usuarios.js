@@ -304,69 +304,6 @@ const usuariosRoutes = {
                 500: commonResponses[500]()
             }
         }
-    },
-    
-    "/usuarios/new": {
-        post: {
-            tags: ["Usuários"],
-            summary: "Cria um novo usuário com validações específicas",
-            description: `
-            + Caso de uso: Criação de usuário com processo de validação aprimorado.
-            
-            + Função de Negócio:
-                - Permitir a criação de novos usuários com validações adicionais de segurança.
-                - Aplicar regras específicas de negócio para campos obrigatórios e opcionais.
-                + Recebe no corpo da requisição:
-                    - Objeto conforme schema **UsuarioPost**, contendo campos como nome, email, cpf, campus, cargo, etc.
-
-            + Regras de Negócio:
-                - Validação rigorosa de campos obrigatórios (nome, email, cpf, campus, cargo).
-                - Verificação de unicidade para campos únicos (email, cpf).
-                - Validação de formato de CPF e email.
-                - Verificação se o campus informado existe e está ativo.
-                - Definição de status inicial (ativo por padrão).
-                - Geração automática de senha temporária (se aplicável).
-                - Em caso de duplicidade ou erro de validação, retorna erro específico.
-
-            + Resultado Esperado:
-                - HTTP 201 Created com corpo conforme **UsuarioDetalhes**, contendo todos os dados do usuário criado.
-                - Notificação por email com credenciais temporárias (se configurado).
-            `,
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-                required: true,
-                content: {
-                    "application/json": {
-                        schema: {
-                            $ref: "#/components/schemas/UsuarioPost"
-                        }
-                    }
-                }
-            },
-            responses: {
-                201: commonResponses[201]("#/components/schemas/UsuarioDetalhes"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                409: {
-                    description: "Conflito - Usuário já existe",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "object",
-                                properties: {
-                                    success: { type: "boolean", example: false },
-                                    message: { type: "string", example: "Usuário com este email ou CPF já existe" },
-                                    error: { type: "string", example: "DUPLICATE_USER" }
-                                }
-                            }
-                        }
-                    }
-                },
-                422: commonResponses[422](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
-            }
-        }
     }
 };
 

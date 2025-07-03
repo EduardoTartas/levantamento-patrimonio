@@ -2,6 +2,17 @@ import fakerbr   from 'faker-br';
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
+// Importa todos os modelos
+import Usuario from '../models/Usuario.js';
+import Campus from '../models/Campus.js';
+import Sala from '../models/Sala.js';
+import Inventario from '../models/Inventario.js';
+import Bem from '../models/Bem.js';
+import Levantamento from '../models/Levantamento.js';
+import PassResetToken from '../models/PassResetToken.js';
+import RefreshToken from '../models/RefreshToken.js';
+import Rota from '../models/Rota.js';
+
 const fakeMappings = {
     // Campos comuns a vários models
     common: {
@@ -33,6 +44,8 @@ const fakeMappings = {
         cpf: () => fakerbr.br.cpf(),
         email: () => fakerbr.internet.email(),
         senha: () => fakerbr.internet.password(),
+        senhaToken: () => fakerbr.internet.password(),
+        senhaTokenExpira: () => fakerbr.date.future(),
         cargo: () => fakerbr.lorem.word(10),
         status: () => fakerbr.random.boolean(),
     },
@@ -48,19 +61,24 @@ const fakeMappings = {
     Levantamento: {
         inventario: () => new mongoose.Types.ObjectId().toString(),
         bem: () => ({
-            salaID: () => new mongoose.Types.ObjectId().toString(),
+            id: () => new mongoose.Types.ObjectId().toString(),
+            salaId: () => new mongoose.Types.ObjectId().toString(),
             nome: () => fakerbr.commerce.productName(),
             tombo: () => fakerbr.random.alphaNumeric(10),
-            responsavel: () => fakerbr.name.findName(),
-            ocioso: () => fakerbr.random.boolean(),
+            responsavel: () => ({
+                nome: () => fakerbr.name.findName(),
+                cpf: () => fakerbr.br.cpf(),
+            }),
+            descricao: () => fakerbr.lorem.sentence(),
         }),
-        sala: () => new mongoose.Types.ObjectId().toString(),
+        salaNova: () => new mongoose.Types.ObjectId().toString(),
         usuario: () => new mongoose.Types.ObjectId().toString(),
-        imagem: () => fakerbr.internet.url() + "/" + uuid() + ".jpg",
+        imagem: () => [fakerbr.internet.url() + "/" + uuid() + ".jpg"],
         estado: () => {
             const values = ["Em condições de uso", "Inservível", "Danificado"];
             return values[Math.floor(Math.random() * values.length)];
         },
+        ocioso: () => fakerbr.random.boolean(),
     },
   
     // Mapping específico para o model Inventario
@@ -79,6 +97,7 @@ const fakeMappings = {
         bairro: () => fakerbr.address.neighborhood(),
         rua: () => fakerbr.address.streetName(),
         numeroResidencia: () => fakerbr.address.streetAddress(),
+        status: () => fakerbr.random.boolean(),
     },
   
     // Mapping específico para o model Bem
@@ -86,15 +105,60 @@ const fakeMappings = {
         sala: () => new mongoose.Types.ObjectId().toString(),
         nome: () => fakerbr.commerce.productName(),
         tombo: () => fakerbr.random.alphaNumeric(10),
-        responsavel: () => fakerbr.name.findName(),
+        responsavel: () => ({
+            nome: () => fakerbr.name.findName(),
+            cpf: () => fakerbr.br.cpf(),
+        }),
         descricao: () => fakerbr.lorem.sentence(),
-        valor: () => fakerbr.commerce.price(),
+        valor: () => parseFloat(fakerbr.commerce.price()),
         auditado: () => fakerbr.random.boolean(),
-        ocioso: () => fakerbr.random.boolean(),
+    },
 
+    // Mapping específico para o model PassResetToken
+    PassResetToken: {
+        usuario: () => new mongoose.Types.ObjectId().toString(),
+        token: () => fakerbr.random.alphaNumeric(32),
+        expiresAt: () => fakerbr.date.future(),
+        used: () => fakerbr.random.boolean(),
+    },
+
+    // Mapping específico para o model RefreshToken
+    RefreshToken: {
+        token: () => fakerbr.random.alphaNumeric(64),
+        user: () => new mongoose.Types.ObjectId().toString(),
+        createdAt: () => fakerbr.date.recent(),
+    },
+
+    // Mapping específico para o model Rota
+    Rota: {
+        rota: () => fakerbr.lorem.word(10),
+        dominio: () => fakerbr.internet.url(),
+        ativo: () => fakerbr.random.boolean(),
+        buscar: () => fakerbr.random.boolean(),
+        enviar: () => fakerbr.random.boolean(),
+        substituir: () => fakerbr.random.boolean(),
+        modificar: () => fakerbr.random.boolean(),
+        excluir: () => fakerbr.random.boolean(),
     },
   };
   
+/*
+ * Carrega todos os modelos disponíveis
+ */
+async function loadModels() {
+  return [
+    { model: Usuario, name: 'Usuario' },
+    { model: Campus, name: 'Campus' },
+    { model: Sala, name: 'Sala' },
+    { model: Inventario, name: 'Inventario' },
+    { model: Bem, name: 'Bem' },
+    { model: Levantamento, name: 'Levantamento' },
+    { model: PassResetToken, name: 'PassResetToken' },
+    { model: RefreshToken, name: 'RefreshToken' },
+    { model: Rota, name: 'Rota' },
+  ];
+}
+
 export async function getGlobalFakeMapping() {
     const models = await loadModels();
     let globalMapping = { ...fakeMappings.common };
@@ -145,7 +209,7 @@ export async function getGlobalFakeMapping() {
   /*
    * Executa a validação para os models fornecidos, utilizando o mapping específico de cada um.
    */
-  async function validateAllMappings() {
+  export async function validateAllMappings() {
     const models = await loadModels();
     let totalMissing = {};
   
@@ -169,21 +233,6 @@ export async function getGlobalFakeMapping() {
       return false;
     }
   }
-  
-  // Executa a validação antes de prosseguir com o seeding ou outras operações
-  validateAllMappings()
-    .then((valid) => {
-      if (valid) {
-        console.log('Podemos acessar globalFakeMapping com segurança.');
-        // Prossegue com o seeding ou outras operações
-      } else {
-        throw new Error('globalFakeMapping não possui todos os mapeamentos necessários.');
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
-  
+
   export default getGlobalFakeMapping;
   

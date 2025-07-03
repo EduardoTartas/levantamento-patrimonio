@@ -15,12 +15,12 @@ const usuariosRoutes = {
         + Função de Negócio:
             - Permitir à front-end, App Mobile e serviços server-to-server obter uma lista paginada de usuários cadastrados.
             + Recebe como query parameters (opcionais):
-                • filtros: nome, email, ativo, grupo, unidade.  
+                • filtros: nome, email, cpf, cargo, status, campus.  
                 • paginação: page (número da página), limite (quantidade de itens por página).
 
         + Regras de Negócio:
             - Validar formatos e valores dos filtros fornecidos.  
-            - Respeitar as permissões do usuário autenticado (por exemplo, administradores veem todos, demais apenas os de sua secretaria).  
+            - Respeitar as permissões do usuário autenticado.  
             - Aplicar paginação e retornar metadados: total de registros e total de páginas.
 
         + Resultado Esperado:
@@ -49,12 +49,12 @@ const usuariosRoutes = {
             + Função de Negócio:
                 - Permitir ao perfil administrador inserir um novo usuário com todos os dados obrigatórios.
                 + Recebe no corpo da requisição:
-                    - Objeto conforme schema **UsuarioPost**, contendo campos como nome, email, código interno, perfil, etc.
+                    - Objeto conforme schema **UsuarioPost**, contendo campos como nome, email, cpf, campus, cargo, etc.
 
             + Regras de Negócio:
-                - Validação de campos obrigatórios (nome e email).  
-                - Verificação de unicidade para campos únicos (email, código interno).  
-                - Definição de status inicial (ex.: ativo ou pendente) de acordo com o fluxo de cadastro.  
+                - Validação de campos obrigatórios (nome, email, cpf, campus, cargo).  
+                - Verificação de unicidade para campos únicos (email, cpf).  
+                - Definição de status inicial (ativo por padrão).  
                 - Em caso de duplicidade ou erro de validação, retorna erro apropriado.
 
             + Resultado Esperado:
@@ -132,9 +132,9 @@ const usuariosRoutes = {
                     - No corpo, objeto conforme **UsuarioPutPatch** com os campos a alterar.
 
             + Regras de Negócio:
-                - Garantir unicidade de campos como email.  
+                - Garantir unicidade de campos como cpf.  
                 - Aplicar imediatamente alterações críticas (ex.: desativação inibe login).  
-                - Impedir alterações inconsistentes com regras de negócio.
+                - Impedir alterações em campos sensíveis como email e senha.
 
             + Resultado Esperado:
                 - HTTP 200 OK com corpo conforme **UsuarioDetalhes**, refletindo as alterações.
@@ -256,101 +256,118 @@ const usuariosRoutes = {
             }
         }
     },
-
-    // Rotas para upload de foto do usuário
-    "/usuarios/{id}/foto": {
+    "/cadastrar-senha": {
         post: {
             tags: ["Usuários"],
-            summary: "Faz upload da foto do usuário",
+            summary: "Cadastra nova senha para usuário",
             description: `
-        + Caso de uso: Recebe um arquivo de imagem e atualiza o link_foto do usuário.
-        + Função de Negócio:
-            - Validar extensão (jpg, jpeg, png, svg).
-            - Redimensionar para 400×400.
-            - Salvar no servidor e atualizar o campo link_foto.
-        + Regras de Negócio:
-            - Verificar se o usuário existe.
-            - Garantir que o arquivo seja uma imagem válida.
-        + Resultado Esperado:
-            - 200 OK com mensagem de sucesso, link_foto atualizado e metadados do arquivo.
-      `,
-            security: [{ bearerAuth: [] }],
+            + Caso de uso: Permite que usuário defina nova senha usando token recebido por email.
+            
+            + Função de Negócio:
+                - Permite ao usuário definir nova senha após validação de token.
+                + Recebe:
+                    - **token** como query parameter.
+                    - **senha** no corpo da requisição.
+
+            + Regras de Negócio:
+                - Validar token e verificar se não expirou.
+                - Aplicar critérios de segurança para senha.
+                - Invalidar token após uso.
+
+            + Resultado Esperado:
+                - HTTP 200 OK com mensagem de sucesso.
+            `,
             parameters: [
                 {
-                    name: "id",
-                    in: "path",
+                    name: "token",
+                    in: "query",
                     required: true,
-                    schema: { type: "string" }
+                    schema: {
+                        type: "string"
+                    },
+                    description: "Token de verificação para cadastro de senha"
                 }
             ],
             requestBody: {
                 content: {
-                    "multipart/form-data": {
+                    "application/json": {
                         schema: {
-                            type: "object",
-                            properties: {
-                                file: {
-                                    type: "string",
-                                    format: "binary",
-                                    description: "Arquivo de imagem a ser enviado"
-                                }
-                            },
-                            required: ["file"]
+                            $ref: "#/components/schemas/CadastrarSenha"
                         }
                     }
                 }
             },
             responses: {
-                200: commonResponses[200]('#/components/schemas/UsuarioFotoPayload'),
+                200: commonResponses[200]("#/components/schemas/CadastrarSenhaResposta"),
                 400: commonResponses[400](),
-                401: commonResponses[401](),
                 404: commonResponses[404](),
-                498: commonResponses[498](),
                 500: commonResponses[500]()
             }
-        },
-        get: {
+        }
+    },
+    
+    "/usuarios/new": {
+        post: {
             tags: ["Usuários"],
-            summary: "Faz download da foto do usuário",
+            summary: "Cria um novo usuário com validações específicas",
             description: `
-        + Caso de uso: Retorna o arquivo de imagem associado ao usuário.
-        + Função de Negócio:
-            - Buscar link_foto no banco.
-            - Retornar o binário da imagem com o Content-Type apropriado.
-        + Regras de Negócio:
-            - Verificar se o usuário existe.
-            - Garantir que o arquivo seja uma imagem válida.
-        + Resultado Esperado:
-            - 200 OK com o arquivo de imagem.
-      `,
-            parameters: [
-                {
-                    name: "id",
-                    in: "path",
-                    required: true,
-                    schema: { type: "binary" }
-                }
-            ],
-            responses: {
-                200: {
-                    description: "Arquivo de imagem retornado",
-                    content: {
-                        "image/jpeg": { schema: { type: "string", format: "binary" } },
-                        "image/png": { schema: { type: "string", format: "binary" } },
-                        "image/svg+xml": { schema: { type: "string", format: "binary" } }
+            + Caso de uso: Criação de usuário com processo de validação aprimorado.
+            
+            + Função de Negócio:
+                - Permitir a criação de novos usuários com validações adicionais de segurança.
+                - Aplicar regras específicas de negócio para campos obrigatórios e opcionais.
+                + Recebe no corpo da requisição:
+                    - Objeto conforme schema **UsuarioPost**, contendo campos como nome, email, cpf, campus, cargo, etc.
+
+            + Regras de Negócio:
+                - Validação rigorosa de campos obrigatórios (nome, email, cpf, campus, cargo).
+                - Verificação de unicidade para campos únicos (email, cpf).
+                - Validação de formato de CPF e email.
+                - Verificação se o campus informado existe e está ativo.
+                - Definição de status inicial (ativo por padrão).
+                - Geração automática de senha temporária (se aplicável).
+                - Em caso de duplicidade ou erro de validação, retorna erro específico.
+
+            + Resultado Esperado:
+                - HTTP 201 Created com corpo conforme **UsuarioDetalhes**, contendo todos os dados do usuário criado.
+                - Notificação por email com credenciais temporárias (se configurado).
+            `,
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            $ref: "#/components/schemas/UsuarioPost"
+                        }
                     }
-                },
+                }
+            },
+            responses: {
+                201: commonResponses[201]("#/components/schemas/UsuarioDetalhes"),
                 400: commonResponses[400](),
                 401: commonResponses[401](),
-                404: commonResponses[404](),
+                409: {
+                    description: "Conflito - Usuário já existe",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    success: { type: "boolean", example: false },
+                                    message: { type: "string", example: "Usuário com este email ou CPF já existe" },
+                                    error: { type: "string", example: "DUPLICATE_USER" }
+                                }
+                            }
+                        }
+                    }
+                },
+                422: commonResponses[422](),
                 498: commonResponses[498](),
                 500: commonResponses[500]()
             }
         }
     }
-
-
-
 };
 
 export default usuariosRoutes;

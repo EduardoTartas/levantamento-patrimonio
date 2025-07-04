@@ -103,6 +103,10 @@
       "<rootDir>/jest.setup.js"
     ],
     "coveragePathIgnorePatterns": [
+      "src/routes/index.js",
+      "src/docs/",
+      "src/seeds/",
+      "/src/app.js",
       "/node_modules/",
       "/utils/helpers/index.js",
       "/utils/logger.js"

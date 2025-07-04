@@ -1,7 +1,6 @@
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import authSchemas from "../schemas/authSchema.js";
 import commonResponses from "../schemas/swaggerCommonResponses.js";
-import { generateParameters } from "./utils/generateParameters.js"; // ajuste o caminho conforme necessário
 
 
 const usuariosRoutes = {
@@ -29,7 +28,61 @@ const usuariosRoutes = {
                 • **dados de paginação**: totalDocs, limit, totalPages, page, pagingCounter, hasPrevPage, hasNextPage, prevPage, nextPage.
       `,
             security: [{ bearerAuth: [] }],
-            parameters: generateParameters(usuariosSchemas.UsuarioFiltro),
+            parameters: [
+                {
+                    name: "nome",
+                    in: "query",
+                    description: "Filtrar por nome do usuário (busca parcial, case-insensitive)",
+                    required: false,
+                    schema: {
+                        type: "string",
+                        minLength: 1
+                    }
+                },
+                {
+                    name: "ativo",
+                    in: "query",
+                    description: "Filtrar por status ativo/inativo do usuário",
+                    required: false,
+                    schema: {
+                        type: "string",
+                        enum: ["true", "false"]
+                    }
+                },
+                {
+                    name: "campus",
+                    in: "query",
+                    description: "Filtrar por campus do usuário (busca parcial, case-insensitive)",
+                    required: false,
+                    schema: {
+                        type: "string",
+                        minLength: 1
+                    }
+                },
+                {
+                    name: "page",
+                    in: "query",
+                    description: "Número da página para paginação",
+                    required: false,
+                    schema: {
+                        type: "integer",
+                        minimum: 1,
+                        default: 1
+                    }
+                },
+                {
+                    name: "limite",
+                    in: "query",
+                    description: "Limite de itens por página",
+                    required: false,
+                    schema: {
+                        type: "integer",
+                        minimum: 1,
+                        maximum: 100,
+                        default: 10
+                    }
+                }
+            ],
             responses: {
                 200: commonResponses[200](usuariosSchemas.UsuarioListagem),
                 400: commonResponses[400](),

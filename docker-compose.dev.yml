@@ -15,9 +15,6 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: npx nodemon --legacy-watch server.js
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - minio
 

@@ -195,8 +195,7 @@ const campusPaths = {
           "description": "ID do campus",
           "schema": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "507f1f77bcf86cd799439011"
+            "pattern": "^[0-9a-fA-F]{24}$"
           }
         }
       ],
@@ -264,8 +263,7 @@ const campusPaths = {
           "description": "ID do campus",
           "schema": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "507f1f77bcf86cd799439011"
+            "pattern": "^[0-9a-fA-F]{24}$"
           }
         }
       ],
@@ -343,8 +341,7 @@ const campusPaths = {
           "description": "ID do campus",
           "schema": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "507f1f77bcf86cd799439011"
+            "pattern": "^[0-9a-fA-F]{24}$"
           }
         }
       ],
@@ -422,8 +419,7 @@ const campusPaths = {
           "description": "ID do campus",
           "schema": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "507f1f77bcf86cd799439011"
+            "pattern": "^[0-9a-fA-F]{24}$"
           }
         }
       ],

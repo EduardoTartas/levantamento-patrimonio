@@ -1,7 +1,9 @@
 import authPaths from "../paths/auth.js";
 import usuariosPaths from "../paths/usuarios.js";
+import salasPaths from "../paths/salas.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
+import salasSchemas from "../schemas/salasSchema.js";
 
 // Função para definir as URLs do servidor dependendo do ambiente
 const getServersInCorrectOrder = () => {
@@ -38,13 +40,18 @@ const getSwaggerOptions = () => {
                     description: "Rotas para gestão de usuários"
                 },
                 {
+                    name: "Salas",
+                    description: "Rotas para consulta de salas"
+                },
+                {
                     name: "Campus",
                     description: "Rotas para gestão de campus"
                 }
             ],
             paths: {
                 ...authPaths,
-                ...usuariosPaths
+                ...usuariosPaths,
+                ...salasPaths
             },
             components: {
                 securitySchemes: {
@@ -56,7 +63,8 @@ const getSwaggerOptions = () => {
                 },
                 schemas: {
                     ...authSchemas,
-                    ...usuariosSchemas
+                    ...usuariosSchemas,
+                    ...salasSchemas
                 }
             },
             security: [{

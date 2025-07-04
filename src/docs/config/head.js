@@ -1,9 +1,11 @@
 import authPaths from "../paths/auth.js";
 import usuariosPaths from "../paths/usuarios.js";
 import campusPaths from "../paths/campus.js";
+import inventariosPaths from "../paths/inventarios.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import campusSchemas from "../schemas/campusSchema.js";
+import inventariosSchemas from "../schemas/inventarioSchema.js";
 
 // Função para definir as URLs do servidor dependendo do ambiente
 const getServersInCorrectOrder = () => {
@@ -42,12 +44,17 @@ const getSwaggerOptions = () => {
                 {
                     name: "Campus",
                     description: "Rotas para gestão de campus"
+                },
+                {
+                    name: "Inventários",
+                    description: "Rotas para gestão de inventários"
                 }
             ],
             paths: {
                 ...authPaths,
                 ...usuariosPaths,
-                ...campusPaths
+                ...campusPaths,
+                ...inventariosPaths
             },
             components: {
                 securitySchemes: {
@@ -60,7 +67,8 @@ const getSwaggerOptions = () => {
                 schemas: {
                     ...authSchemas,
                     ...usuariosSchemas,
-                    ...campusSchemas
+                    ...campusSchemas,
+                    ...inventariosSchemas
                 }
             },
             security: [{

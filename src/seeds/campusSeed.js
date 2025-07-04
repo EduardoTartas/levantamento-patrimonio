@@ -1,21 +1,20 @@
-import fakerbr from "faker-br";
-import Campus  from "../models/Campus.js";
-// import DbConnect from "../config/dbConnect.js";
+import { faker } from "@faker-js/faker";
+import Campus from "../models/Campus.js";
 
 export default async function campusSeed() {
     // Deleta todos os campus existentes no banco de dados
     await Campus.deleteMany({});
 
-    // Gera 25 campus
+    // Gera 10 campus
     for (let i = 0; i < 10; i++) {
         const campus = {
-            nome: fakerbr.lorem.word(),
-            telefone: fakerbr.phone.phoneNumber().toString(),
-            cidade: fakerbr.address.city(),
-            bairro: fakerbr.lorem.word(15),
-            rua: fakerbr.address.streetName().toString(),
-            numeroResidencia: fakerbr.address.streetAddress().toString(),
-            status: Math.random() < 0.5,
+            nome: faker.company.name(),
+            telefone: faker.phone.number(),
+            cidade: faker.location.city(),
+            bairro: faker.location.secondaryAddress(),
+            rua: faker.location.street(),
+            numeroResidencia: faker.location.streetAddress(),
+            status: faker.datatype.boolean(),
         };
 
         await Campus.create(campus);

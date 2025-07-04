@@ -27,7 +27,7 @@ class BemFilterBuilder {
         if (!tombo) return this;
         
         const tomboEscaped = this.escapeRegex(tombo);
-        this.filtros.tombo = tomboEscaped;
+        this.filtros.tombo = { $regex: tomboEscaped, $options: "i" };
         
         return this;
     }    

@@ -34,7 +34,7 @@ class ImportacaoService {
                 descricaoCompleta: fields[2] || '',
                 localizacao: fields[4] || '',
                 valor: fields[10] || '0',
-                tombo: fields[15] || '',
+                tombo: fields[20] || '',
                 cpfResponsavel: fields[len - 7] || '',
                 nomeResponsavel: fields[len - 6] || 'Responsável não informado',
             };

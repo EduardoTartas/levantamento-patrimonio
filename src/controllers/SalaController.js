@@ -1,5 +1,5 @@
 import SalaService from '../services/SalaService.js';
-import { CommonResponse, CustomError, HttpStatusCodes} from '../utils/helpers/index.js';
+import { CommonResponse } from '../utils/helpers/index.js';
 import { SalaQuerySchema, SalaIdSchema } from '../utils/validators/schemas/zod/querys/SalaQuerySchema.js';
 
 class SalaController {

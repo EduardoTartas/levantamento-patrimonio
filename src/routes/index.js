@@ -1,8 +1,8 @@
 // BIBLIOTECAS
 import express from "express";
-//import swaggerJsDoc from "swagger-jsdoc";
-//import swaggerUI from "swagger-ui-express";
-//import getSwaggerOptions from "../docs/config/head.js";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUI from "swagger-ui-express";
+import getSwaggerOptions from "../docs/config/head.js";
 import dotenv from "dotenv";
 
 // MIDDLEWARES
@@ -31,11 +31,8 @@ const routes = (app) => {
     });
 
     // Configuração do Swagger e criação da rota /docs
-    /*const swaggerDocs = swaggerJsDoc(getSwaggerOptions());
-    app.use(swaggerUI.serve);
-    app.get("/docs", (req, res, next) => {
-        swaggerUI.setup(swaggerDocs)(req, res, next);
-    });*/
+    const swaggerDocs = swaggerJsDoc(getSwaggerOptions());
+    app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
     app.use(express.json(),
     

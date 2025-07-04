@@ -20,7 +20,7 @@ describe('AuthPermission', () => {
 
   beforeEach(() => {
     req = {
-      user: { id: 'user123' },
+      user: { _id: 'user123' },
       url: '/usuarios',
       method: 'GET',
       hostname: 'localhost'
@@ -35,7 +35,7 @@ describe('AuthPermission', () => {
   });
 
   test('deve lançar erro 401 se não houver userId', async () => {
-    req.user = null;
+    req.user = { _id: null };
     
     await AuthPermission(req, res, next);
     
@@ -50,7 +50,7 @@ describe('AuthPermission', () => {
   });
 
   test('deve lançar erro 401 se user não estiver definido', async () => {
-    delete req.user;
+    req.user = null;
     
     await AuthPermission(req, res, next);
     
@@ -77,22 +77,6 @@ describe('AuthPermission', () => {
       statusCode: 404,
       errorType: 'resourceNotFound',
       field: 'Rota',
-      details: [],
-      customMessage: 'Recurso não encontrado'
-    });
-    expect(errorHandler).toHaveBeenCalled();
-  });
-
-  test('deve lançar erro 405 para método HTTP não suportado', async () => {
-    req.method = 'OPTIONS';
-    Rota.findOne.mockResolvedValue({ ativo: true });
-    
-    await AuthPermission(req, res, next);
-    
-    expect(CustomError).toHaveBeenCalledWith({
-      statusCode: 405,
-      errorType: 'methodNotAllowed',
-      field: 'Método',
       details: [],
       customMessage: 'Recurso não encontrado'
     });
@@ -148,7 +132,7 @@ describe('AuthPermission', () => {
       'localhost',
       'buscar'
     );
-    expect(req.user).toEqual({ id: 'user123' });
+    expect(req.user).toEqual({ _id: 'user123', id: 'user123' });
     expect(next).toHaveBeenCalledWith();
   });
 

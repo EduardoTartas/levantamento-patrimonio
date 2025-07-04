@@ -194,6 +194,20 @@ describe('Modelo de Bem - Criação (Conforme Schema Mongoose)', () => {
         await expect(bem2.save()).rejects.toThrow(/duplicate key/);
     });
 
+    it('deve permitir bens com tombo apenas com espaços (função unique)', async () => {
+        const bemData1 = { ...baseValidBemData(), tombo: '   ' };
+        const bemData2 = { ...baseValidBemData(), nome: 'Cadeira de Escritório', tombo: '  ' };
+
+        const bem1 = new Bem(bemData1);
+        const bem2 = new Bem(bemData2);
+
+        await bem1.save();
+        await bem2.save();
+
+        const savedBems = await Bem.find({ tombo: { $exists: true } });
+        expect(savedBems).toHaveLength(2);
+    });
+
     it('não deve permitir bens com mesmo tombo não vazio', async () => {
         const bemData1 = { ...baseValidBemData(), tombo: 'TOM123' };
         const bemData2 = { ...baseValidBemData(), nome: 'Cadeira de Escritório', tombo: 'TOM123' };

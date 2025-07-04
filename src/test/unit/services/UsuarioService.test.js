@@ -1,12 +1,16 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import UsuarioService from "@services/UsuarioService.js";
 import UsuarioRepository from "@repositories/UsuarioRepository.js";
 import CampusService from "@services/CampusService.js";
+import Usuario from "@models/Usuario.js";
 import { CustomError, HttpStatusCodes, messages } from "@utils/helpers/index.js";
 
 jest.mock("@repositories/UsuarioRepository.js");
 jest.mock("@services/CampusService.js");
 jest.mock("bcrypt");
+jest.mock("jsonwebtoken");
+jest.mock("@models/Usuario.js");
 
 jest.mock("@utils/SendMail.js", () => ({
     enviaEmail: jest.fn().mockResolvedValue({ 
@@ -349,6 +353,83 @@ describe("UsuarioService", () => {
             expect(mockCustomError).toHaveBeenCalledWith(expect.objectContaining({
                  customMessage: messages.error.resourceNotFound("Usuário")
             }));
+        });
+    });
+
+    describe("cadastrarSenha", () => {
+        const validToken = "validToken123";
+        const validSenha = "novaSenha123";
+        const mockDecodedToken = { email: "test@email.com" };
+        const mockUsuario = {
+            email: "test@email.com",
+            senhaToken: validToken,
+            senhaTokenExpira: new Date(Date.now() + 3600000),
+            save: jest.fn().mockResolvedValue()
+        };
+
+        beforeEach(() => {
+            process.env.JWT_SECRET = "testSecret";
+            jwt.verify.mockReturnValue(mockDecodedToken);
+            Usuario.findOne.mockReturnValue({
+                select: jest.fn().mockResolvedValue(mockUsuario)
+            });
+            bcrypt.hash.mockResolvedValue("hashedPassword");
+        });
+
+        it("deve cadastrar senha com sucesso", async () => {
+            const result = await usuarioService.cadastrarSenha(validToken, validSenha);
+
+            expect(jwt.verify).toHaveBeenCalledWith(validToken, "testSecret");
+            expect(Usuario.findOne).toHaveBeenCalledWith({ email: mockDecodedToken.email });
+            expect(bcrypt.hash).toHaveBeenCalledWith(validSenha, 10);
+            expect(mockUsuario.save).toHaveBeenCalled();
+            expect(result).toEqual({ mensagem: "Senha cadastrada com sucesso!" });
+        });
+
+        it("deve lançar erro se token for inválido", async () => {
+            jwt.verify.mockImplementation(() => {
+                throw new Error("Token inválido");
+            });
+
+            await expect(usuarioService.cadastrarSenha("invalidToken", validSenha))
+                .rejects.toThrow("Erro ao cadastrar senha.");
+        });
+
+        it("deve lançar erro se usuário não for encontrado", async () => {
+            Usuario.findOne.mockReturnValue({
+                select: jest.fn().mockResolvedValue(null)
+            });
+
+            await expect(usuarioService.cadastrarSenha(validToken, validSenha))
+                .rejects.toThrow("Erro ao cadastrar senha.");
+        });
+
+        it("deve lançar erro se token não conferir", async () => {
+            const mockUsuarioComTokenDiferente = {
+                ...mockUsuario,
+                senhaToken: "tokenDiferente"
+            };
+
+            Usuario.findOne.mockReturnValue({
+                select: jest.fn().mockResolvedValue(mockUsuarioComTokenDiferente)
+            });
+
+            await expect(usuarioService.cadastrarSenha(validToken, validSenha))
+                .rejects.toThrow("Erro ao cadastrar senha.");
+        });
+
+        it("deve lançar erro se token estiver expirado", async () => {
+            const mockUsuarioTokenExpirado = {
+                ...mockUsuario,
+                senhaTokenExpira: new Date(Date.now() - 3600000)
+            };
+
+            Usuario.findOne.mockReturnValue({
+                select: jest.fn().mockResolvedValue(mockUsuarioTokenExpirado)
+            });
+
+            await expect(usuarioService.cadastrarSenha(validToken, validSenha))
+                .rejects.toThrow("Erro ao cadastrar senha.");
         });
     });
 });

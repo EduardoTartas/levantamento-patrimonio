@@ -24,13 +24,34 @@ const usuariosSchemas = {
   UsuarioFiltro: {
     type: "object",
     properties: {
-      nome: usuarioJsonSchema.properties.nome,
-      email: usuarioJsonSchema.properties.email,
-      cpf: usuarioJsonSchema.properties.cpf,
-      cargo: usuarioJsonSchema.properties.cargo,
-      status: usuarioJsonSchema.properties.status,
-      campus: campusJsonSchema.properties.nome,
-    }
+      nome: {
+        type: "string",
+        description: "Filtrar por nome do usuário (busca parcial, case-insensitive)"
+      },
+      ativo: {
+        type: "string",
+        enum: ["true", "false"],
+        description: "Filtrar por status ativo/inativo do usuário"
+      },
+      campus: {
+        type: "string",
+        description: "Filtrar por campus do usuário (busca parcial, case-insensitive)"
+      },
+      page: {
+        type: "integer",
+        minimum: 1,
+        default: 1,
+        description: "Número da página para paginação"
+      },
+      limite: {
+        type: "integer",
+        minimum: 1,
+        maximum: 100,
+        default: 10,
+        description: "Limite de itens por página"
+      }
+    },
+    description: "Schema para filtro de usuários"
   },
   UsuarioListagem: {
     ...deepCopy(usuarioJsonSchema),

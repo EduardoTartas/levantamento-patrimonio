@@ -112,5 +112,18 @@ const levantamentoSchemas = {
   }
 };
 
+const removalMapping = {
+  LevantamentoListagem: [],
+  LevantamentoDetalhes: [],
+  LevantamentoPost: ['createdAt', 'updatedAt', '__v', '_id'],
+  LevantamentoPutPatch: ['createdAt', 'updatedAt', '__v', '_id']
+}
+
+Object.entries(removalMapping).forEach(([schemaKey, fields]) => {
+  if (levantamentoSchemas[schemaKey]) {
+    removeFieldsRecursively(levantamentoSchemas[schemaKey], fields);
+  }
+});
+
 
 export default levantamentoSchemas;

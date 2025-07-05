@@ -125,5 +125,15 @@ Object.entries(removalMapping).forEach(([schemaKey, fields]) => {
   }
 });
 
+const levantamentoMongooseSchema = Levantamento.schema;
+
+const addExamples = async () => {
+  levantamentoSchemas.LevantamentoListagem.example = await generateExample(levantamentoSchemas.LevantamentoListagem, null, levantamentoMongooseSchema);
+  levantamentoSchemas.LevantamentoDetalhes.example = await generateExample(levantamentoSchemas.LevantamentoDetalhes, null, levantamentoMongooseSchema);
+  levantamentoSchemas.LevantamentoPost.example = await generateExample(levantamentoSchemas.LevantamentoPost, null, levantamentoMongooseSchema);
+  levantamentoSchemas.LevantamentoPutPatch.example = await generateExample(levantamentoSchemas.LevantamentoPutPatch, null, levantamentoMongooseSchema);
+};
+
+addExamples().catch(console.error);
 
 export default levantamentoSchemas;

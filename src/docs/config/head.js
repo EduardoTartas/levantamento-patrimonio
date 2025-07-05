@@ -45,17 +45,17 @@ const getSwaggerOptions = () => {
                     description: "Rotas para gestão de usuários"
                 },
                 {
-                    name: "Salas",
-                    description: "Rotas para consulta de salas"
-                },
-                {
                     name: "Campus",
                     description: "Rotas para gestão de campus"
                 },
                 {
                     name: "Inventários",
                     description: "Rotas para gestão de inventários"
-                }
+                },
+                {
+                    name: "Salas",
+                    description: "Rotas para consulta de salas"
+                },
             ],
             paths: {
                 ...authPaths,

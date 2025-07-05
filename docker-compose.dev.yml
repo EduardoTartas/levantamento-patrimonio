@@ -33,6 +33,3 @@ services:
       - MINIO_SERVER_URL=${MINIO_PUBLIC_URL} 
       - MINIO_BROWSER_REDIRECT_URL=http://localhost:${MINIO_CONSOLE_PORT} 
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
-
-volumes:
-  mongodb-data:

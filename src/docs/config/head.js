@@ -3,12 +3,14 @@ import usuariosPaths from "../paths/usuarios.js";
 
 import campusPaths from "../paths/campus.js";
 import inventariosPaths from "../paths/inventarios.js";
+import importacaoPaths from "../paths/importacao.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import campusSchemas from "../schemas/campusSchema.js";
 import inventariosSchemas from "../schemas/inventarioSchema.js";
 import salasSchemas from "../schemas/salasSchema.js";
 import salasPaths from "../paths/salas.js";
+import importacaoSchemas from "../schemas/importacaoSchema.js";
 
 // Função para definir as URLs do servidor dependendo do ambiente
 const getServersInCorrectOrder = () => {
@@ -53,6 +55,11 @@ const getSwaggerOptions = () => {
                     description: "Rotas para gestão de inventários"
                 },
                 {
+                    name: "Importação",
+                    description: "Rotas para importação de bens via CSV"
+                },
+                {
+
                     name: "Salas",
                     description: "Rotas para consulta de salas"
                 },
@@ -62,7 +69,9 @@ const getSwaggerOptions = () => {
                 ...usuariosPaths,
                 ...campusPaths,
                 ...inventariosPaths,
-                ...salasPaths
+                ...salasPaths,
+                ...importacaoPaths,
+                
 
             },
             components: {
@@ -79,6 +88,8 @@ const getSwaggerOptions = () => {
                     ...campusSchemas,
                     ...inventariosSchemas,
                     ...salasSchemas,
+                    ...importacaoSchemas
+                    
                 }
             },
             security: [{

@@ -1,3 +1,5 @@
+import commonResponses from "../schemas/swaggerCommonResponses.js";
+
 const importacaoPaths = {
   "/csv/{campusId}": {
     post: {
@@ -77,36 +79,9 @@ const importacaoPaths = {
             },
           },
         },
-        400: {
-          description: "Requisição inválida ou arquivo CSV ausente/inválido.",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "../schemas/swaggerCommonResponses.js#/BadRequest"
-              }
-            }
-          }
-        },
-        401: {
-          description: "Token de autenticação ausente ou inválido.",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "../schemas/swaggerCommonResponses.js#/Unauthorized"
-              }
-            }
-          }
-        },
-        500: {
-          description: "Erro interno do servidor.",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "../schemas/swaggerCommonResponses.js#/InternalServerError"
-              }
-            }
-          }
-        }
+        400: commonResponses[400](),
+        401: commonResponses[401](),
+        500: commonResponses[500]()
       },
       security: [{ bearerAuth: [] }],
     },

@@ -73,7 +73,7 @@ const salasSchemas = {
 };
 
 // Gera exemplos para cada schema
-await (async () => {
+(async () => {
     for (const [key, schema] of Object.entries(salasSchemas)) {
         if (schema.type === 'object') {
             const example = await generateExample(schema, key, Sala.schema);

@@ -63,7 +63,7 @@ const bemSchemas = {
     }
 };
 
-await (async () => {
+(async () => {
     for (const [key, schema] of Object.entries(bemSchemas)) {
         if (schema.type === 'object') {
             const example = await generateExample(schema, key, Bem.schema);

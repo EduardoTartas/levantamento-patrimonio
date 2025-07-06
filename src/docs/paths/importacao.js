@@ -1,5 +1,5 @@
 const importacaoPaths = {
-  "/importacao/csv/{campusId}": {
+  "/csv/{campusId}": {
     post: {
       tags: ["Importação"],
       summary: "Importar bens via arquivo CSV para um campus específico",

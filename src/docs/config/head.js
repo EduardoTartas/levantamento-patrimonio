@@ -1,13 +1,20 @@
 import authPaths from "../paths/auth.js";
 import usuariosPaths from "../paths/usuarios.js";
+
 import campusPaths from "../paths/campus.js";
 import inventariosPaths from "../paths/inventarios.js";
 import levantamentosPaths from "../paths/levantamentos.js";
+import importacaoPaths from "../paths/importacao.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import campusSchemas from "../schemas/campusSchema.js";
 import inventariosSchemas from "../schemas/inventarioSchema.js";
 import levantamentosSchemas from "../schemas/levantamentoSchema.js";
+import salasSchemas from "../schemas/salasSchema.js";
+import salasPaths from "../paths/salas.js";
+import bemPaths from "../paths/bem.js";
+import bemSchemas from "../schemas/bemSchema.js";
+import importacaoSchemas from "../schemas/importacaoSchema.js";
 
 // Função para definir as URLs do servidor dependendo do ambiente
 const getServersInCorrectOrder = () => {
@@ -52,16 +59,35 @@ const getSwaggerOptions = () => {
                     description: "Rotas para gestão de inventários"
                 },
                 {
+                    name: "Importação",
+                    description: "Rotas para importação de bens via CSV"
+                },
+                {
+                    name: "Salas",
+                    description: "Rotas para consulta de salas"
+                },
+                {
+                    name: "Bem",
+                    description: "Rotas para gestão de bens"
+                },
+                {
                     name: "Levantamentos",
                     description: "Rotas para gestão de levantamentos de patrimônio"
-                }
+                },
+                
             ],
             paths: {
                 ...authPaths,
                 ...usuariosPaths,
                 ...campusPaths,
                 ...inventariosPaths,
-                ...levantamentosPaths
+                ...importacaoPaths,
+                ...salasPaths,
+                ...bemPaths,
+                ...levantamentosPaths,
+                
+                
+
             },
             components: {
                 securitySchemes: {
@@ -76,7 +102,12 @@ const getSwaggerOptions = () => {
                     ...usuariosSchemas,
                     ...campusSchemas,
                     ...inventariosSchemas,
-                    ...levantamentosSchemas
+                    ...importacaoSchemas,
+                    ...salasSchemas,
+                    ...bemSchemas,
+                    ...levantamentosSchemas,
+                    
+                    
                 }
             },
             security: [{

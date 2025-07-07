@@ -15,9 +15,6 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: npx nodemon --legacy-watch server.js
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - minio
 
@@ -36,6 +33,3 @@ services:
       - MINIO_SERVER_URL=${MINIO_PUBLIC_URL} 
       - MINIO_BROWSER_REDIRECT_URL=http://localhost:${MINIO_CONSOLE_PORT} 
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
-
-volumes:
-  mongodb-data:

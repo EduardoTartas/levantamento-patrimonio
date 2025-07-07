@@ -17,7 +17,7 @@ Object.keys(HttpStatusCodes).forEach((statusKey) => {
                     type: "object",
                     properties: {
                         data: schemaRef
-                            ? { $ref: schemaRef }
+                            ? (typeof schemaRef === 'string' ? { $ref: schemaRef } : schemaRef)
                             : { type: "array", items: {}, example: [] },
                         message: { type: "string", example: message },
                         errors: {

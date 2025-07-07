@@ -3,12 +3,14 @@ import usuariosPaths from "../paths/usuarios.js";
 
 import campusPaths from "../paths/campus.js";
 import inventariosPaths from "../paths/inventarios.js";
+import relatorioPaths from "../paths/relatorios.js";
 import levantamentosPaths from "../paths/levantamentos.js";
 import importacaoPaths from "../paths/importacao.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import campusSchemas from "../schemas/campusSchema.js";
 import inventariosSchemas from "../schemas/inventarioSchema.js";
+import relatorioSchemas from "../schemas/relatorioSchema.js";
 import levantamentosSchemas from "../schemas/levantamentoSchema.js";
 import salasSchemas from "../schemas/salasSchema.js";
 import salasPaths from "../paths/salas.js";
@@ -74,7 +76,10 @@ const getSwaggerOptions = () => {
                     name: "Levantamentos",
                     description: "Rotas para gestão de levantamentos de patrimônio"
                 },
-                
+                {
+                    name: "Relatórios",
+                    description: "Rotas para geração de relatórios em PDF"
+                },
             ],
             paths: {
                 ...authPaths,
@@ -85,9 +90,7 @@ const getSwaggerOptions = () => {
                 ...salasPaths,
                 ...bemPaths,
                 ...levantamentosPaths,
-                
-                
-
+                ...relatorioPaths,
             },
             components: {
                 securitySchemes: {
@@ -106,8 +109,7 @@ const getSwaggerOptions = () => {
                     ...salasSchemas,
                     ...bemSchemas,
                     ...levantamentosSchemas,
-                    
-                    
+                    ...relatorioSchemas,
                 }
             },
             security: [{

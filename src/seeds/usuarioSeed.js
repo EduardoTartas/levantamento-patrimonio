@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import bcrypt from "bcrypt";
 import Campus from '../models/Campus.js';
 import Usuario from '../models/Usuario.js';
 
@@ -12,8 +13,23 @@ export default async function usuarioSeed() {
         return;
     }
 
-    // Deleta todos os usuários existentes no banco de dados (exceto admin)
-    await Usuario.deleteMany({ nome: { $ne: "admin" } });
+    await Usuario.deleteMany({});
+
+    const senhaAdmin = await bcrypt.hash("admin", 10);
+    const primeiroCampus = campusList[0];
+    
+    const adminUser = {
+        campus: primeiroCampus._id.toString(),
+        nome: "admin",
+        cpf: "00000000000",
+        email: "admin@admin.com",
+        senha: senhaAdmin,
+        cargo: "Funcionario Cpalm",
+        status: true
+    };
+
+    await Usuario.create(adminUser);
+    console.log("Usuário admin criado com sucesso.");
 
     // Gera 50 usuários
     for(let i = 0; i < 50; i++) {

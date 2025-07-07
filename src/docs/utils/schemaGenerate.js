@@ -33,6 +33,11 @@ export function isRefField(key, mongooseSchema) {
  * @param {mongoose.Schema|null} mongooseSchema - Schema do modelo do Mongoose para detectar referências (opcional).
  */
 export async function generateExample(schema, key = null, mongooseSchema = null) {
+  // Verifica se o schema existe
+  if (!schema || typeof schema !== 'object') {
+    return {};
+  }
+
   // Se já houver um exemplo definido no schema, retorna-o
   if (schema.example !== undefined) {
     return schema.example;

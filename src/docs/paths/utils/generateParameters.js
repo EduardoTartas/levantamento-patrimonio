@@ -18,9 +18,10 @@ export function generateParameters(schema, baseRef = '', parentKey = '') {
         in: 'query',
         required: false,
         schema: {
-          $ref: `${baseRef}/properties/${paramName}`
+          type: value.type || 'string',
+          description: value.description || `Filtro por ${paramName}`
         },
-        description: `Filtro por ${paramName}`
+        description: value.description || `Filtro por ${paramName}`
       });
     }
   }

@@ -3,11 +3,13 @@ import usuariosPaths from "../paths/usuarios.js";
 
 import campusPaths from "../paths/campus.js";
 import inventariosPaths from "../paths/inventarios.js";
+import levantamentosPaths from "../paths/levantamentos.js";
 import importacaoPaths from "../paths/importacao.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
 import campusSchemas from "../schemas/campusSchema.js";
 import inventariosSchemas from "../schemas/inventarioSchema.js";
+import levantamentosSchemas from "../schemas/levantamentoSchema.js";
 import salasSchemas from "../schemas/salasSchema.js";
 import salasPaths from "../paths/salas.js";
 import bemPaths from "../paths/bem.js";
@@ -61,7 +63,6 @@ const getSwaggerOptions = () => {
                     description: "Rotas para importação de bens via CSV"
                 },
                 {
-
                     name: "Salas",
                     description: "Rotas para consulta de salas"
                 },
@@ -69,6 +70,11 @@ const getSwaggerOptions = () => {
                     name: "Bem",
                     description: "Rotas para gestão de bens"
                 },
+                {
+                    name: "Levantamentos",
+                    description: "Rotas para gestão de levantamentos de patrimônio"
+                },
+                
             ],
             paths: {
                 ...authPaths,
@@ -78,6 +84,7 @@ const getSwaggerOptions = () => {
                 ...importacaoPaths,
                 ...salasPaths,
                 ...bemPaths,
+                ...levantamentosPaths,
                 
                 
 
@@ -98,6 +105,7 @@ const getSwaggerOptions = () => {
                     ...importacaoSchemas,
                     ...salasSchemas,
                     ...bemSchemas,
+                    ...levantamentosSchemas,
                     
                     
                 }

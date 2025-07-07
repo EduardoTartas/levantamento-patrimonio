@@ -16,7 +16,18 @@ services:
       - /usr/src/app/node_modules
     command: npx nodemon --legacy-watch server.js
     depends_on:
+      - mongo
       - minio
+
+  mongo:
+    image: mongo:8
+    container_name: levantamento-mongodb-dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data-dev:/data/db
+    command: mongod --quiet --logpath /dev/null
+    restart: always
 
   # Serviço do MinIO para armazenamento das fotos
   minio:
@@ -33,3 +44,6 @@ services:
       - MINIO_SERVER_URL=${MINIO_PUBLIC_URL} 
       - MINIO_BROWSER_REDIRECT_URL=http://localhost:${MINIO_CONSOLE_PORT} 
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+
+volumes:
+  mongo-data-dev:

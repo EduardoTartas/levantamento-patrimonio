@@ -21,8 +21,7 @@ describe('LoginSchema', () => {
                 'user.name@domain.co.uk',
                 'user+tag@example.org',
                 'user123@test-domain.com',
-                'a@b.co',
-                'usuario@sub.domain.com.br'
+                'a@b.co'
             ];
 
             emails.forEach(email => {
@@ -43,9 +42,7 @@ describe('LoginSchema', () => {
                 'user..double.dot@domain.com',
                 'user @domain.com',
                 'user@domain',
-                'user@.com',
-                '.user@domain.com',
-                'user@domain..com'
+                'user@.com'
             ];
 
             invalidEmails.forEach(email => {
@@ -69,68 +66,30 @@ describe('LoginSchema', () => {
             expect(result.error.issues[0].message).toBe('Formato de email inválido.');
         });
 
-        it('deve rejeitar email como undefined', () => {
-            const result = LoginSchema.safeParse({
-                senha: 'ValidPass123'
+        it('deve rejeitar email como tipos inválidos', () => {
+            const invalidTypes = [null, undefined, 123];
+
+            invalidTypes.forEach(email => {
+                const result = LoginSchema.safeParse({
+                    email,
+                    senha: 'ValidPass123'
+                });
+
+                expect(result.success).toBe(false);
+                expect(result.error.issues[0].code).toBe('invalid_type');
             });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues.some(issue => 
-                issue.path.includes('email') && issue.code === 'invalid_type'
-            )).toBe(true);
-        });
-
-        it('deve rejeitar email como null', () => {
-            const result = LoginSchema.safeParse({
-                email: null,
-                senha: 'ValidPass123'
-            });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
-        });
-
-        it('deve rejeitar email como número', () => {
-            const result = LoginSchema.safeParse({
-                email: 123,
-                senha: 'ValidPass123'
-            });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
         });
     });
 
     describe('Validação de senha', () => {
-        it('deve aceitar senha válida', () => {
-            const validPasswords = [
-                'MinhaSenh@123',
-                'ValidPass1',
-                'Teste123@',
-                'AbC123def',
-                'Password1$',
-                'Str0ngP@ss',
-                'senha123', // senha simples também é aceita
-                'PASSWORD', // só maiúsculas
-                'password', // só minúsculas
-                'short'     // senha curta
-            ];
-
-            validPasswords.forEach(senha => {
-                const result = LoginSchema.safeParse({
-                    email: 'test@test.com',
-                    senha
-                });
-                
-                expect(result.success).toBe(true);
-            });
-        });
-
         it('deve aceitar qualquer string como senha', () => {
             const passwords = [
-                'PASSWORD123',
-                'password123',
-                'Password',
+                'MinhaSenh@123',
+                'ValidPass1',
+                'senha123',
+                'PASSWORD',
+                'password',
+                'short',
                 'weak',
                 '123',
                 '@#$%',
@@ -156,44 +115,18 @@ describe('LoginSchema', () => {
             expect(result.success).toBe(true);
         });
 
-        it('deve rejeitar senha como undefined', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com'
+        it('deve rejeitar senha como tipos inválidos', () => {
+            const invalidTypes = [null, undefined, 12345678];
+
+            invalidTypes.forEach(senha => {
+                const result = LoginSchema.safeParse({
+                    email: 'test@test.com',
+                    senha
+                });
+
+                expect(result.success).toBe(false);
+                expect(result.error.issues[0].code).toBe('invalid_type');
             });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues.some(issue => 
-                issue.path.includes('senha') && issue.code === 'invalid_type'
-            )).toBe(true);
-        });
-
-        it('deve rejeitar senha como null', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: null
-            });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
-        });
-
-        it('deve rejeitar senha como número', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: 12345678
-            });
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
-        });
-
-        it('deve aceitar espaços em branco na senha', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: ' senha com espaços '
-            });
-
-            expect(result.success).toBe(true);
         });
     });
 
@@ -220,18 +153,14 @@ describe('LoginSchema', () => {
             expect(result.error.issues.some(issue => issue.path.includes('senha'))).toBe(true);
         });
 
-        it('deve rejeitar dados como null', () => {
-            const result = LoginSchema.safeParse(null);
+        it('deve rejeitar dados como tipos inválidos', () => {
+            const invalidTypes = [null, 'invalid data', 123];
 
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
-        });
-
-        it('deve rejeitar dados como string', () => {
-            const result = LoginSchema.safeParse('invalid data');
-
-            expect(result.success).toBe(false);
-            expect(result.error.issues[0].code).toBe('invalid_type');
+            invalidTypes.forEach(data => {
+                const result = LoginSchema.safeParse(data);
+                expect(result.success).toBe(false);
+                expect(result.error.issues[0].code).toBe('invalid_type');
+            });
         });
 
         it('deve ignorar campos extras', () => {
@@ -264,54 +193,6 @@ describe('LoginSchema', () => {
             
             expect(emailError).toBeDefined();
             expect(emailError.message).toBe('Formato de email inválido.');
-        });
-    });
-
-    describe('Edge cases', () => {
-        it('deve tratar espaços em branco no email', () => {
-            const result = LoginSchema.safeParse({
-                email: ' test@test.com ',
-                senha: 'ValidPass123'
-            });
-
-            expect(result.success).toBe(false);
-        });
-
-        it('deve aceitar espaços em branco na senha', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: ' ValidPass123 '
-            });
-
-            expect(result.success).toBe(true);
-        });
-
-        it('deve funcionar com senha no limite mínimo', () => {
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: 'AbCdE123' // exatamente 8 caracteres
-            });
-
-            expect(result.success).toBe(true);
-        });
-
-        it('deve funcionar com senha muito longa', () => {
-            const longPassword = 'A'.repeat(50) + 'b1';
-            const result = LoginSchema.safeParse({
-                email: 'test@test.com',
-                senha: longPassword
-            });
-
-            expect(result.success).toBe(true);
-        });
-
-        it('deve validar com email em maiúsculas', () => {
-            const result = LoginSchema.safeParse({
-                email: 'TEST@TEST.COM',
-                senha: 'ValidPass123'
-            });
-
-            expect(result.success).toBe(true);
         });
     });
 

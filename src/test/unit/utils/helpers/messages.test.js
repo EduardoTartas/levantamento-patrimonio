@@ -2,13 +2,9 @@ import messages from '@utils/helpers/messages.js';
 
 describe('Messages Helper', () => {
     describe('Informative Messages', () => {
-        test('deve retornar mensagem de boas-vindas', () => {
+        test('deve retornar mensagens informativas básicas', () => {
             expect(messages.info.welcome).toBe("Bem-vindo à nossa aplicação!");
-        });
-
-        test('deve retornar mensagem de usuário logado', () => {
-            const username = 'Gilberto';
-            expect(messages.info.userLoggedIn(username)).toBe(`Usuário ${username} logado com sucesso.`);
+            expect(messages.info.userLoggedIn('Gilberto')).toBe("Usuário Gilberto logado com sucesso.");
         });
     });
 
@@ -18,298 +14,101 @@ describe('Messages Helper', () => {
         });
     });
 
+    describe('Authorized Messages', () => {
+        test('deve retornar mensagem de autorização padrão', () => {
+            expect(messages.authorized.default).toBe("autorizado");
+        });
+    });
+
     describe('Error Messages', () => {
-        test('deve retornar mensagem de erro padrão', () => {
+        test('deve retornar mensagens de erro básicas', () => {
             expect(messages.error.default).toBe("Ocorreu um erro ao processar a solicitação.");
-        });
-
-        test('deve retornar mensagem de erro de servidor (anteriormente serverError)', () => {
-            const msg = messages.error.internalServerError ? messages.error.internalServerError() : messages.error.internalServerErrorTextIfNoArg;
-            expect(msg).toBe("Erro interno no servidor ao processar undefined.");
-        });
-
-        test('deve retornar mensagem de erro de validação (genérica)', () => {
-            expect(messages.error.validationErrorText || messages.error.validationError)
-                .toBe("Erro de validação. Verifique os dados fornecidos e tente novamente.");
-        });
-
-        test('deve retornar mensagem de requisição inválida', () => {
+            expect(messages.error.serverError).toBe("Erro interno do servidor. Tente novamente mais tarde.");
+            expect(messages.error.validationError).toBe("Erro de validação. Verifique os dados fornecidos e tente novamente.");
             expect(messages.error.invalidRequest).toBe("Requisição inválida. Verifique os parâmetros fornecidos.");
-        });
-
-        test('deve retornar mensagem de acesso não autorizado', () => {
             expect(messages.error.unauthorizedAccess).toBe("Acesso não autorizado. Faça login para continuar.");
-        });
-
-        test('deve retornar mensagem de URL inválida', () => {
             expect(messages.error.invalidURL).toBe("URL inválida. Verifique a URL fornecida.");
-        });
-
-        test('deve retornar mensagem de operação não suportada', () => {
             expect(messages.error.unsupportedOperation).toBe("Operação não suportada neste contexto.");
-        });
-
-        test('deve retornar mensagem de erro ao analisar os dados', () => {
             expect(messages.error.dataParsingError).toBe("Erro ao analisar os dados recebidos.");
-        });
-
-        test('deve retornar mensagem de erro ao comunicar com serviço externo', () => {
             expect(messages.error.externalServiceError).toBe("Erro ao se comunicar com um serviço externo.");
-        });
-
-        test('deve retornar mensagem de chave de API inválida', () => {
             expect(messages.error.invalidApiKey).toBe("Chave de API inválida.");
-        });
-
-        test('deve retornar mensagem de operação cancelada pelo usuário', () => {
             expect(messages.error.operationCanceled).toBe("Operação cancelada pelo usuário.");
         });
 
-        test('deve retornar mensagem de recurso não encontrado (específico)', () => {
-            const fieldName = 'Recurso';
-            expect(messages.error.resourceNotFound(fieldName)).toBe(`Recurso não encontrado em ${fieldName}.`);
-        });
-
-        test('deve retornar mensagem de página não disponível', () => {
-            const page = 'Página';
-            expect(messages.error.pageIsNotAvailable(page)).toBe(`A página ${page} não está disponível.`);
-        });
-
-        test('deve retornar mensagem de página sem dados', () => {
-            const page = 'Página';
-            expect(messages.error.pageNotContainsData(page)).toBe(`A página ${page} não contém dados.`);
-        });
-
-        test('deve retornar mensagem de entrada duplicada (com fieldName)', () => {
-            const fieldName = 'CampoX';
-            expect(messages.error.duplicateEntry(fieldName)).toBe(`Já existe um registro com o dado informado no(s) campo(s) ${fieldName}.`);
-        });
-
-        test('deve retornar mensagem de recurso em uso', () => {
-            const fieldName = 'RecursoY';
-            expect(messages.error.resourceInUse(fieldName)).toBe(`Recurso em uso em ${fieldName}.`);
-        });
-
-        test('deve retornar mensagem de erro interno do servidor (com toMatch)', () => {
-            const msg = messages.error.internalServerError ? messages.error.internalServerError() : messages.error.internalServerErrorTextIfNoArg;
-            expect(msg).toMatch(/servidor/i);
-        });
-
-        test('deve retornar mensagem de erro de validação (com toMatch)', () => {
-            expect(messages.error.validationErrorText || messages.error.validationError).toMatch(/validação/i);
-        });
-
-        test('deve retornar mensagem de acesso não autorizado (com toMatch)', () => {
-            expect(messages.error.unauthorizedAccess).toMatch(/não autorizado/i);
-        });
-
-        test('deve retornar mensagem de requisição inválida (com toMatch)', () => {
-            expect(messages.error.invalidRequest).toMatch(/Requisição inválida/);
-        });
-
-        test('deve retornar mensagem de recurso não encontrado (com toMatch)', () => {
-            expect(messages.error.resourceNotFound('Categoria')).toMatch(/Categoria/i);
-        });
-
-        test('deve retornar mensagem de permissão negada (com toMatch)', () => {
-            const permissionMsg = messages.error.forbidden ? messages.error.forbidden('Ação Restrita') : messages.error.permissionDeniedText || "Permissão negada para esta Ação Restrita.";
-            expect(permissionMsg).toMatch(/Ação Restrita|Permissão negada/i);
-        });
-
-        test('deve retornar mensagem de entrada duplicada (com toMatch)', () => {
-            expect(messages.error.duplicateEntry('Identificador')).toMatch(/Identificador/i);
-        });
-
-        test('deve retornar mensagem de erro de servidor com recurso', () => {
-            const resource = 'Usuário';
-            const expectedMessage = `Erro interno no servidor ao processar ${resource}.`;
-            const actualMessage = messages.error.internalServerErrorProcessing
-                ? messages.error.internalServerErrorProcessing(resource)
-                : messages.error.internalServerError(resource);
-
-            expect(actualMessage).toBe(expectedMessage);
-        });
-
-        test('deve retornar mensagem de erro de validação com campo', () => {
-            const field = 'email';
-            const expectedMessage = `Erro de validação no campo ${field}.`;
-            const actualMessage = messages.error.fieldValidationError
-                ? messages.error.fieldValidationError(field)
-                : (messages.error.validationErrorWithField ? messages.error.validationErrorWithField(field) : `Erro de validação no campo ${field}.`);
-
-            expect(actualMessage).toBe(expectedMessage);
+        test('deve retornar mensagens de erro com parâmetros', () => {
+            expect(messages.error.resourceNotFound('Recurso')).toBe("Recurso não encontrado em Recurso.");
+            expect(messages.error.duplicateEntry('CampoX')).toBe("Já existe um registro com o dado informado no(s) campo(s) CampoX.");
+            expect(messages.error.resourceInUse('RecursoY')).toBe("Recurso em uso em RecursoY.");
+            expect(messages.error.internalServerError('Usuário')).toBe("Erro interno no servidor ao processar Usuário.");
+            expect(messages.error.unauthorized('Operação')).toBe("Erro de autorização: Operação.");
+            expect(messages.error.resourceConflict('Recurso', 'Campo')).toBe("Conflito de recurso em Recurso contém Campo.");
+            expect(messages.error.pageIsNotAvailable('1')).toBe("A página 1 não está disponível.");
+            expect(messages.error.pageNotContainsData('2')).toBe("A página 2 não contém dados.");
+            expect(messages.error.authenticationError('Sistema')).toBe("Erro de autenticação em Sistema.");
+            expect(messages.error.permissionError('Acesso')).toBe("Erro de permissão em Acesso.");
         });
     });
 
     describe('Validation Messages', () => {
-        test('deve retornar mensagem de campo obrigatório', () => {
-            const fieldName = 'Campo';
-            expect(messages.validation.generic.fieldIsRequired(fieldName)).toBe(`O campo ${fieldName} é obrigatório.`);
+        test('deve retornar mensagens de validação genéricas', () => {
+            expect(messages.validation.generic.fieldIsRequired('Campo')).toBe("O campo Campo é obrigatório.");
+            expect(messages.validation.generic.fieldIsRepeated('Campo')).toBe("O campo Campo informado já está cadastrado.");
+            expect(messages.validation.generic.invalidInputFormat('Campo')).toBe("Formato de entrada inválido para o campo Campo.");
+            expect(messages.validation.generic.invalid('Campo')).toBe("Valor informado em Campo é inválido.");
+            expect(messages.validation.generic.notFound('Campo')).toBe("Valor informado para o campo Campo não foi encontrado.");
+            expect(messages.validation.generic.mustBeOneOf('Status', ['ativo', 'inativo'])).toBe("O campo Status deve ser um dos seguintes valores: ativo, inativo.");
         });
 
-        test('deve retornar mensagem de campo repetido', () => {
-            const fieldName = 'Campo';
-            expect(messages.validation.generic.fieldIsRepeated(fieldName)).toBe(`O campo ${fieldName} informado já está cadastrado.`);
+        test('deve retornar mensagens de validação para operações CRUD', () => {
+            expect(messages.validation.generic.resourceCreated('Recurso')).toBe("Recurso criado(a) com sucesso.");
+            expect(messages.validation.generic.resourceUpdated('Recurso')).toBe("Recurso atualizado(a) com sucesso.");
+            expect(messages.validation.generic.resourceDeleted('Recurso')).toBe("Recurso excluído(a) com sucesso.");
+            expect(messages.validation.generic.resourceAlreadyExists('Recurso')).toBe("Recurso já existe.");
         });
 
-        test('deve retornar mensagem de formato de entrada inválido', () => {
-            const fieldName = 'Campo';
-            expect(messages.validation.generic.invalidInputFormat(fieldName)).toBe(`Formato de entrada inválido para o campo ${fieldName}.`);
+        test('deve retornar mensagens de validação de referência', () => {
+            expect(messages.validation.reference.resourceWithReference('Usuário', 'Produto')).toBe("Usuário com referência em Produto. Exclusão impedida.");
         });
 
-        test('deve retornar mensagem de valor inválido', () => {
-            const fieldName = 'Campo';
-            expect(messages.validation.generic.invalid(fieldName)).toBe(`Valor informado em ${fieldName} é inválido.`);
-        });
-
-        test('deve retornar mensagem de valor não encontrado', () => {
-            const fieldName = 'Campo';
-            expect(messages.validation.generic.notFound(fieldName)).toBe(`Valor informado para o campo ${fieldName} não foi encontrado.`);
-        });
-
-        test('deve retornar mensagem de valor deve ser um dos especificados', () => {
-            const fieldName = 'Campo';
-            const values = ['Valor1', 'Valor2'];
-            expect(messages.validation.generic.mustBeOneOf(fieldName, values)).toBe(`O campo ${fieldName} deve ser um dos seguintes valores: ${values.join(", ")}.`);
-        });
-
-        test('deve retornar mensagem de recurso criado com sucesso', () => {
-            const fieldName = 'Recurso';
-            expect(messages.validation.generic.resourceCreated(fieldName)).toBe(`${fieldName} criado(a) com sucesso.`);
-        });
-
-        test('deve retornar mensagem de recurso atualizado com sucesso', () => {
-            const fieldName = 'Recurso';
-            expect(messages.validation.generic.resourceUpdated(fieldName)).toBe(`${fieldName} atualizado(a) com sucesso.`);
-        });
-
-        test('deve retornar mensagem de recurso excluído com sucesso', () => {
-            const fieldName = 'Recurso';
-            expect(messages.validation.generic.resourceDeleted(fieldName)).toBe(`${fieldName} excluído(a) com sucesso.`);
-        });
-
-        test('deve retornar mensagem de recurso já existente', () => {
-            const fieldName = 'Recurso';
-            expect(messages.validation.generic.resourceAlreadyExists(fieldName)).toBe(`${fieldName} já existe.`);
-        });
-
-        test('deve retornar mensagem de recurso com referência', () => {
-            const resource = 'Recurso';
-            const reference = 'Referência';
-            expect(messages.validation.reference.resourceWithReference(resource, reference)).toBe(`${resource} com referência em ${reference}. Exclusão impedida.`);
-        });
-
-        test('deve retornar mensagem de CPF inválido', () => {
+        test('deve retornar mensagens de validação customizadas', () => {
             expect(messages.validation.custom.invalidCPF.message).toBe("CPF inválido. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de CNPJ inválido', () => {
             expect(messages.validation.custom.invalidCNPJ.message).toBe("CNPJ inválido. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de CEP inválido', () => {
             expect(messages.validation.custom.invalidCEP.message).toBe("CEP inválido. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de número de telefone inválido', () => {
             expect(messages.validation.custom.invalidPhoneNumber.message).toBe("Número de telefone inválido. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de email inválido', () => {
             expect(messages.validation.custom.invalidMail.message).toBe("Email no formato inválido.");
-        });
-
-        test('deve retornar mensagem de ano inválido', () => {
             expect(messages.validation.custom.invalidYear.message).toBe("Ano inválido. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de data inválida', () => {
             expect(messages.validation.custom.invalidDate.message).toBe("Data inválida. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de quilometragem inicial inválida', () => {
             expect(messages.validation.custom.invalidKilometerInitial.message).toBe("Quilometragem inicial inválida.");
-        });
-
-        test('deve retornar mensagem de quilometragem inválida', () => {
             expect(messages.validation.custom.invalidKilometer.message).toBe("Quilometragem inválida.");
         });
 
-        test('deve retornar mensagem de data de início inválida (passada)', () => {
+        test('deve retornar mensagens de validação de data específicas', () => {
             expect(messages.validation.custom.invalidDatePast.message).toBe("Data do início deve ser uma data atual ou futura.");
-        });
-
-        test('deve retornar mensagem de data de conclusão inválida (futura)', () => {
             expect(messages.validation.custom.invalidDateFuture.message).toBe("A data de conclusão deve ser maior do que a data de início!");
-        });
-
-        test('deve retornar mensagem de data de início inválida (atual ou passada)', () => {
             expect(messages.validation.custom.invalidDateCurrent.message).toBe("Data do início deve ser uma data atual ou passada.");
-        });
-
-        test('deve retornar mensagem de vigência com período maior que 12 meses', () => {
             expect(messages.validation.custom.invalidDateMonths.message).toBe("A data final da vigência não pode ser um período maior que 12 meses após a data de início da vigência.");
-        });
-
-        test('deve retornar mensagem de data de nascimento inválida', () => {
             expect(messages.validation.custom.invalidDataNascimento.message).toBe("Data de nascimento deve ser uma data passada e maior que 18 anos.");
-        });
-
-        test('deve retornar mensagem de data de admissão inválida', () => {
             expect(messages.validation.custom.invalidDataAdmissao.message).toBe("Data de admissão deve ser uma data atual ou passada.");
-        });
-
-        test('deve retornar mensagem de ano/semestre inválido', () => {
             expect(messages.validation.custom.invalidYearSemester.message).toBe("Ano/semestre. Verifique o formato e tente novamente.");
-        });
-
-        test('deve retornar mensagem de data de início do semestre inválida', () => {
             expect(messages.validation.custom.invalidYearStartSemester.message).toBe("Data do início do semestre deve ser menor que a data fim de semestre.");
         });
     });
 
     describe('Authentication Messages', () => {
-        test('deve retornar mensagem de falha na autenticação', () => {
+        test('deve retornar mensagens de autenticação básicas', () => {
             expect(messages.auth.authenticationFailed).toBe("Falha na autenticação. Credenciais inválidas.");
-        });
-
-        test('deve retornar mensagem de usuário não encontrado', () => {
-            const userId = '123';
-            expect(messages.auth.userNotFound(userId)).toBe(`Usuário com ID ${userId} não encontrado.`);
-        });
-
-        test('deve retornar mensagem de permissão insuficiente', () => {
             expect(messages.auth.invalidPermission).toBe("Permissão insuficiente para executar a operação.");
-        });
-
-        test('deve retornar mensagem de entrada duplicada (auth)', () => {
-            const fieldName = 'NomeDeUsuario';
-            expect(messages.auth.duplicateEntry(fieldName)).toBe(`Já existe um registro com o mesmo ${fieldName}.`);
-        });
-
-        test('deve retornar mensagem de conta bloqueada', () => {
             expect(messages.auth.accountLocked).toBe("Conta bloqueada. Entre em contato com o suporte.");
-        });
-
-        test('deve retornar mensagem de token inválido', () => {
             expect(messages.auth.invalidToken).toBe("Token inválido. Faça login novamente.");
-        });
-
-        test('deve retornar mensagem de tempo de espera excedido', () => {
+            expect(messages.auth.invalidCredentials).toBe("Credenciais inválidas. Verifique seu usuário e senha.");
             expect(messages.auth.timeoutError).toBe("Tempo de espera excedido. Tente novamente mais tarde.");
-        });
-
-        test('deve retornar mensagem de erro de conexão com o banco de dados', () => {
             expect(messages.auth.databaseConnectionError).toBe("Erro de conexão com o banco de dados. Tente novamente mais tarde.");
         });
 
-        test('deve retornar mensagem de email já existente', () => {
-            const email = 'email@example.com';
-            expect(messages.auth.emailAlreadyExists(email)).toBe(`O endereço de email ${email} já está em uso.`);
-        });
-
-        test('deve retornar mensagem de credenciais inválidas', () => {
-            expect(messages.auth.invalidCredentials).toBe("Credenciais inválidas. Verifique seu usuário e senha.");
+        test('deve retornar mensagens de autenticação com parâmetros', () => {
+            expect(messages.auth.userNotFound('123')).toBe("Usuário com ID 123 não encontrado.");
+            expect(messages.auth.duplicateEntry('NomeDeUsuario')).toBe("Já existe um registro com o mesmo NomeDeUsuario.");
+            expect(messages.auth.emailAlreadyExists('email@example.com')).toBe("O endereço de email email@example.com já está em uso.");
         });
     });
 });

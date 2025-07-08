@@ -1,5 +1,3 @@
-//src/test/utils/helpers/CustomError.test.js
-
 import { CustomError } from "@utils/helpers";
 
 describe('CustomError', () => {
@@ -26,10 +24,7 @@ describe('CustomError', () => {
       customMessage: 'Seu token expirou. Faça login novamente.'
     });
 
-    // Aqui validamos se a mensagem principal é a personalizada (customMessage),
-    // já que é essa a lógica usada no construtor da classe.
     expect(error.message).toBe('Seu token expirou. Faça login novamente.');
-
     expect(error.statusCode).toBe(401);
     expect(error.errorType).toBe('tokenExpired');
     expect(error.field).toBe('authToken');
@@ -43,8 +38,6 @@ describe('CustomError', () => {
       customMessage: 'Erro personalizado'
     });
 
-    // Essa verificação é importante para garantir que a lógica de fallback no construtor
-    // realmente está usando a customMessage como mensagem principal quando fornecida.
     expect(error.message).toBe('Erro personalizado');
   });
 });

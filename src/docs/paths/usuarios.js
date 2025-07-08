@@ -7,7 +7,7 @@ const usuariosRoutes = {
     "/usuarios": {
         get: {
             tags: ["Usuários"],
-            summary: "Lista todos os usuários",
+            summary: "Listar usuários",
             description: `
         + Caso de uso: Listagem de usuários para gerenciamento e consulta.
         
@@ -95,7 +95,7 @@ const usuariosRoutes = {
 
         post: {
             tags: ["Usuários"],
-            summary: "Cria um novo usuário",
+            summary: "Criar novo usuário",
             description: `
             + Caso de uso: Criação de novo usuário no sistema.
             
@@ -115,6 +115,7 @@ const usuariosRoutes = {
       `,
             security: [{ bearerAuth: [] }],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
@@ -135,7 +136,7 @@ const usuariosRoutes = {
     "/usuarios/{id}": {
         get: {
             tags: ["Usuários"],
-            summary: "Obtém detalhes de um usuário",
+            summary: "Obter usuário por ID",
             description: `
             + Caso de uso: Consulta de detalhes de usuário específico.
             
@@ -174,7 +175,7 @@ const usuariosRoutes = {
         },
         patch: {
             tags: ["Usuários"],
-            summary: "Atualiza um usuário (PATCH)",
+            summary: "Atualizar usuário parcialmente",
             description: `
             + Caso de uso: Atualização parcial de dados do usuário.
             
@@ -204,6 +205,7 @@ const usuariosRoutes = {
                 }
             ],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
@@ -223,7 +225,7 @@ const usuariosRoutes = {
         },
         put: {
             tags: ["Usuários"],
-            summary: "Atualiza um usuário (PUT)",
+            summary: "Atualizar usuário completamente",
             description: `
             + Caso de uso: Atualização completa de usuário via PUT.
             
@@ -251,6 +253,7 @@ const usuariosRoutes = {
                 }
             ],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
@@ -270,7 +273,7 @@ const usuariosRoutes = {
         },
         delete: {
             tags: ["Usuários"],
-            summary: "Deleta um usuário",
+            summary: "Excluir usuário",
             description: `
             + Caso de uso: Exclusão ou inativação de usuário.
             
@@ -312,7 +315,7 @@ const usuariosRoutes = {
     "/cadastrar-senha": {
         post: {
             tags: ["Usuários"],
-            summary: "Cadastra nova senha para usuário",
+            summary: "Definir nova senha",
             description: `
             + Caso de uso: Permite que usuário defina nova senha usando token recebido por email.
             
@@ -342,6 +345,7 @@ const usuariosRoutes = {
                 }
             ],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
                         schema: {

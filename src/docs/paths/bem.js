@@ -1,52 +1,69 @@
+import commonResponses from "../schemas/swaggerCommonResponses.js";
+
 const bemPaths = {
   "/bens": {
-    "get": {
-      "tags": ["Bem"],
-      "summary": "Listar bens",
-      "description": "Retorna uma lista paginada de bens com possibilidade de filtros",
-      "operationId": "listarBens",
-      "parameters": [
+    get: {
+      tags: ["Bem"],
+      summary: "Listar bens patrimoniais",
+      description: `
+        + Caso de uso: Listagem de bens patrimoniais para consulta e gestão.
+        
+        + Função de Negócio:
+            - Permitir consulta paginada de bens cadastrados no sistema.
+            - Aplicar filtros por nome, tombo, sala e status de auditoria.
+            - Fornecer dados para relatórios e controle patrimonial.
+
+        + Regras de Negócio:
+            - Validar parâmetros de filtro fornecidos.
+            - Aplicar paginação conforme limites estabelecidos.
+            - Retornar apenas bens que o usuário tem permissão para visualizar.
+
+        + Resultado Esperado:
+            - 200 OK com lista paginada de bens conforme filtros aplicados.
+      `,
+      operationId: "listarBens",
+      parameters: [
         {
-          "name": "nome",
-          "in": "query",
-          "description": "Filtrar por nome do bem (busca parcial, case-insensitive)",
-          "required": false,
-          "schema": { "type": "string", "minLength": 1 }
+          name: "nome",
+          in: "query",
+          description: "Filtrar por nome do bem (busca parcial, case-insensitive)",
+          required: false,
+          schema: { type: "string", minLength: 1 }
         },
         {
-          "name": "tombo",
-          "in": "query",
-          "description": "Filtrar por número de tombo",
-          "required": false,
-          "schema": { "type": "string", "minLength": 1 }
+          name: "tombo",
+          in: "query",
+          description: "Filtrar por número de tombo",
+          required: false,
+          schema: { type: "string", minLength: 1 }
         },
         {
-          "name": "sala",
-          "in": "query",
-          "description": "Filtrar por sala (ID ou nome)",
-          "required": false,
-          "schema": { "type": "string", "minLength": 1 }
+          name: "sala",
+          in: "query",
+          description: "Filtrar por sala (ID ou nome)",
+          required: false,
+          schema: { type: "string", minLength: 1 }
         },
         {
-          "name": "auditado",
-          "in": "query",
-          "description": "Filtrar por status de auditoria",
-          "required": false,
-          "schema": { "type": "string", "enum": ["true", "false"] }
+          name: "auditado",
+          in: "query",
+          description: "Filtrar por status de auditoria",
+          required: false,
+          schema: { type: "string", enum: ["true", "false"] }
         },
         {
-          "name": "page",
-          "in": "query",
-          "description": "Número da página para paginação",
-          "required": false,
-          "schema": { "type": "integer", "minimum": 1, "default": 1 }
+          name: "page",
+          in: "query",
+          description: "Número da página para paginação",
+          required: false,
+          schema: { type: "integer", minimum: 1, default: 1 }
         },
         {
-          "name": "limite",
-          "in": "query",
-          "description": "Limite de itens por página",
-          "required": false,
-          "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 }
+          name: "limite",
+          in: "query",
+          description: "Limite de itens por página",
+          required: false,
+          schema: { type: "integer", minimum: 1, maximum: 100, default: 10 }
         }
       ],
       "responses": {
@@ -103,7 +120,7 @@ const bemPaths = {
   "/bens/{id}": {
     "get": {
       "tags": ["Bem"],
-      "summary": "Buscar bem por ID",
+      "summary": "Obter bem por ID",
       "description": "Retorna os detalhes de um bem específico",
       "operationId": "buscarBemPorId",
       "parameters": [

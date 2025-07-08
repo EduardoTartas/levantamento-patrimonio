@@ -7,9 +7,8 @@ describe('CampusIdSchema', () => {
     expect(result).toBe(validId);
   });
 
-  it('deve lançar erro para um ObjectId inválido', () => {
-    const invalidId = '123';
-    expect(() => CampusIdSchema.parse(invalidId)).toThrowError(/ID inválido/);
+  it('deve falhar para ObjectId inválido', () => {
+    expect(() => CampusIdSchema.parse('123')).toThrowError(/ID inválido/);
   });
 });
 
@@ -32,20 +31,33 @@ describe('CampusQuerySchema', () => {
   });
 
   it('deve aplicar valores padrão para page e limite se ausentes', () => {
-    const input = {};
-    const result = CampusQuerySchema.parse(input);
+    const result = CampusQuerySchema.parse({});
     expect(result.page).toBe(1);
     expect(result.limite).toBe(10);
   });
 
-  it('deve lançar erro se "ativo" tiver valor inválido', () => {
-    const input = { ativo: 'yes' };
-    expect(() => CampusQuerySchema.parse(input)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+  it('deve aceitar ativo como true ou false', () => {
+    expect(CampusQuerySchema.parse({ ativo: 'true' }).ativo).toBe('true');
+    expect(CampusQuerySchema.parse({ ativo: 'false' }).ativo).toBe('false');
   });
 
-  it('deve lançar erro se "page" não for inteiro positivo', () => {
-    const input = { page: '0' };
-    expect(() => CampusQuerySchema.parse(input)).toThrowError(/Page deve ser um número inteiro maior que 0/);
+  it('deve falhar para ativo inválido', () => {
+    expect(() => CampusQuerySchema.parse({ ativo: 'yes' })).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+  });
+
+  it('deve falhar para page inválido', () => {
+    expect(() => CampusQuerySchema.parse({ page: '0' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+    expect(() => CampusQuerySchema.parse({ page: 'abc' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+  });
+
+  it('deve falhar para limite inválido', () => {
+    expect(() => CampusQuerySchema.parse({ limite: '0' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+    expect(() => CampusQuerySchema.parse({ limite: '101' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+  });
+
+  it('deve falhar para nome ou cidade vazios', () => {
+    expect(() => CampusQuerySchema.parse({ nome: '   ' })).toThrowError(/Nome não pode ser vazio/);
+    expect(() => CampusQuerySchema.parse({ cidade: '   ' })).toThrowError(/Localidade não pode ser vazio/);
   });
 
   it('deve lançar erro se "limite" for maior que 100', () => {

@@ -1,7 +1,7 @@
 import { InventarioQuerySchema } from '@utils/validators/schemas/zod/querys/InventarioQuerySchema';
 
 describe('InventarioQuerySchema', () => {
-    it('should parse an empty object correctly (using defaults from transform)', () => {
+    it('should parse an empty object correctly using defaults', () => {
         const resultado = InventarioQuerySchema.parse({});
         expect(resultado).toEqual({
             nome: undefined,
@@ -12,7 +12,7 @@ describe('InventarioQuerySchema', () => {
         });
     });
 
-    it('should parse valid data and apply transformations correctly (including trim for data)', () => {
+    it('should parse valid data and apply transformations correctly', () => {
         const query = {
             nome: '  Inventário Central  ',
             ativo: 'true',
@@ -30,7 +30,7 @@ describe('InventarioQuerySchema', () => {
         });
     });
 
-    it('should allow "ativo" as "false"', () => {
+    it('should allow ativo as false', () => {
         const query = { ativo: 'false' };
         const resultado = InventarioQuerySchema.parse(query);
         expect(resultado.ativo).toBe('false');
@@ -38,99 +38,45 @@ describe('InventarioQuerySchema', () => {
         expect(resultado.limite).toBe(10);
     });
 
-    it('throws an error when "nome" is an empty string (after trim attempt by refine)', () => {
-        const query = { nome: '' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
+    it('should accept valid data string and trim it', () => {
+        expect(InventarioQuerySchema.parse({ data: '2023-10-15' }).data).toBe('2023-10-15');
+        expect(InventarioQuerySchema.parse({ data: ' 2023-10-15 ' }).data).toBe('2023-10-15');
     });
 
-    it('throws an error when "nome" contains only spaces (after trim attempt by refine)', () => {
-        const query = { nome: '   ' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
+    it('should parse page and limite as float strings and take integer part', () => {
+        expect(InventarioQuerySchema.parse({ page: '2.5' }).page).toBe(2);
+        expect(InventarioQuerySchema.parse({ limite: '20.7' }).limite).toBe(20);
     });
 
-    it('throws an error when "ativo" is an invalid string value', () => {
-        const query = { ativo: 'talvez' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+    it('should accept limite at boundary values', () => {
+        expect(InventarioQuerySchema.parse({ limite: '1' }).limite).toBe(1);
+        expect(InventarioQuerySchema.parse({ limite: '100' }).limite).toBe(100);
     });
 
-    it('throws an error when "ativo" is a number (as string) that is not "true" or "false"', () => {
-        const query = { ativo: '1' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+    it('throws an error when nome is empty or spaces only', () => {
+        expect(() => InventarioQuerySchema.parse({ nome: '' })).toThrowError(/Nome não pode ser vazio/);
+        expect(() => InventarioQuerySchema.parse({ nome: '   ' })).toThrowError(/Nome não pode ser vazio/);
     });
 
-    it('throws an error when "data" contains only spaces (after trim attempt by refine)', () => {
-        const query = { data: '   ' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Data não pode ser vazia/);
+    it('throws an error when ativo is invalid', () => {
+        expect(() => InventarioQuerySchema.parse({ ativo: 'talvez' })).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+        expect(() => InventarioQuerySchema.parse({ ativo: '1' })).toThrowError(/Ativo deve ser 'true' ou 'false'/);
     });
 
-    it('should accept valid "data" string (and it should be trimmed if schema has trim transform)', () => {
-        const query = { data: '2023-10-15' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.data).toBe('2023-10-15');
+    it('throws an error when data contains only spaces', () => {
+        expect(() => InventarioQuerySchema.parse({ data: '   ' })).toThrowError(/Data não pode ser vazia/);
     });
 
-    it('should accept "data" string with leading/trailing spaces and trim it (if schema has trim transform)', () => {
-        const query = { data: ' 2023-10-15 ' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.data).toBe('2023-10-15');
+    it('throws an error when page is invalid', () => {
+        expect(() => InventarioQuerySchema.parse({ page: 'abc' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+        expect(() => InventarioQuerySchema.parse({ page: '0' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+        expect(() => InventarioQuerySchema.parse({ page: '-1' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
     });
 
-    it('throws an error when "page" is provided as a non-numeric string', () => {
-        const query = { page: 'abc' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('throws an error when "page" is "0" (as string)', () => {
-        const query = { page: '0' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('throws an error when "page" is a negative number (as string)', () => {
-        const query = { page: '-1' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('should parse "page" as float string and take integer part (e.g., "2.5" becomes 2)', () => {
-        const query = { page: '2.5' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.page).toBe(2);
-    });
-
-    it('throws an error when "limite" is provided as a non-numeric string', () => {
-        const query = { limite: 'xyz' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('throws an error when "limite" is "0" (as string)', () => {
-        const query = { limite: '0' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('throws an error when "limite" is a negative number (as string)', () => {
-        const query = { limite: '-5' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('throws an error when "limite" is greater than 100 (as string)', () => {
-        const query = { limite: '101' };
-        expect(() => InventarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('should parse "limite" as float string and take integer part (e.g., "20.7" becomes 20)', () => {
-        const query = { limite: '20.7' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(20);
-    });
-
-    it('should accept "limite" as "1" (string)', () => {
-        const query = { limite: '1' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(1);
-    });
-
-    it('should accept "limite" as "100" (string)', () => {
-        const query = { limite: '100' };
-        const resultado = InventarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(100);
+    it('throws an error when limite is invalid', () => {
+        expect(() => InventarioQuerySchema.parse({ limite: 'xyz' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => InventarioQuerySchema.parse({ limite: '0' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => InventarioQuerySchema.parse({ limite: '-5' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => InventarioQuerySchema.parse({ limite: '101' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
     });
 });

@@ -4,7 +4,7 @@ Sistema para gerenciamento e controle de bens patrimoniais de instituições, de
 
 ---
 
-## 👥 Equipe
+## Equipe
 
 - Gustavo
 - Eduardo
@@ -12,13 +12,13 @@ Sistema para gerenciamento e controle de bens patrimoniais de instituições, de
 
 ---
 
-## ✨ Visão Geral
+## Visão Geral
 
 O Levantamento de Patrimônio é uma solução para controle, cadastro e gestão de bens patrimoniais de instituições. O sistema integra diferentes serviços como API, banco de dados MongoDB e armazenamento de arquivos via MinIO, facilitando o acompanhamento dos ativos institucionais de forma eficiente e segura.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 ### Pré-requisitos
 

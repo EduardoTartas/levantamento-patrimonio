@@ -8,12 +8,14 @@ import setupMinio from './config/setupMinio.js';
 import errorHandler from './utils/helpers/errorHandler.js';
 import logger from './utils/logger.js';
 import CommonResponse from './utils/helpers/CommonResponse.js';
+import rotaSeed from "./seeds/rotaSeed.js";
 
 const app = express();
 
 async function initializeApp() {
     await setupMinio();
     await DbConnect.conectar();
+    await rotaSeed();
 }
 
 if (process.env.NODE_ENV !== 'test') {

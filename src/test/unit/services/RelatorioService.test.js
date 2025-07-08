@@ -66,7 +66,7 @@ describe('RelatorioService', () => {
     });
 
     describe('gerarRelatorio', () => {
-        it('deve gerar relatório geral com sucesso', async () => {
+        test('deve gerar relatório geral com sucesso', async () => {
             const query = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'geral'
@@ -90,7 +90,7 @@ describe('RelatorioService', () => {
             expect(Buffer.isBuffer(result)).toBe(true);
         });
 
-        it('deve gerar relatório com filtro de sala', async () => {
+        test('deve gerar relatório com filtro de sala', async () => {
             const query = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'geral',
@@ -103,7 +103,7 @@ describe('RelatorioService', () => {
             expect(mockSalaService.ensureSalaExists).toHaveBeenCalledWith(query.sala);
         });
 
-        it('deve lançar erro quando inventarioId está faltando', async () => {
+        test('deve lançar erro quando inventarioId está faltando', async () => {
             const query = {
                 tipoRelatorio: 'geral'
             };
@@ -111,7 +111,7 @@ describe('RelatorioService', () => {
             await expect(service.gerarRelatorio(query)).rejects.toThrow(CustomError);
         });
 
-        it('deve lançar erro quando tipoRelatorio está faltando', async () => {
+        test('deve lançar erro quando tipoRelatorio está faltando', async () => {
             const query = {
                 inventarioId: '655f5e39884c8b76c56a5084'
             };
@@ -119,86 +119,24 @@ describe('RelatorioService', () => {
             await expect(service.gerarRelatorio(query)).rejects.toThrow(CustomError);
         });
 
-        it('deve gerar relatório de bens danificados', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'bens_danificados'
-            };
+        test('deve gerar relatórios específicos por tipo', async () => {
+            const inventarioId = '655f5e39884c8b76c56a5084';
+            const tipos = [
+                { tipo: 'bens_danificados', filtro: { estado: 'Danificado' } },
+                { tipo: 'bens_inserviveis', filtro: { estado: 'Inservível' } },
+                { tipo: 'bens_ociosos', filtro: { ocioso: true } },
+                { tipo: 'bens_nao_encontrados', filtro: { ocioso: false } },
+                { tipo: 'bens_sem_etiqueta', filtro: { 'bem.tombo': { $in: [null, ''] } } }
+            ];
 
-            await service.gerarRelatorio(query);
-
-            expect(Levantamento.find).toHaveBeenCalledWith({
-                inventario: query.inventarioId,
-                estado: 'Danificado'
-            });
+            for (const { tipo, filtro } of tipos) {
+                const query = { inventarioId, tipoRelatorio: tipo };
+                await service.gerarRelatorio(query);
+                expect(Levantamento.find).toHaveBeenCalledWith({ inventario: inventarioId, ...filtro });
+            }
         });
 
-        it('deve gerar relatório de bens inserviveis', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'bens_inserviveis'
-            };
-
-            await service.gerarRelatorio(query);
-
-            expect(Levantamento.find).toHaveBeenCalledWith({
-                inventario: query.inventarioId,
-                estado: 'Inservível'
-            });
-        });
-
-        it('deve gerar relatório de bens ociosos', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'bens_ociosos'
-            };
-
-            await service.gerarRelatorio(query);
-
-            expect(Levantamento.find).toHaveBeenCalledWith({
-                inventario: query.inventarioId,
-                ocioso: true
-            });
-        });
-
-        it('deve gerar relatório de bens não encontrados', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'bens_nao_encontrados'
-            };
-
-            await service.gerarRelatorio(query);
-
-            expect(Levantamento.find).toHaveBeenCalledWith({
-                inventario: query.inventarioId,
-                ocioso: false
-            });
-        });
-
-        it('deve gerar relatório de bens sem etiqueta', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'bens_sem_etiqueta'
-            };
-
-            await service.gerarRelatorio(query);
-
-            expect(Levantamento.find).toHaveBeenCalledWith({
-                inventario: query.inventarioId,
-                'bem.tombo': { $in: [null, ''] }
-            });
-        });
-
-        it('deve lançar erro para tipo de relatório inválido', async () => {
-            const query = {
-                inventarioId: '655f5e39884c8b76c56a5084',
-                tipoRelatorio: 'tipo_invalido'
-            };
-
-            await expect(service.gerarRelatorio(query)).rejects.toThrow(CustomError);
-        });
-
-        it('deve aplicar filtro de sala quando fornecido', async () => {
+        test('deve aplicar filtro de sala quando fornecido', async () => {
             const query = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'bens_danificados',
@@ -213,10 +151,19 @@ describe('RelatorioService', () => {
                 'bem.salaId': query.sala
             });
         });
+
+        test('deve lançar erro para tipo de relatório inválido', async () => {
+            const query = {
+                inventarioId: '655f5e39884c8b76c56a5084',
+                tipoRelatorio: 'tipo_invalido'
+            };
+
+            await expect(service.gerarRelatorio(query)).rejects.toThrow(CustomError);
+        });
     });
 
     describe('_buscarLevantamentos', () => {
-        it('deve buscar levantamentos com filtro básico', async () => {
+        test('deve buscar levantamentos com filtro básico', async () => {
             const params = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'geral'
@@ -229,7 +176,7 @@ describe('RelatorioService', () => {
             });
         });
 
-        it('deve popular campos relacionados', async () => {
+        test('deve popular campos relacionados', async () => {
             const params = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'geral'
@@ -250,7 +197,7 @@ describe('RelatorioService', () => {
             expect(mockQuery.lean).toHaveBeenCalled();
         });
 
-        it('deve lançar erro para tipo de relatório não suportado', async () => {
+        test('deve lançar erro para tipo de relatório não suportado', async () => {
             const params = {
                 inventarioId: '655f5e39884c8b76c56a5084',
                 tipoRelatorio: 'tipo_nao_suportado'
@@ -261,7 +208,7 @@ describe('RelatorioService', () => {
     });
 
     describe('_gerarPDF', () => {
-        it('deve gerar PDF com levantamentos', async () => {
+        test('deve gerar PDF com levantamentos', async () => {
             const levantamentos = [
                 {
                     bem: { tombo: 'TOM123', nome: 'Mesa' },
@@ -274,7 +221,7 @@ describe('RelatorioService', () => {
             expect(Buffer.isBuffer(result)).toBe(true);
         });
 
-        it('deve gerar PDF vazio quando não há levantamentos', async () => {
+        test('deve gerar PDF vazio quando não há levantamentos', async () => {
             const levantamentos = [];
 
             const result = await service._gerarPDF(levantamentos, 'geral');

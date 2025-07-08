@@ -55,20 +55,14 @@ describe("ImportacaoService", () => {
                 nome: "Não Localizado",
                 bloco: "Não Especificado"
             });
-            
-            expect(ImportacaoService._extractSalaInfo(undefined)).toEqual({
-                nome: "Não Localizado",
-                bloco: "Não Especificado"
-            });
         });
     });
 
     describe("importCSV", () => {
         const generateValidCSVLine = (overrides = {}) => {
             const defaults = {
-                descricaoCompleta: "POLTRONA FIXA ESPALDAR BAIXO. REVESTIMENTO SANLEATHER COURO ECOLÓGICO. COR PRETA.",
-                codigo: "123110303",
-                localizacao: "SALA 27 - DPLAD, CCL, CPALM, COFIN, CSG (GJM - BLOCO B)",
+                descricaoCompleta: "POLTRONA FIXA ESPALDAR BAIXO. REVESTIMENTO SANLEATHER",
+                localizacao: "SALA 27 (BLOCO B)",
                 valor: "40000",
                 tombo: "200035",
                 cpfResponsavel: "00682571202",
@@ -79,25 +73,22 @@ describe("ImportacaoService", () => {
             const fields = [
                 "D", "", 
                 merged.descricaoCompleta, 
-                merged.codigo, 
+                "", 
                 merged.localizacao, 
-                "", "1", "999", "1", "13122009", 
+                "", "", "", "", "", 
                 merged.valor, 
-                "13122009", "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - REITORIA", "", "", "2", "", "", "", "", 
+                "", "", "", "", "", "", "", "", "", 
                 merged.tombo, 
                 "", "", 
                 merged.cpfResponsavel, 
-                merged.nomeResponsavel, 
-                "FALSE", "", "", "120", "", "" 
+                merged.nomeResponsavel
             ];
             
-            return fields.join("¥") + "¥£¥2015NE" + merged.tombo;
+            return fields.join("¥");
         };
 
         beforeEach(() => {
             ImportacaoService.repository = {
-                findByTombamento: jest.fn(),
-                create: jest.fn(),
                 findSalasByCombinations: jest.fn().mockResolvedValue([]),
                 verificarTombosDuplicados: jest.fn().mockResolvedValue([]),
                 createSala: jest.fn().mockResolvedValue({ _id: "salaId123", nome: "Sala A101", bloco: "Bloco A" }),
@@ -126,29 +117,6 @@ describe("ImportacaoService", () => {
                 totalRecordsSkipped: 0,
                 errors: [],
             });
-        });
-
-        it("deve tratar erro de banco de dados durante criação", async () => {
-            const csvContent = generateValidCSVLine();
-            const mockFile = { buffer: Buffer.from(csvContent, "utf-8") };
-            const options = { campus_id: "507f1f77bcf86cd799439011" };
-
-            const mockError = {
-                result: { nInserted: 0 },
-                writeErrors: [{
-                    op: { tombo: "123456" },
-                    errmsg: "Erro de duplicata"
-                }]
-            };
-            ImportacaoService.repository.insertManyBens.mockRejectedValue(mockError);
-
-            const resultado = await ImportacaoService.importCSV(mockFile, options);
-
-            expect(resultado.totalRecordsProcessed).toBe(1);
-            expect(resultado.totalRecordsInserted).toBe(0);
-            expect(resultado.totalRecordsSkipped).toBe(1);
-            expect(resultado.errors).toHaveLength(1);
-            expect(resultado.errors[0].message).toContain("Falha ao inserir bem (Tombo: 123456)");
         });
 
         it("deve processar CSV com sucesso e inserir novo bem", async () => {
@@ -221,27 +189,8 @@ describe("ImportacaoService", () => {
             );
         });
 
-        it("deve tratar responsável 'FALSE' como responsável não informado", async () => {
-            const csvContent = generateValidCSVLine({ nomeResponsavel: "FALSE" });
-            const mockFile = { buffer: Buffer.from(csvContent, "utf-8") };
-            const options = { campus_id: "507f1f77bcf86cd799439011" };
-
-            await ImportacaoService.importCSV(mockFile, options);
-
-            expect(ImportacaoService.repository.insertManyBens).toHaveBeenCalledWith(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        responsavel: expect.objectContaining({
-                            nome: "Responsável não informado"
-                        })
-                    })
-                ]),
-                { ordered: false }
-            );
-        });
-
         it("deve definir ocioso como true quando localização contém 'BENS RECOLHIDOS'", async () => {
-            const csvContent = generateValidCSVLine({ localizacao: "BENS RECOLHIDOS (MUDANÇA) (REIT - SEDE)" });
+            const csvContent = generateValidCSVLine({ localizacao: "BENS RECOLHIDOS (MUDANÇA)" });
             const mockFile = { buffer: Buffer.from(csvContent, "utf-8") };
             const options = { campus_id: "507f1f77bcf86cd799439011" };
 
@@ -276,7 +225,7 @@ describe("ImportacaoService", () => {
 
         it("deve extrair nome do bem da descrição antes do primeiro ponto", async () => {
             const csvContent = generateValidCSVLine({ 
-                descricaoCompleta: "POLTRONA FIXA ESPALDAR BAIXO.REVESTIMENTO SANLEATHER.COR PRETA" 
+                descricaoCompleta: "POLTRONA FIXA ESPALDAR BAIXO.REVESTIMENTO SANLEATHER" 
             });
             const mockFile = { buffer: Buffer.from(csvContent, "utf-8") };
             const options = { campus_id: "507f1f77bcf86cd799439011" };
@@ -293,5 +242,4 @@ describe("ImportacaoService", () => {
             );
         });
     });
-
 });

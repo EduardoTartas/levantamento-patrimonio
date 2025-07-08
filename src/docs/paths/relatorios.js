@@ -1,33 +1,49 @@
+import commonResponses from "../schemas/swaggerCommonResponses.js";
+
 const relatorioPaths = {
   "/relatorios": {
-    "get": {
-      "tags": ["Relatórios"],
-      "summary": "Gerar relatório PDF",
-      "description": "Gera e retorna um relatório em PDF baseado no inventário e tipo especificados. O arquivo PDF é retornado diretamente como resposta.",
-      "operationId": "gerarRelatorio",
-      "parameters": [
+    get: {
+      tags: ["Relatórios"],
+      summary: "Gerar relatório em PDF",
+      description: `
+        + Caso de uso: Geração de relatórios patrimoniais em formato PDF.
+        
+        + Função de Negócio:
+            - Permitir geração de relatórios detalhados sobre inventários.
+            - Suportar diferentes tipos de relatórios (geral, bens danificados, etc.).
+            - Aplicar filtros por sala quando necessário.
+
+        + Regras de Negócio:
+            - Validar ID do inventário fornecido.
+            - Verificar tipo de relatório válido.
+            - Aplicar filtros quando especificados.
+
+        + Resultado Esperado:
+            - 200 OK com arquivo PDF retornado diretamente.
+      `,
+      operationId: "gerarRelatorio",
+      parameters: [
         {
-          "name": "inventarioId",
-          "in": "query",
-          "description": "ID do inventário para gerar o relatório (obrigatório)",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "ObjectId",
-            "minLength": 24,
-            "maxLength": 24,
-            "pattern": "^[0-9a-fA-F]{24}$"
+          name: "inventarioId",
+          in: "query",
+          description: "ID do inventário para gerar o relatório (obrigatório)",
+          required: true,
+          schema: {
+            type: "string",
+            format: "ObjectId",
+            minLength: 24,
+            maxLength: 24,
+            pattern: "^[0-9a-fA-F]{24}$"
           },
-          "example": "507f1f77bcf86cd799439011"
         },
         {
-          "name": "tipoRelatorio",
-          "in": "query", 
-          "description": "Tipo de relatório a ser gerado (obrigatório)",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
+          name: "tipoRelatorio",
+          in: "query", 
+          description: "Tipo de relatório a ser gerado (obrigatório)",
+          required: true,
+          schema: {
+            type: "string",
+            enum: [
               "geral",
               "bens_danificados",
               "bens_inserviveis", 
@@ -36,21 +52,20 @@ const relatorioPaths = {
               "bens_sem_etiqueta"
             ]
           },
-          "example": "geral"
+          example: "geral"
         },
         {
-          "name": "sala",
-          "in": "query",
-          "description": "ID da sala para filtrar o relatório (opcional)",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "format": "ObjectId",
-            "minLength": 24,
-            "maxLength": 24,
+          name: "sala",
+          in: "query",
+          description: "ID da sala para filtrar o relatório (opcional)",
+          required: false,
+          schema: {
+            type: "string",
+            format: "ObjectId",
+            minLength: 24,
+            maxLength: 24,
             "pattern": "^[0-9a-fA-F]{24}$"
           },
-          "example": "507f1f77bcf86cd799439012"
         }
       ],
       "responses": {

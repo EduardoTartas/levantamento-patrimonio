@@ -4,7 +4,7 @@ const importacaoPaths = {
   "/csv/{campusId}": {
     post: {
       tags: ["Importação"],
-      summary: "Importar bens via arquivo CSV para um campus específico",
+      summary: "Importar bens via CSV",
       description:
         "Realiza a importação em massa de bens patrimoniais a partir de um arquivo CSV para o campus informado. O arquivo deve seguir o layout padrão do sistema.",
       operationId: "importarCSV",

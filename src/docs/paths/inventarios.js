@@ -1,62 +1,79 @@
+import commonResponses from "../schemas/swaggerCommonResponses.js";
+
 const inventarioPaths = {
   "/inventarios": {
-    "get": {
-      "tags": ["Inventários"],
-      "summary": "Listar inventários",
-      "description": "Retorna uma lista paginada de inventários com possibilidade de filtros",
-      "operationId": "listarInventarios",
-      "parameters": [
+    get: {
+      tags: ["Inventários"],
+      summary: "Listar inventários",
+      description: `
+        + Caso de uso: Listagem de inventários patrimoniais para consulta e gestão.
+        
+        + Função de Negócio:
+            - Permitir consulta paginada de inventários cadastrados no sistema.
+            - Aplicar filtros por nome, status ativo e data.
+            - Fornecer dados para relatórios e controle patrimonial.
+
+        + Regras de Negócio:
+            - Validar parâmetros de filtro fornecidos.
+            - Aplicar paginação conforme limites estabelecidos.
+            - Retornar apenas inventários que o usuário tem permissão para visualizar.
+
+        + Resultado Esperado:
+            - 200 OK com lista paginada de inventários conforme filtros aplicados.
+      `,
+      operationId: "listarInventarios",
+      parameters: [
         {
-          "name": "nome",
-          "in": "query",
-          "description": "Filtrar por nome do inventário (busca parcial, case-insensitive)",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "minLength": 1
+          name: "nome",
+          in: "query",
+          description: "Filtrar por nome do inventário (busca parcial, case-insensitive)",
+          required: false,
+          schema: {
+            type: "string",
+            minLength: 1
           }
         },
         {
-          "name": "ativo",
-          "in": "query",
-          "description": "Filtrar por status ativo/inativo do inventário",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": ["true", "false"]
+          name: "ativo",
+          in: "query",
+          description: "Filtrar por status ativo/inativo do inventário",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["true", "false"]
           }
         },
         {
-          "name": "data",
-          "in": "query",
-          "description": "Filtrar por data do inventário (formato DD/MM/YYYY)",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "pattern": "^\\d{2}/\\d{2}/\\d{4}$"
+          name: "data",
+          in: "query",
+          description: "Filtrar por data do inventário (formato DD/MM/YYYY)",
+          required: false,
+          schema: {
+            type: "string",
+            pattern: "^\\d{2}/\\d{2}/\\d{4}$"
           }
         },
         {
-          "name": "page",
-          "in": "query",
-          "description": "Número da página para paginação",
-          "required": false,
-          "schema": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 1
+          name: "page",
+          in: "query",
+          description: "Número da página para paginação",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1
           }
         },
         {
-          "name": "limite",
-          "in": "query",
-          "description": "Limite de itens por página",
-          "required": false,
-          "schema": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100,
-            "default": 10
+          name: "limite",
+          in: "query",
+          description: "Limite de itens por página",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 100,
+            default: 10
           }
         }
       ],
@@ -116,7 +133,7 @@ const inventarioPaths = {
     },
     "post": {
       "tags": ["Inventários"],
-      "summary": "Criar um novo inventário",
+      "summary": "Criar novo inventário",
       "description": "Cria um novo inventário no sistema",
       "operationId": "criarInventario",
       "requestBody": {
@@ -408,7 +425,7 @@ const inventarioPaths = {
     },
     "delete": {
       "tags": ["Inventários"],
-      "summary": "Deletar inventário",
+      "summary": "Excluir inventário",
       "description": "Remove um inventário do sistema",
       "operationId": "deletarInventario",
       "parameters": [

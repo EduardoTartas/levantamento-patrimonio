@@ -1,100 +1,117 @@
+import commonResponses from "../schemas/swaggerCommonResponses.js";
+
 const levantamentoPaths = {
   "/levantamentos": {
-    "get": {
-      "tags": ["Levantamentos"],
-      "summary": "Listar levantamentos",
-      "description": "Retorna uma lista paginada de levantamentos com possibilidade de filtros",
-      "operationId": "listarLevantamentos",
-      "parameters": [
+    get: {
+      tags: ["Levantamentos"],
+      summary: "Listar levantamentos",
+      description: `
+        + Caso de uso: Listagem de levantamentos patrimoniais realizados.
+        
+        + Função de Negócio:
+            - Permitir consulta paginada de levantamentos registrados no sistema.
+            - Aplicar filtros por inventário, bem, tombo, responsável, estado e outros.
+            - Fornecer dados para auditoria e controle patrimonial.
+
+        + Regras de Negócio:
+            - Validar parâmetros de filtro fornecidos.
+            - Aplicar paginação conforme limites estabelecidos.
+            - Retornar apenas levantamentos que o usuário tem permissão para visualizar.
+
+        + Resultado Esperado:
+            - 200 OK com lista paginada de levantamentos conforme filtros aplicados.
+      `,
+      operationId: "listarLevantamentos",
+      parameters: [
         {
-          "name": "inventario",
-          "in": "query",
-          "description": "Filtrar por ID do inventário",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "format": "ObjectId"
+          name: "inventario",
+          in: "query",
+          description: "Filtrar por ID do inventário",
+          required: false,
+          schema: {
+            type: "string",
+            format: "ObjectId"
           }
         },
         {
-          "name": "bem",
-          "in": "query",
-          "description": "Filtrar por nome do bem (busca parcial, case-insensitive)",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "minLength": 1
+          name: "bem",
+          in: "query",
+          description: "Filtrar por nome do bem (busca parcial, case-insensitive)",
+          required: false,
+          schema: {
+            type: "string",
+            minLength: 1
           }
         },
         {
-          "name": "tombo",
-          "in": "query",
-          "description": "Filtrar por tombo do bem",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "minLength": 1
+          name: "tombo",
+          in: "query",
+          description: "Filtrar por tombo do bem",
+          required: false,
+          schema: {
+            type: "string",
+            minLength: 1
           }
         },
         {
-          "name": "responsavel",
-          "in": "query",
-          "description": "Filtrar por nome do responsável (busca parcial, case-insensitive)",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "minLength": 1
+          name: "responsavel",
+          in: "query",
+          description: "Filtrar por nome do responsável (busca parcial, case-insensitive)",
+          required: false,
+          schema: {
+            type: "string",
+            minLength: 1
           }
         },
         {
-          "name": "estado",
-          "in": "query",
-          "description": "Filtrar por estado do bem",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": ["Em condições de uso", "Inservível", "Danificado"]
+          name: "estado",
+          in: "query",
+          description: "Filtrar por estado do bem",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["Em condições de uso", "Inservível", "Danificado"]
           }
         },
         {
-          "name": "ocioso",
-          "in": "query",
-          "description": "Filtrar por status ocioso do bem",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": ["true", "false"]
+          name: "ocioso",
+          in: "query",
+          description: "Filtrar por status ocioso do bem",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["true", "false"]
           }
         },
         {
-          "name": "usuario",
-          "in": "query",
-          "description": "Filtrar por ID do usuário responsável pelo levantamento",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "format": "ObjectId"
+          name: "usuario",
+          in: "query",
+          description: "Filtrar por ID do usuário responsável pelo levantamento",
+          required: false,
+          schema: {
+            type: "string",
+            format: "ObjectId"
           }
         },
         {
-          "name": "salaNova",
-          "in": "query",
-          "description": "Filtrar por ID da nova sala",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "format": "ObjectId"
+          name: "salaNova",
+          in: "query",
+          description: "Filtrar por ID da nova sala",
+          required: false,
+          schema: {
+            type: "string",
+            format: "ObjectId"
           }
         },
         {
-          "name": "page",
-          "in": "query",
-          "description": "Número da página para paginação",
-          "required": false,
-          "schema": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 1
+          name: "page",
+          in: "query",
+          description: "Número da página para paginação",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1
           }
         },
         {
@@ -252,7 +269,7 @@ const levantamentoPaths = {
   "/levantamentos/{id}": {
     "get": {
       "tags": ["Levantamentos"],
-      "summary": "Obter detalhes de um levantamento",
+      "summary": "Obter levantamento por ID",
       "description": "Retorna os detalhes de um levantamento específico",
       "operationId": "obterLevantamento",
       "parameters": [

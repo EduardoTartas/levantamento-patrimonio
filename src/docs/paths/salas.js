@@ -7,7 +7,7 @@ const salasRoutes = {
     "/salas": {
         get: {
             tags: ["Salas"],
-            summary: "Lista todas as salas",
+            summary: "Listar salas",
             description: `
         + Caso de uso: Listagem de salas para consulta e gerenciamento.
         
@@ -43,7 +43,7 @@ const salasRoutes = {
     "/salas/{id}": {
         get: {
             tags: ["Salas"],
-            summary: "Busca uma sala específica",
+            summary: "Obter sala por ID",
             description: `
         + Caso de uso: Obter detalhes completos de uma sala específica.
         
@@ -74,47 +74,10 @@ const salasRoutes = {
                 }
             ],
             responses: {
-                200: {
-                    description: "Dados da sala encontrada",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "object",
-                                properties: {
-                                    success: {
-                                        type: "boolean",
-                                        example: true
-                                    },
-                                    data: {
-                                        $ref: "#/components/schemas/SalaDetalhes"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
+                200: commonResponses[200]("#/components/schemas/SalaDetalhes"),
                 400: commonResponses[400](),
                 401: commonResponses[401](),
-                404: {
-                    description: "Sala não encontrada",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "object",
-                                properties: {
-                                    success: {
-                                        type: "boolean",
-                                        example: false
-                                    },
-                                    message: {
-                                        type: "string",
-                                        example: "Sala não encontrada"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
+                404: commonResponses[404](),
                 498: commonResponses[498](),
                 500: commonResponses[500]()
             }

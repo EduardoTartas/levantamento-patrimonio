@@ -27,6 +27,19 @@ const salasSchemas = {
             campus: {
                 type: "string",
                 description: "ID ou nome do campus para filtrar salas"
+            },
+            page: {
+                type: "integer",
+                minimum: 1,
+                default: 1,
+                description: "Número da página para paginação"
+            },
+            limite: {
+                type: "integer",
+                minimum: 1,
+                maximum: 100,
+                default: 10,
+                description: "Limite de itens por página"
             }
         }
     },

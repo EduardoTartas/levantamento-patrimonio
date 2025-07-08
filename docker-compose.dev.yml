@@ -3,7 +3,7 @@
 services:
   # Serviço da API em modo desenvolvimento
   api:
-    container_name: levantamento-api-dev
+    container_name: levantamento-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -21,7 +21,7 @@ services:
 
   mongo:
     image: mongo:8
-    container_name: levantamento-mongodb-dev
+    container_name: levantamento-mongodb
     ports:
       - "27017:27017"
     volumes:
@@ -32,7 +32,7 @@ services:
   # Serviço do MinIO para armazenamento das fotos
   minio:
     image: minio/minio:latest
-    container_name: levantamento-minio-dev
+    container_name: levantamento-minio
     ports:
       - "${MINIO_PORT}:${MINIO_PORT}"
       - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"

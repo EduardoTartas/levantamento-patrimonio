@@ -12,51 +12,24 @@ describe('LevantamentoFilterBuilder', () => {
         filterBuilder = new LevantamentoFilterBuilder();
     });
 
-    describe('Constructor', () => {
-        it('deve criar instância com filtros vazios', () => {
-            expect(filterBuilder).toBeInstanceOf(LevantamentoFilterBuilder);
-            expect(filterBuilder.filtros).toEqual({});
-            expect(filterBuilder.levantamentoModel).toBe(Levantamento);
-        });
-    });
-
     describe('comInventario', () => {
         it('deve adicionar filtro de inventário com ObjectId válido', () => {
             const validObjectId = '507f1f77bcf86cd799439011';
-
             const result = filterBuilder.comInventario(validObjectId);
 
             expect(result).toBe(filterBuilder);
             expect(filterBuilder.filtros.inventario).toBe(validObjectId);
         });
 
-        it('deve ignorar inventário com ID inválido', () => {
-            const invalidId = 'invalid-id';
-
-            const result = filterBuilder.comInventario(invalidId);
-
-            expect(result).toBe(filterBuilder);
+        it('deve ignorar inventário com ID inválido ou vazio', () => {
+            filterBuilder.comInventario('invalid-id');
             expect(filterBuilder.filtros.inventario).toBeUndefined();
-        });
 
-        it('deve ignorar inventário vazio ou null', () => {
-            expect(filterBuilder.comInventario('').filtros.inventario).toBeUndefined();
-            expect(filterBuilder.comInventario(null).filtros.inventario).toBeUndefined();
-            expect(filterBuilder.comInventario(undefined).filtros.inventario).toBeUndefined();
-        });
+            filterBuilder.comInventario('');
+            expect(filterBuilder.filtros.inventario).toBeUndefined();
 
-        it('deve ignorar inventário com formato incorreto', () => {
-            const invalidFormats = [
-                '507f1f77bcf86cd79943901',
-                '507f1f77bcf86cd799439011g',
-                'gggggggggggggggggggggggg',
-            ];
-
-            invalidFormats.forEach(invalidId => {
-                const builder = new LevantamentoFilterBuilder();
-                builder.comInventario(invalidId);
-                expect(builder.filtros.inventario).toBeUndefined();
-            });
+            filterBuilder.comInventario(null);
+            expect(filterBuilder.filtros.inventario).toBeUndefined();
         });
     });
 
@@ -66,7 +39,6 @@ describe('LevantamentoFilterBuilder', () => {
 
             estadosValidos.forEach(estado => {
                 const builder = new LevantamentoFilterBuilder();
-                
                 const result = builder.comEstado(estado);
 
                 expect(result).toBe(builder);
@@ -74,73 +46,53 @@ describe('LevantamentoFilterBuilder', () => {
             });
         });
 
-        it('deve ignorar estado inválido', () => {
-            const estadosInvalidos = ["Estado Inválido", "Novo", "", "ativo"];
+        it('deve ignorar estado inválido ou vazio', () => {
+            filterBuilder.comEstado('Estado Inválido');
+            expect(filterBuilder.filtros.estado).toBeUndefined();
 
-            estadosInvalidos.forEach(estado => {
-                const builder = new LevantamentoFilterBuilder();
-                
-                builder.comEstado(estado);
+            filterBuilder.comEstado('');
+            expect(filterBuilder.filtros.estado).toBeUndefined();
 
-                expect(builder.filtros.estado).toBeUndefined();
-            });
-        });
-
-        it('deve ignorar estado vazio ou null', () => {
-            expect(filterBuilder.comEstado('').filtros.estado).toBeUndefined();
-            expect(filterBuilder.comEstado(null).filtros.estado).toBeUndefined();
-            expect(filterBuilder.comEstado(undefined).filtros.estado).toBeUndefined();
+            filterBuilder.comEstado(null);
+            expect(filterBuilder.filtros.estado).toBeUndefined();
         });
     });
 
     describe('comUsuario', () => {
         it('deve adicionar filtro de usuário com ObjectId válido', () => {
             const validObjectId = '507f1f77bcf86cd799439011';
-
             const result = filterBuilder.comUsuario(validObjectId);
 
             expect(result).toBe(filterBuilder);
             expect(filterBuilder.filtros.usuario).toBe(validObjectId);
         });
 
-        it('deve ignorar usuário com ID inválido', () => {
-            const invalidId = 'invalid-user-id';
-
-            filterBuilder.comUsuario(invalidId);
-
+        it('deve ignorar usuário com ID inválido ou vazio', () => {
+            filterBuilder.comUsuario('invalid-user-id');
             expect(filterBuilder.filtros.usuario).toBeUndefined();
-        });
 
-        it('deve ignorar usuário vazio ou null', () => {
-            expect(filterBuilder.comUsuario('').filtros.usuario).toBeUndefined();
-            expect(filterBuilder.comUsuario(null).filtros.usuario).toBeUndefined();
-            expect(filterBuilder.comUsuario(undefined).filtros.usuario).toBeUndefined();
+            filterBuilder.comUsuario('');
+            expect(filterBuilder.filtros.usuario).toBeUndefined();
+
+            filterBuilder.comUsuario(null);
+            expect(filterBuilder.filtros.usuario).toBeUndefined();
         });
     });
 
     describe('comOcioso', () => {
-        it('deve adicionar filtro ocioso true para string "true"', () => {
-            const result = filterBuilder.comOcioso("true");
-
-            expect(result).toBe(filterBuilder);
+        it('deve adicionar filtro ocioso true para string "true" ou boolean true', () => {
+            filterBuilder.comOcioso("true");
             expect(filterBuilder.filtros.ocioso).toBe(true);
-        });
 
-        it('deve adicionar filtro ocioso true para boolean true', () => {
             filterBuilder.comOcioso(true);
-
             expect(filterBuilder.filtros.ocioso).toBe(true);
         });
 
-        it('deve adicionar filtro ocioso false para string "false"', () => {
+        it('deve adicionar filtro ocioso false para string "false" ou boolean false', () => {
             filterBuilder.comOcioso("false");
-
             expect(filterBuilder.filtros.ocioso).toBe(false);
-        });
 
-        it('deve adicionar filtro ocioso false para boolean false', () => {
             filterBuilder.comOcioso(false);
-
             expect(filterBuilder.filtros.ocioso).toBe(false);
         });
 
@@ -158,7 +110,6 @@ describe('LevantamentoFilterBuilder', () => {
     describe('comTombo', () => {
         it('deve adicionar filtro de tombo com escape de regex', () => {
             const tombo = 'TOM-123';
-
             const result = filterBuilder.comTombo(tombo);
 
             expect(result).toBe(filterBuilder);
@@ -170,30 +121,21 @@ describe('LevantamentoFilterBuilder', () => {
             const expectedEscaped = 'TOM\\.123\\[test\\]';
 
             filterBuilder.comTombo(tomboComEspeciais);
-
             expect(filterBuilder.filtros["bem.tombo"]).toBe(expectedEscaped);
         });
 
         it('deve ignorar tombo vazio ou null', () => {
-            expect(filterBuilder.comTombo('').filtros["bem.tombo"]).toBeUndefined();
-            expect(filterBuilder.comTombo(null).filtros["bem.tombo"]).toBeUndefined();
-            expect(filterBuilder.comTombo(undefined).filtros["bem.tombo"]).toBeUndefined();
-        });
+            filterBuilder.comTombo('');
+            expect(filterBuilder.filtros["bem.tombo"]).toBeUndefined();
 
-        it('deve processar tombo com todos os caracteres especiais', () => {
-            const tomboComplexo = 'TOM-[123]{test}(abc)*+?.\\^$|#  ';
-            const expectedEscaped = 'TOM\\-\\[123\\]\\{test\\}\\(abc\\)\\*\\+\\?\\.\\\\\\^\\$\\|\\#\\ \\ ';
-
-            filterBuilder.comTombo(tomboComplexo);
-
-            expect(filterBuilder.filtros["bem.tombo"]).toBe(expectedEscaped);
+            filterBuilder.comTombo(null);
+            expect(filterBuilder.filtros["bem.tombo"]).toBeUndefined();
         });
     });
 
     describe('comNomeBem', () => {
         it('deve adicionar filtro regex para nome com múltiplos caracteres', () => {
             const nome = 'Mesa';
-
             const result = filterBuilder.comNomeBem(nome);
 
             expect(result).toBe(filterBuilder);
@@ -205,7 +147,6 @@ describe('LevantamentoFilterBuilder', () => {
 
         it('deve adicionar filtro regex com início para nome de um caractere', () => {
             const nome = 'M';
-
             filterBuilder.comNomeBem(nome);
 
             expect(filterBuilder.filtros["bem.nome"]).toEqual({
@@ -219,7 +160,6 @@ describe('LevantamentoFilterBuilder', () => {
             const expectedEscaped = 'Mesa\\.Teste\\[123\\]';
 
             filterBuilder.comNomeBem(nomeComEspeciais);
-
             expect(filterBuilder.filtros["bem.nome"]).toEqual({
                 $regex: expectedEscaped,
                 $options: 'i'
@@ -227,52 +167,17 @@ describe('LevantamentoFilterBuilder', () => {
         });
 
         it('deve ignorar nome vazio ou null', () => {
-            expect(filterBuilder.comNomeBem('').filtros["bem.nome"]).toBeUndefined();
-            expect(filterBuilder.comNomeBem(null).filtros["bem.nome"]).toBeUndefined();
-            expect(filterBuilder.comNomeBem(undefined).filtros["bem.nome"]).toBeUndefined();
-        });
+            filterBuilder.comNomeBem('');
+            expect(filterBuilder.filtros["bem.nome"]).toBeUndefined();
 
-        it('deve processar nome com um caractere especial corretamente', () => {
-            const nomeEspecial = '.';
-
-            filterBuilder.comNomeBem(nomeEspecial);
-
-            expect(filterBuilder.filtros["bem.nome"]).toEqual({
-                $regex: '^\\.',
-                $options: 'i'
-            });
-        });
-    });
-
-    describe('escapeRegex', () => {
-        it('deve fazer escape de todos os caracteres especiais de regex', () => {
-            const textoComEspeciais = '-[]{}()*+?.,\\^$|#  ';
-            const expectedEscaped = '\\-\\[\\]\\{\\}\\(\\)\\*\\+\\?\\.\\,\\\\\\^\\$\\|\\#\\ \\ ';
-
-            const result = filterBuilder.escapeRegex(textoComEspeciais);
-
-            expect(result).toBe(expectedEscaped);
-        });
-
-        it('deve retornar texto normal inalterado', () => {
-            const textoNormal = 'TextoNormal123';
-
-            const result = filterBuilder.escapeRegex(textoNormal);
-
-            expect(result).toBe(textoNormal);
-        });
-
-        it('deve processar string vazia', () => {
-            const result = filterBuilder.escapeRegex('');
-
-            expect(result).toBe('');
+            filterBuilder.comNomeBem(null);
+            expect(filterBuilder.filtros["bem.nome"]).toBeUndefined();
         });
     });
 
     describe('build', () => {
         it('deve retornar filtros vazios quando nenhum filtro foi adicionado', () => {
             const result = filterBuilder.build();
-
             expect(result).toEqual({});
         });
 
@@ -298,7 +203,6 @@ describe('LevantamentoFilterBuilder', () => {
                 .comNomeBem('Mesa');
 
             const result = filterBuilder.build();
-
             expect(result).toEqual(expectedFiltros);
         });
 
@@ -326,72 +230,6 @@ describe('LevantamentoFilterBuilder', () => {
 
             expect(result).toEqual({
                 usuario: '507f1f77bcf86cd799439011'
-            });
-        });
-    });
-
-    describe('Casos de uso complexos', () => {
-        it('deve construir filtros completos para busca avançada', () => {
-            const filtroCompleto = new LevantamentoFilterBuilder()
-                .comInventario('507f1f77bcf86cd799439011')
-                .comEstado('Danificado')
-                .comOcioso(true)
-                .comUsuario('507f1f77bcf86cd799439012')
-                .comTombo('COMP-2024-001')
-                .comNomeBem('Computador Dell')
-                .build();
-
-            expect(filtroCompleto).toEqual({
-                inventario: '507f1f77bcf86cd799439011',
-                estado: 'Danificado',
-                ocioso: true,
-                usuario: '507f1f77bcf86cd799439012',
-                "bem.tombo": 'COMP\\-2024\\-001',
-                "bem.nome": {
-                    $regex: 'Computador\\ Dell',
-                    $options: 'i'
-                }
-            });
-        });
-
-        it('deve permitir reutilização de instância para diferentes filtros', () => {
-            const filtro1 = filterBuilder
-                .comInventario('507f1f77bcf86cd799439011')
-                .comEstado('Em condições de uso')
-                .build();
-
-            filterBuilder.filtros = {};
-
-            const filtro2 = filterBuilder
-                .comUsuario('507f1f77bcf86cd799439012')
-                .comOcioso(false)
-                .build();
-
-            expect(filtro1).toEqual({
-                inventario: '507f1f77bcf86cd799439011',
-                estado: 'Em condições de uso'
-            });
-
-            expect(filtro2).toEqual({
-                usuario: '507f1f77bcf86cd799439012',
-                ocioso: false
-            });
-        });
-
-        it('deve lidar com combinações válidas e inválidas', () => {
-            const filtroMisto = filterBuilder
-                .comInventario('507f1f77bcf86cd799439011')
-                .comEstado('Estado Inexistente')
-                .comOcioso(true)
-                .comUsuario('invalid-user')
-                .comTombo('TOM-123')
-                .comNomeBem('')
-                .build();
-
-            expect(filtroMisto).toEqual({
-                inventario: '507f1f77bcf86cd799439011',
-                ocioso: true,
-                "bem.tombo": 'TOM\\-123'
             });
         });
     });

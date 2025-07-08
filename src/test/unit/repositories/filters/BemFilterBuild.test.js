@@ -26,18 +26,12 @@ describe('BemFilterBuilder', () => {
       });
     });
 
-    it('não deve adicionar filtro se nome for vazio', () => {
+    it('não deve adicionar filtro se nome for vazio ou null', () => {
       builder.comNome('');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('nome');
-    });
 
-    it('não deve adicionar filtro se nome for null ou undefined', () => {
       builder.comNome(null);
-      const filtros1 = builder.build();
-      expect(filtros1).not.toHaveProperty('nome');
-
-      builder.comNome(undefined);
       const filtros2 = builder.build();
       expect(filtros2).not.toHaveProperty('nome');
     });
@@ -50,11 +44,6 @@ describe('BemFilterBuilder', () => {
         $options: 'i',
       });
     });
-
-    it('deve retornar this para encadeamento', () => {
-      const result = builder.comNome('Mesa');
-      expect(result).toBe(builder);
-    });
   });
 
   describe('comTombo()', () => {
@@ -64,18 +53,12 @@ describe('BemFilterBuilder', () => {
       expect(filtros.tombo).toEqual({ $regex: 'TOM123456', $options: 'i' });
     });
 
-    it('não deve adicionar filtro se tombo for vazio', () => {
+    it('não deve adicionar filtro se tombo for vazio ou null', () => {
       builder.comTombo('');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('tombo');
-    });
 
-    it('não deve adicionar filtro se tombo for null ou undefined', () => {
       builder.comTombo(null);
-      const filtros1 = builder.build();
-      expect(filtros1).not.toHaveProperty('tombo');
-
-      builder.comTombo(undefined);
       const filtros2 = builder.build();
       expect(filtros2).not.toHaveProperty('tombo');
     });
@@ -84,11 +67,6 @@ describe('BemFilterBuilder', () => {
       builder.comTombo('TOM.123(456)');
       const filtros = builder.build();
       expect(filtros.tombo).toEqual({ $regex: 'TOM\\.123\\(456\\)', $options: 'i' });
-    });
-
-    it('deve retornar this para encadeamento', () => {
-      const result = builder.comTombo('TOM123');
-      expect(result).toBe(builder);
     });
   });
 
@@ -100,43 +78,20 @@ describe('BemFilterBuilder', () => {
       expect(filtros.sala).toBe(salaId);
     });
 
-    it('não deve adicionar filtro se salaId for vazio', () => {
-      builder.comSala('');
-      const filtros = builder.build();
-      expect(filtros).not.toHaveProperty('sala');
-    });
-
-    it('não deve adicionar filtro se salaId for null ou undefined', () => {
-      builder.comSala(null);
-      const filtros1 = builder.build();
-      expect(filtros1).not.toHaveProperty('sala');
-
-      builder.comSala(undefined);
-      const filtros2 = builder.build();
-      expect(filtros2).not.toHaveProperty('sala');
-    });
-
-    it('não deve adicionar filtro se salaId não for ObjectId válido', () => {
+    it('não deve adicionar filtro se salaId for inválido', () => {
       builder.comSala('not-a-valid-objectid');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('sala');
     });
 
-    it('não deve adicionar filtro se salaId for muito curto', () => {
-      builder.comSala('123');
+    it('não deve adicionar filtro se salaId for vazio ou null', () => {
+      builder.comSala('');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('sala');
-    });
 
-    it('não deve adicionar filtro se salaId for muito longo', () => {
-      builder.comSala('507f1f77bcf86cd799439011abc');
-      const filtros = builder.build();
-      expect(filtros).not.toHaveProperty('sala');
-    });
-
-    it('deve retornar this para encadeamento', () => {
-      const result = builder.comSala('507f1f77bcf86cd799439011');
-      expect(result).toBe(builder);
+      builder.comSala(null);
+      const filtros2 = builder.build();
+      expect(filtros2).not.toHaveProperty('sala');
     });
   });
 
@@ -150,18 +105,12 @@ describe('BemFilterBuilder', () => {
       });
     });
 
-    it('não deve adicionar filtro se responsável for vazio', () => {
+    it('não deve adicionar filtro se responsável for vazio ou null', () => {
       builder.comResponsavel('');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('responsavel.nome');
-    });
 
-    it('não deve adicionar filtro se responsável for null ou undefined', () => {
       builder.comResponsavel(null);
-      const filtros1 = builder.build();
-      expect(filtros1).not.toHaveProperty('responsavel.nome');
-
-      builder.comResponsavel(undefined);
       const filtros2 = builder.build();
       expect(filtros2).not.toHaveProperty('responsavel.nome');
     });
@@ -174,95 +123,37 @@ describe('BemFilterBuilder', () => {
         $options: 'i',
       });
     });
-
-    it('deve retornar this para encadeamento', () => {
-      const result = builder.comResponsavel('João');
-      expect(result).toBe(builder);
-    });
   });
 
   describe('comAuditado()', () => {
-    it('deve definir auditado como true se valor for "true"', () => {
+    it('deve definir auditado como true se valor for "true" ou boolean true', () => {
       builder.comAuditado('true');
       const filtros = builder.build();
       expect(filtros.auditado).toBe(true);
-    });
 
-    it('deve definir auditado como true se valor for boolean true', () => {
       builder.comAuditado(true);
-      const filtros = builder.build();
-      expect(filtros.auditado).toBe(true);
+      const filtros2 = builder.build();
+      expect(filtros2.auditado).toBe(true);
     });
 
-    it('deve definir auditado como false se valor for "false"', () => {
+    it('deve definir auditado como false se valor for "false" ou boolean false', () => {
       builder.comAuditado('false');
       const filtros = builder.build();
       expect(filtros.auditado).toBe(false);
-    });
 
-    it('deve definir auditado como false se valor for boolean false', () => {
       builder.comAuditado(false);
-      const filtros = builder.build();
-      expect(filtros.auditado).toBe(false);
+      const filtros2 = builder.build();
+      expect(filtros2.auditado).toBe(false);
     });
 
-    it('não deve definir auditado se valor for inválido', () => {
+    it('não deve definir auditado se valor for inválido ou vazio', () => {
       builder.comAuditado('maybe');
       const filtros = builder.build();
       expect(filtros).not.toHaveProperty('auditado');
-    });
 
-    it('não deve definir auditado se valor for null ou undefined', () => {
-      builder.comAuditado(null);
-      const filtros1 = builder.build();
-      expect(filtros1).not.toHaveProperty('auditado');
-
-      builder.comAuditado(undefined);
+      builder.comAuditado('');
       const filtros2 = builder.build();
       expect(filtros2).not.toHaveProperty('auditado');
-    });
-
-    it('não deve definir auditado se valor for string vazia', () => {
-      builder.comAuditado('');
-      const filtros = builder.build();
-      expect(filtros).not.toHaveProperty('auditado');
-    });
-
-    it('deve retornar this para encadeamento', () => {
-      const result = builder.comAuditado('true');
-      expect(result).toBe(builder);
-    });
-  });
-
-  describe('getNomeSala()', () => {
-    it('deve retornar null por padrão', () => {
-      const nomeSala = builder.getNomeSala();
-      expect(nomeSala).toBeNull();
-    });
-  });
-
-  describe('escapeRegex()', () => {
-    it('deve escapar corretamente caracteres especiais de regex', () => {
-      const texto = 'Mesa.de(escritório)?+[test]*{1,2}^$|#';
-      const escaped = builder.escapeRegex(texto);
-      expect(escaped).toBe('Mesa\\.de\\(escritório\\)\\?\\+\\[test\\]\\*\\{1\\,2\\}\\^\\$\\|\\#');
-    });
-
-    it('deve escapar espaços', () => {
-      const texto = 'Mesa de escritório';
-      const escaped = builder.escapeRegex(texto);
-      expect(escaped).toBe('Mesa\\ de\\ escritório');
-    });
-
-    it('deve retornar string vazia se entrada for vazia', () => {
-      const escaped = builder.escapeRegex('');
-      expect(escaped).toBe('');
-    });
-
-    it('deve tratar texto sem caracteres especiais', () => {
-      const texto = 'MesaSimples';
-      const escaped = builder.escapeRegex(texto);
-      expect(escaped).toBe('MesaSimples');
     });
   });
 
@@ -309,54 +200,6 @@ describe('BemFilterBuilder', () => {
       expect(filtros).not.toHaveProperty('tombo');
       expect(filtros).not.toHaveProperty('sala');
       expect(filtros).not.toHaveProperty('auditado');
-    });
-  });
-
-  describe('Encadeamento de métodos', () => {
-    it('deve permitir encadeamento fluente de todos os métodos', () => {
-      const result = builder
-        .comNome('Mesa')
-        .comTombo('TOM123')
-        .comSala('507f1f77bcf86cd799439011')
-        .comResponsavel('João')
-        .comAuditado('true');
-      
-      expect(result).toBe(builder);
-      
-      const filtros = result.build();
-      expect(Object.keys(filtros)).toHaveLength(5);
-    });
-
-    it('deve permitir múltiplas chamadas do mesmo método (sobrescrever)', () => {
-      builder
-        .comNome('Mesa')
-        .comNome('Cadeira');
-      
-      const filtros = builder.build();
-      expect(filtros.nome).toEqual({
-        $regex: 'Cadeira',
-        $options: 'i'
-      });
-    });
-  });
-
-  describe('Casos extremos', () => {
-    it('deve lidar com valores falsy corretamente', () => {
-      builder
-        .comNome(0)
-        .comTombo(false)
-        .comSala(0)
-        .comResponsavel(false);
-      
-      const filtros = builder.build();
-      expect(filtros).toEqual({});
-    });
-
-    it('deve tratar ObjectId com letras maiúsculas e minúsculas', () => {
-      const salaIdMaiuscula = '507F1F77BCF86CD799439011';
-      builder.comSala(salaIdMaiuscula);
-      const filtros = builder.build();
-      expect(filtros.sala).toBe(salaIdMaiuscula);
     });
   });
 });

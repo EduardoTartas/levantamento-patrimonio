@@ -2,7 +2,6 @@ import usuariosSchemas from "../schemas/usuariosSchema.js";
 import authSchemas from "../schemas/authSchema.js";
 import commonResponses from "../schemas/swaggerCommonResponses.js";
 
-
 const usuariosRoutes = {
     "/usuarios": {
         get: {

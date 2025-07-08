@@ -35,7 +35,6 @@ const relatorioPaths = {
             maxLength: 24,
             pattern: "^[0-9a-fA-F]{24}$"
           },
-          example: "507f1f77bcf86cd799439011"
         },
         {
           name: "tipoRelatorio",
@@ -67,7 +66,6 @@ const relatorioPaths = {
             maxLength: 24,
             "pattern": "^[0-9a-fA-F]{24}$"
           },
-          "example": "507f1f77bcf86cd799439012"
         }
       ],
       "responses": {

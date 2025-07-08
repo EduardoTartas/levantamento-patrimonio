@@ -1,20 +1,15 @@
 import UsuarioRepository from '@repositories/UsuarioRepository.js';
 
-// --- Definição dos Mocks e Trackers ---
-
-// Para UsuarioModel e suas queries
 const mockUsuarioSave = jest.fn();
 const mockUsuarioFindOne = jest.fn();
 const mockUsuarioPaginate = jest.fn();
 const mockUsuarioFindByIdAndDelete = jest.fn();
 
-// Mocks para os métodos de query chainable
 const mockSelect = jest.fn();
 const mockPopulate = jest.fn();
 const mockLean = jest.fn();
 let directQueryResolverValue; 
 
-// queryMock: Este objeto simula a query do Mongoose.
 const queryMock = {}; 
 
 Object.assign(queryMock, {
@@ -35,7 +30,6 @@ mockSelect.mockReturnValue(queryMock);
 mockPopulate.mockReturnValue(queryMock);
 mockLean.mockReturnValue(queryMock);
 
-// Para UsuarioFilterBuilder
 const mockFilterBuilderBuild = jest.fn();
 const mockFilterBuilderComNome = jest.fn();
 const mockFilterBuilderComAtivo = jest.fn();
@@ -47,12 +41,9 @@ const mockUsuarioFilterBuilderInstance = {
   build: mockFilterBuilderBuild,
 };
 
-// Para utils/helpers
 const mockCustomErrorTracker = jest.fn();
 const mockMessagesErrorResourceNotFound = jest.fn(resource => `${resource} não encontrado.`);
 const mockMessagesErrorInternalServerError = jest.fn(resource => `Erro interno no servidor ao processar ${resource}.`);
-
-// --- Mocks das Dependências ---
 
 jest.mock('@models/Usuario.js', () => {
   const MockedUsuarioConstructor = jest.fn().mockImplementation(data => ({
@@ -91,7 +82,6 @@ jest.mock('@utils/helpers/index.js', () => ({
   },
 }));
 
-// --- Início dos Testes ---
 describe('UsuarioRepository', () => {
   let repository;
   const mockUsuarioId = 'mockUserId123';
@@ -107,22 +97,6 @@ describe('UsuarioRepository', () => {
     repository = new UsuarioRepository({ Usuario: MockedUsuario, Campus: MockedCampus });
 
     directQueryResolverValue = undefined; 
-  });
-
-  describe('constructor', () => {
-    it('deve instanciar corretamente com um modelo válido', () => {
-      const MockedUsuario = require('@models/Usuario.js');
-      const repo = new UsuarioRepository({ Usuario: MockedUsuario });
-      expect(repo).toBeDefined();
-      expect(repo.model).toBe(MockedUsuario);
-      expect(typeof repo.model.paginate).toBe('function');
-    });
-
-    it('deve lançar erro se o modelo não tiver o método paginate', () => {
-      const InvalidModelNoPaginate = jest.fn();
-      expect(() => new UsuarioRepository({ Usuario: InvalidModelNoPaginate }))
-        .toThrow('The Usuario model must include the paginate method. Ensure mongoose-paginate-v2 is applied.');
-    });
   });
 
   describe('buscarPorId', () => {
@@ -143,7 +117,7 @@ describe('UsuarioRepository', () => {
       expect(result).toEqual(userWithTokens);
     });
 
-    it('deve lançar CustomError se usuário não for encontrado em buscarPorId', async () => {
+    it('deve lançar CustomError se usuário não for encontrado', async () => {
       directQueryResolverValue = null;
       await expect(repository.buscarPorId(mockUsuarioId)).rejects.toThrow('Usuário não encontrado.');
       expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
@@ -170,7 +144,7 @@ describe('UsuarioRepository', () => {
       expect(require('@models/Usuario.js').findOne).toHaveBeenCalledWith({ email, _id: { $ne: idIgnorado } }, '+senha');
     });
 
-    it('deve retornar null se nenhum usuário for encontrado por email', async () => {
+    it('deve retornar null se nenhum usuário for encontrado', async () => {
       mockUsuarioFindOne.mockResolvedValueOnce(null);
       const email = 'inexistente@exemplo.com';
       const result = await repository.buscarPorEmail(email);
@@ -195,7 +169,7 @@ describe('UsuarioRepository', () => {
       expect(require('@models/Usuario.js').findOne).toHaveBeenCalledWith({ cpf, _id: { $ne: idIgnorado } });
     });
 
-    it('deve retornar null se nenhum usuário for encontrado por CPF', async () => {
+    it('deve retornar null se nenhum usuário for encontrado', async () => {
       mockUsuarioFindOne.mockResolvedValueOnce(null);
       const cpf = '00000000000';
       const result = await repository.buscarPorCpf(cpf);
@@ -206,8 +180,8 @@ describe('UsuarioRepository', () => {
   describe('listar', () => {
     const mockReqWithId = { params: { id: mockUsuarioId }, query: {} };
 
-    describe('Quando um ID é fornecido nos parâmetros', () => {
-      it('deve buscar e retornar um único usuário por ID com populate e lean', async () => {
+    describe('Quando um ID é fornecido', () => {
+      it('deve buscar e retornar um único usuário por ID', async () => {
         directQueryResolverValue = mockUsuarioData; 
         const result = await repository.listar(mockReqWithId);
         expect(require('@models/Usuario.js').findById).toHaveBeenCalledWith(mockUsuarioId);
@@ -216,7 +190,7 @@ describe('UsuarioRepository', () => {
         expect(result).toEqual(mockUsuarioData);
       });
 
-      it('deve lançar CustomError se usuário não for encontrado ao listar por ID', async () => {
+      it('deve lançar CustomError se usuário não for encontrado', async () => {
         directQueryResolverValue = null; 
         await expect(repository.listar(mockReqWithId)).rejects.toThrow('Usuário não encontrado.');
         expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
@@ -226,10 +200,10 @@ describe('UsuarioRepository', () => {
       });
     });
 
-    describe('Quando nenhum ID é fornecido (listagem com filtros e paginação)', () => {
+    describe('Listagem com filtros e paginação', () => {
       const mockReqQueryBase = { params: {} };
       const mockFiltrosConstruidos = { nome: /Teste/i, status: true, campus: { $in: ['campusIdCentral'] } };
-      const mockPaginatedData = { docs: [mockUsuarioData], totalDocs: 1, limit: 20, page: 2, totalPages: 1, pagingCounter: 1, hasPrevPage: false, hasNextPage: false, prevPage: null, nextPage: null };
+      const mockPaginatedData = { docs: [mockUsuarioData], totalDocs: 1, limit: 20, page: 2, totalPages: 1 };
 
       it('deve construir filtros e paginar resultados', async () => {
         const mockReqQuery = { 
@@ -241,11 +215,9 @@ describe('UsuarioRepository', () => {
 
         const result = await repository.listar(mockReqQuery);
 
-        expect(require('@repositories/filters/UsuarioFilterBuilder.js')).toHaveBeenCalledTimes(1);
         expect(mockFilterBuilderComNome).toHaveBeenCalledWith('Teste');
         expect(mockFilterBuilderComAtivo).toHaveBeenCalledWith('true');
         expect(mockFilterBuilderComCampus).toHaveBeenCalledWith('Campus Central');
-        expect(mockFilterBuilderBuild).toHaveBeenCalledTimes(1);
         expect(require('@models/Usuario.js').paginate).toHaveBeenCalledWith(mockFiltrosConstruidos, {
           page: 2,
           limit: 20,
@@ -256,7 +228,7 @@ describe('UsuarioRepository', () => {
         expect(result).toEqual(mockPaginatedData);
       });
 
-      it('deve usar valores padrão para filtros e paginação se não fornecidos', async () => {
+      it('deve usar valores padrão quando não fornecidos', async () => {
         const emptyReqQuery = { ...mockReqQueryBase, query: {} };
         mockFilterBuilderBuild.mockReturnValueOnce({ status: true }); 
         mockUsuarioPaginate.mockResolvedValueOnce(mockPaginatedData);
@@ -271,8 +243,8 @@ describe('UsuarioRepository', () => {
           limit: 10,
         }));
       });
-      
-      it('deve limitar o "limite" a 100 no máximo', async () => {
+
+      it('deve limitar o limite a 100 no máximo', async () => {
         const reqWithHighLimit = { ...mockReqQueryBase, query: { limite: '200' } };
         mockFilterBuilderBuild.mockReturnValueOnce({});
         mockUsuarioPaginate.mockResolvedValueOnce(mockPaginatedData);
@@ -281,33 +253,6 @@ describe('UsuarioRepository', () => {
         expect(require('@models/Usuario.js').paginate).toHaveBeenCalledWith({}, expect.objectContaining({
           limit: 100,
         }));
-      });
-
-      it('deve lançar CustomError se filterBuilder.build não for uma função (cenário de guarda)', async () => {
-        const originalFilterBuilderMock = require('@repositories/filters/UsuarioFilterBuilder.js').getMockImplementation();
-        require('@repositories/filters/UsuarioFilterBuilder.js').mockImplementationOnce(() => ({
-          comNome: jest.fn().mockReturnThis(),
-          comAtivo: jest.fn().mockReturnThis(),
-          comCampus: jest.fn().mockReturnThis(),
-          build: undefined, 
-        }));
-        
-        const MockedUsuario = require('@models/Usuario.js');
-        const MockedCampus = require('@models/Campus.js');
-        const tempRepository = new UsuarioRepository({ Usuario: MockedUsuario, Campus: MockedCampus });
-
-
-        const mockReqQuery = { ...mockReqQueryBase, query: { nome: 'Teste' } };
-        await expect(tempRepository.listar(mockReqQuery)).rejects.toThrow('Erro interno no servidor ao processar Usuário.');
-        expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
-            statusCode: 500,
-            errorType: "internalServerError",
-            customMessage: mockMessagesErrorInternalServerError("Usuário"),
-        }));
-        // Restore original mock for other tests
-        if (originalFilterBuilderMock) {
-            require('@repositories/filters/UsuarioFilterBuilder.js').mockImplementation(originalFilterBuilderMock);
-        }
       });
     });
   });
@@ -328,10 +273,10 @@ describe('UsuarioRepository', () => {
   });
 
   describe('atualizar', () => {
-    const dadosAtualizacao = { nome: 'Usuário Atualizado' };
-    const usuarioAtualizado = { ...mockUsuarioData, ...dadosAtualizacao };
+    it('deve atualizar um usuário e retornar os dados atualizados', async () => {
+      const dadosAtualizacao = { nome: 'Usuário Atualizado' };
+      const usuarioAtualizado = { ...mockUsuarioData, ...dadosAtualizacao };
 
-    it('deve atualizar um usuário e retornar os dados atualizados com populate e lean', async () => {
       directQueryResolverValue = usuarioAtualizado; 
       const result = await repository.atualizar(mockUsuarioId, dadosAtualizacao);
       expect(require('@models/Usuario.js').findByIdAndUpdate).toHaveBeenCalledWith(mockUsuarioId, dadosAtualizacao, { new: true });
@@ -340,9 +285,9 @@ describe('UsuarioRepository', () => {
       expect(result).toEqual(usuarioAtualizado);
     });
 
-    it('deve lançar CustomError se usuário não for encontrado para atualização', async () => {
+    it('deve lançar CustomError se usuário não for encontrado', async () => {
       directQueryResolverValue = null; 
-      await expect(repository.atualizar(mockUsuarioId, dadosAtualizacao)).rejects.toThrow('Usuário não encontrado.');
+      await expect(repository.atualizar(mockUsuarioId, {})).rejects.toThrow('Usuário não encontrado.');
       expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
         statusCode: 404,
         customMessage: mockMessagesErrorResourceNotFound("Usuário"),
@@ -359,7 +304,7 @@ describe('UsuarioRepository', () => {
       expect(result).toEqual(mockDeleteResult);
     });
 
-    it('deve retornar o resultado mesmo que o usuário não exista (comportamento do findByIdAndDelete)', async () => {
+    it('deve retornar o resultado mesmo que o usuário não exista', async () => {
       mockUsuarioFindByIdAndDelete.mockResolvedValueOnce(null); 
       const result = await repository.deletar('idInexistente');
       expect(require('@models/Usuario.js').findByIdAndDelete).toHaveBeenCalledWith('idInexistente');

@@ -1,4 +1,3 @@
-// CampusRepository.test.js
 import CampusRepository from '@repositories/CampusRepository.js';
 import CampusFilterBuilder from '@repositories/filters/CampusFilterBuilder.js';
 import { CustomError, messages } from '@utils/helpers';
@@ -13,13 +12,10 @@ describe('CampusRepository', () => {
   let repo;
 
   beforeEach(() => {
-    // Reset mocks
     jest.clearAllMocks();
 
-    // Mock paginate method for Campus
     Campus.paginate = jest.fn();
 
-    // Mock constructor for Campus (new Campus())
     Campus.mockImplementation((data) => ({
       save: jest.fn().mockResolvedValue(data),
     }));
@@ -129,7 +125,7 @@ describe('CampusRepository', () => {
         comNome: jest.fn().mockReturnThis(),
         comCidade: jest.fn().mockReturnThis(),
         comAtivo: jest.fn().mockReturnThis(),
-        build: null, // inválido
+        build: null,
       };
       CampusFilterBuilder.mockImplementation(() => badFilterBuilder);
 

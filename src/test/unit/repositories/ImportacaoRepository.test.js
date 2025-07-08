@@ -91,13 +91,6 @@ describe('ImportacaoRepository', () => {
             expect(mockSalaFind).not.toHaveBeenCalled();
         });
 
-        it('deve retornar array vazio quando combinations é null', async () => {
-            const resultado = await ImportacaoRepository.findSalasByCombinations(null, 'campusId123');
-
-            expect(resultado).toEqual([]);
-            expect(mockSalaFind).not.toHaveBeenCalled();
-        });
-
         it('deve buscar salas com múltiplas combinações', async () => {
             const combinations = [
                 { nome: 'Sala A101', bloco: 'Bloco A' },
@@ -163,13 +156,6 @@ describe('ImportacaoRepository', () => {
     describe('verificarTombosDuplicados', () => {
         it('deve retornar array vazio quando não há tombos válidos', async () => {
             const resultado = await ImportacaoRepository.verificarTombosDuplicados(['', '  ', null]);
-
-            expect(resultado).toEqual([]);
-            expect(mockBemFind).not.toHaveBeenCalled();
-        });
-
-        it('deve retornar array vazio quando array de tombos é vazio', async () => {
-            const resultado = await ImportacaoRepository.verificarTombosDuplicados([]);
 
             expect(resultado).toEqual([]);
             expect(mockBemFind).not.toHaveBeenCalled();

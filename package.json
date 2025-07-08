@@ -10,10 +10,10 @@
     "node": "20.14.0"
   },
   "scripts": {
-    "dev": "docker-compose -f docker-compose.dev.yml up --build",
-    "seed": "node src/seeds/seeds.js",
+    "dev": "docker compose -f docker-compose.dev.yml up --build",
+    "seed": "docker exec levantamento-api node src/seeds/seeds.js",
     "test": "jest --coverage --detectOpenHandles",
-    "start": "docker-compose -f docker-compose.yml up --build"
+    "start": "node server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

@@ -2,58 +2,85 @@
 
 ### Equipe
 - Gustavo
-
 - Eduardo
-
 - Thiago
 
 ## Visão Geral  
 Sistema para gerenciamento e controle de bens patrimoniais, desenvolvido com metodologia **Scrum** em 2 sprints.  
 
-## Sprint 1 (01/04 - 15/04/2025)  
-**Objetivo:** Definição de requisitos e prototipação  
+## 🚀 Como Executar o Projeto
 
-### ✅ Tarefas Concluídas  
-- **Banco de Dados**  
-  ✔ Modelagem MongoDB 
-  
-- **Documentação**  
-  ✔ Revisão de RFs e RNFs  
-  ✔ Requisitos desejáveis  
+### Pré-requisitos
+- Docker e Docker Compose instalados
+- Node.js 20.14.0 (caso queira executar localmente)
+- Git
 
-- **Figma (UI/UX)**  
-  ✔ Padronização de cores  
-  ✔ Redesign de telas:  
-    - Login  
-    - Lista de Salas  
-    - Inventários  
-    - CRUD de Usuários/Bens  
-    - Leitor QR Code  
+### 1. Clone o repositório
+```bash
+git clone <url-do-repositorio>
+cd levantamento-patrimonio
+```
 
-- **Reuniões**  
-  ✔ 2 sessões com cliente para validação 
+### 2. Configure as variáveis de ambiente
+```bash
+# Copie o arquivo de exemplo
+cp .env.example .env
 
+# Edite o arquivo .env com suas configurações
+# (Para desenvolvimento local, as configurações padrão já funcionam)
+```
 
-## Sprint 2 (16/04 - 29/04/2025)  
-**Objetivo:** Modelagem de dados e API  
+### 3. Execute com Docker (Recomendado)
 
-### ✅ Tarefas Concluídas   
+#### Desenvolvimento
+```bash
+# Inicia todos os serviços (API, MongoDB, MinIO)
+npm run dev
+```
 
-- **Documentação de Rotas**  
-  ```plaintext
-  POST /login  
-  GET /usuarios  
-  POST /inventarios  
-  PUT /itens/{id}  
+#### Executar seeds (dados de exemplo)
+```bash
+# Em outro terminal, execute as seeds
+npm run seed
+```
 
-- **Metodologia - Métricas SCRUM**  
-   - Responsáveis: Eduardo, Thiago e Gustavo  
+### 4. Executar apenas serviços específicos
+```bash
+# Apenas MongoDB
+docker-compose -f docker-compose.dev.yml up mongo -d
 
-- **Dificuldades Encontradas**  
-   - Responsáveis: Eduardo, Thiago e Gustavo  
+# Apenas MinIO
+docker-compose -f docker-compose.dev.yml up minio -d
+```
 
-- **Aprendizagem com o Processo**
-   - Responsáveis: Eduardo, Thiago e Gustavo 
+### 5. Acesso aos serviços
 
+| Serviço | URL | Credenciais |
+|---------|-----|-------------|
+| **API** | http://localhost:3001 | - |
+| **MinIO Console** | http://localhost:9001 | Definidas no .env |
+| **MongoDB** | localhost:27017 | Sem autenticação |
+
+### 6. Usuário padrão (após executar seeds)
+- **Email:** admin@admin.com
+- **Senha:** admin
+- **Cargo:** Funcionario Cpalm
+
+### 7. Scripts disponíveis
+```bash
+npm run dev          # Executa ambiente de desenvolvimento
+npm run seed         # Executa seeds no Docker
+npm run test         # Executa testes
+npm start           # Inicia aplicação (produção)
+```
+
+### 8. Parar os serviços
+```bash
+# Para todos os containers
+docker-compose -f docker-compose.dev.yml down
+
+# Remove volumes (apaga dados)
+docker-compose -f docker-compose.dev.yml down -v
+```
 
 

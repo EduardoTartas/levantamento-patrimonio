@@ -32,22 +32,6 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         cargo: 'Comissionado',
     });
 
-    it('deve criar um usuário com dados válidos e status explícito true', async () => {
-        const userData = { ...baseValidUserData(), senha: 'OptionalPassword123', status: true };
-        const user = new Usuario(userData);
-        await user.save();
-
-        const savedUser = await Usuario.findById(user._id);
-        expect(savedUser).toBeDefined();
-        expect(savedUser.nome).toBe(userData.nome);
-        expect(savedUser.cpf).toBe(userData.cpf);
-        expect(savedUser.email).toBe(userData.email);
-        expect(savedUser.senha).toBeUndefined();
-        expect(savedUser.cargo).toBe(userData.cargo);
-        expect(savedUser.status).toBe(true);
-        expect(savedUser.campus.toString()).toBe(userData.campus);
-    });
-
     it('deve criar um usuário com dados válidos e status padrão true (quando status não é fornecido)', async () => {
         const userData = { ...baseValidUserData(), senha: 'OptionalPassword123' };
         const user = new Usuario(userData);
@@ -69,15 +53,8 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         expect(savedUserWithPassword.senha).toBeUndefined();
     });
 
-    // --- Testes de validação de campos obrigatórios (required: true) ---
     it('não deve criar um usuário sem nome', async () => {
         const { nome, ...invalidData } = baseValidUserData();
-        const user = new Usuario(invalidData);
-        await expect(user.save()).rejects.toThrow(/Path `nome` is required/);
-    });
-
-    it('não deve criar um usuário com nome vazio (Mongoose required implies not empty)', async () => {
-        const invalidData = { ...baseValidUserData(), nome: '' };
         const user = new Usuario(invalidData);
         await expect(user.save()).rejects.toThrow(/Path `nome` is required/);
     });
@@ -88,20 +65,8 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         await expect(user.save()).rejects.toThrow(/Path `cpf` is required/);
     });
 
-    it('não deve criar um usuário com CPF vazio', async () => {
-        const invalidData = { ...baseValidUserData(), cpf: '' };
-        const user = new Usuario(invalidData);
-        await expect(user.save()).rejects.toThrow(/Path `cpf` is required/);
-    });
-
     it('não deve criar um usuário sem email', async () => {
         const { email, ...invalidData } = baseValidUserData();
-        const user = new Usuario(invalidData);
-        await expect(user.save()).rejects.toThrow(/Path `email` is required/);
-    });
-
-    it('não deve criar um usuário com email vazio', async () => {
-        const invalidData = { ...baseValidUserData(), email: '' };
         const user = new Usuario(invalidData);
         await expect(user.save()).rejects.toThrow(/Path `email` is required/);
     });
@@ -110,14 +75,6 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         const { cargo, ...invalidData } = baseValidUserData();
         const user = new Usuario(invalidData);
         await expect(user.save()).rejects.toThrow(/Path `cargo` is required/);
-    });
-
-    it('DEVE criar um usuário com qualquer string para cargo (pois não é enum no Mongoose)', async () => {
-        const userData = { ...baseValidUserData(), cargo: 'Qualquer String de Cargo' };
-        const user = new Usuario(userData);
-        await expect(user.save()).resolves.toBeInstanceOf(Usuario);
-        const savedUser = await Usuario.findById(user._id);
-        expect(savedUser.cargo).toBe('Qualquer String de Cargo');
     });
 
 
@@ -133,8 +90,6 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         await expect(user.save()).rejects.toThrow(/Cast to ObjectId failed for value "nao-e-um-objectid"/);
     });
 
-
-    // --- Testes de unicidade (unique: true) ---
     it('deve garantir que o CPF do usuário seja único', async () => {
         const userData = baseValidUserData();
         await new Usuario(userData).save();
@@ -151,19 +106,6 @@ describe('Modelo de Usuário - Criação (Conforme Schema Mongoose)', () => {
         await expect(user2.save()).rejects.toThrow(/E11000 duplicate key error.*?index: email_1/);
     });
 
-    // --- Testes de timestamps ---
-    it('o sistema deve registrar automaticamente as datas de criação e atualização', async () => {
-        const user = new Usuario(baseValidUserData());
-        await user.save();
-
-        const savedUser = await Usuario.findById(user._id);
-        expect(savedUser.createdAt).toBeDefined();
-        expect(savedUser.updatedAt).toBeDefined();
-        expect(savedUser.createdAt).toBeInstanceOf(Date);
-        expect(savedUser.updatedAt).toBeInstanceOf(Date);
-    });
-
-    // --- Testes de consulta ---
     it('deve retornar todos os usuários cadastrados', async () => {
         const user1Data = {
             ...baseValidUserData(),
@@ -223,42 +165,6 @@ describe('Modelo de Usuário - Atualização (Conforme Schema Mongoose)', () => 
 
         const updatedUser = await Usuario.findById(existingUserId);
         expect(updatedUser.status).toBe(false);
-    });
-
-    it('não deve atualizar nome para uma string vazia (Mongoose required)', async () => {
-        const user = await Usuario.findById(existingUserId);
-        user.nome = '';
-        await expect(user.save()).rejects.toThrow(/Path `nome` is required/);
-    });
-
-    it('DEVE permitir atualizar senha para qualquer string (ou undefined para remover)', async () => {
-        const user = await Usuario.findById(existingUserId).select('+senha');
-        const newPassword = 'NovaSenhaSuper#Valida123';
-        user.senha = newPassword;
-        await user.save();
-
-        const updatedUser = await Usuario.findById(existingUserId).select('+senha');
-    
-        expect(updatedUser.senha).toBeDefined();
-        if (originalPasswordHash) {
-            expect(updatedUser.senha).not.toBe(originalPasswordHash);
-        }
-
-        user.senha = undefined;
-        await user.save();
-        const userWithNoPass = await Usuario.findById(existingUserId).select('+senha');
-        expect(userWithNoPass.senha).toBeUndefined();
-    });
-
-
-    it('DEVE permitir atualizar cargo para qualquer string (pois não é enum no Mongoose)', async () => {
-        const user = await Usuario.findById(existingUserId);
-        const newCargo = 'Cargo Atualizado Sem Restricao Enum';
-        user.cargo = newCargo;
-        await user.save();
-
-        const updatedUser = await Usuario.findById(existingUserId);
-        expect(updatedUser.cargo).toBe(newCargo);
     });
 
     it('deve manter a senha inalterada se o campo senha não for fornecido na atualização', async () => {

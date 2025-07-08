@@ -106,6 +106,7 @@
     "coveragePathIgnorePatterns": [
       "src/routes/index.js",
       "src/docs/",
+      "src/config/",
       "src/seeds/",
       "/src/app.js",
       "/node_modules/",

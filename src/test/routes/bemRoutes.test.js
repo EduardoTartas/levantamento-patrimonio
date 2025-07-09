@@ -1,15 +1,18 @@
 import request from "supertest";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import dotenv from 'dotenv';
 import app from '../../app';
 import Bem from '@models/Bem';
 import Sala from '@models/Sala';
 import Campus from '@models/Campus';
 
+let mongoServer;
+
 dotenv.config();
 
-// Mock dos middlewares de autenticação
+
 jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
     req.user = { _id: 'testuser', id: 'testuser' };
     next();
@@ -43,10 +46,9 @@ describe("Bem Routes", () => {
     beforeAll(async () => {
         token = 'mock-jwt-token';
 
-        if (mongoose.connection.readyState === 0) {
-            const mongoUri = process.env.DB_URL_TESTE || process.env.DB_URL || 'mongodb://localhost:27017/levantamento_patrimonio_test';
-            await mongoose.connect(mongoUri);
-        }
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri);
 
         // Criar campus e sala para testes
         const campus = await Campus.create({
@@ -61,20 +63,16 @@ describe("Bem Routes", () => {
             bloco: 'A'
         });
         salaId = sala._id;
-    }, 30000);
+    }, 60000);
 
     afterAll(async () => {
         try {
-            await Bem.deleteMany({});
-            await Sala.deleteMany({});
-            await Campus.deleteMany({});
-            if (mongoose.connection.readyState !== 0) {
-                await mongoose.connection.close();
-            }
+            await mongoose.disconnect();
+            await mongoServer.stop();
         } catch (error) {
             console.error('Erro na limpeza:', error);
         }
-    });
+    }, 60000);
 
     beforeEach(async () => {
         await Bem.deleteMany({});

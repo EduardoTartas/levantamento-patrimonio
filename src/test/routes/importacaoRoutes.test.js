@@ -32,7 +32,7 @@ describe("Importacao Routes", () => {
 
     beforeAll(async () => {
         if (mongoose.connection.readyState === 0) {
-            const mongoUri = process.env.DB_URL_TESTE || process.env.DB_URL || 'mongodb://localhost:27017/levantamento_patrimonio_test';
+            const mongoUri = process.env.DB_URL_TESTE || 'mongodb://localhost:27017/teste';
             await mongoose.connect(mongoUri);
         }
 
@@ -42,7 +42,7 @@ describe("Importacao Routes", () => {
             cidade: 'Cidade Importacao Test'
         });
         campusId = campus._id.toString();
-    }, 30000);
+    }, 60000);
 
     afterAll(async () => {
         try {
@@ -53,7 +53,7 @@ describe("Importacao Routes", () => {
         } catch (error) {
             console.error('Erro na limpeza:', error);
         }
-    });
+    }, 60000);
 
     beforeEach(() => {
         jest.clearAllMocks();

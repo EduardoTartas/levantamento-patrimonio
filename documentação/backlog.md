@@ -6,12 +6,12 @@
 - [x] Modelagem do banco de dados (MongoDB)  
 - [x] Revisar protótipo no Figma 
 - [x] Documetar rotas (incluindo regras de negócio) 
-- [ ] Readme 
-- [ ] Changelog
-- [ ] Gitflow 
-- [ ] Código
-- [ ] Testes
-- [ ] Swagger
+- [x] Readme 
+- [x] Changelog
+- [x] Gitflow 
+- [x] Código
+- [x] Testes
+- [x] Swagger
 
 
 # Requisitos Funcionais (RF)  

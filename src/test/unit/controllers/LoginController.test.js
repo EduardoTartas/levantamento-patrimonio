@@ -4,7 +4,6 @@ import { LoginRepository } from '@repositories/LoginRepository';
 import AuthenticationError from '@utils/errors/AuthenticationError';
 import { NovaSenhaSchema } from '@utils/validators/schemas/zod/NovaSenhaSchema';
 
-// Mock dos módulos
 jest.mock('@services/LoginService');
 jest.mock('@repositories/LoginRepository');
 jest.mock('@utils/validators/schemas/zod/NovaSenhaSchema', () => ({
@@ -20,7 +19,6 @@ describe('LoginController', () => {
   let res;
   let next;
 
-  // Helper para criar mock do response
   const createMockResponse = () => {
     const res = {};
     res.status = jest.fn().mockReturnValue(res);
@@ -29,13 +27,11 @@ describe('LoginController', () => {
   };
 
   beforeEach(() => {
-    // Limpar todos os mocks
+
     jest.clearAllMocks();
     
-    // Criar instância do controller
     controller = new LoginController();
     
-    // Mock do service
     mockService = {
       autenticar: jest.fn(),
       refreshToken: jest.fn(),
@@ -43,11 +39,9 @@ describe('LoginController', () => {
       solicitarRecuperacao: jest.fn(),
       deletarRefreshToken: jest.fn()
     };
-    
-    // Substituir o service do controller pelo mock
+
     controller.service = mockService;
     
-    // Setup básico para req, res, next
     req = { body: {}, query: {} };
     res = createMockResponse();
     next = jest.fn();

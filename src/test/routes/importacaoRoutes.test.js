@@ -1,22 +1,46 @@
 import request from "supertest";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import dotenv from 'dotenv';
 import app from '../../app';
 import Campus from '@models/Campus';
 
+let mongoServer;
+
 dotenv.config();
+
+// Mock do DbConnect para evitar conexão com banco real
+jest.mock('@config/dbConnect.js', () => ({
+    __esModule: true,
+    default: {
+        conectar: jest.fn(),
+        desconectar: jest.fn(),
+    },
+}));
+
+// Mock do setupMinio
+jest.mock('@config/setupMinio.js', () => ({
+    __esModule: true,
+    default: jest.fn(),
+}));
+
+// Mock do rotaSeed
+jest.mock('@seeds/rotaSeed.js', () => ({
+    __esModule: true,
+    default: jest.fn(),
+}));
 
 // Declaração do mock primeiro
 const mockImportarCSV = jest.fn();
 
 // Mock dos middlewares de autenticação
-jest.mock('../../middlewares/AuthMiddleware.js', () => (req, res, next) => {
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
     req.user = { _id: 'testuser', id: 'testuser' };
     next();
 });
 
-jest.mock('../../middlewares/AuthPermission.js', () => (req, res, next) => {
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
     next();
 });
 
@@ -31,10 +55,9 @@ describe("Importacao Routes", () => {
     let campusId;
 
     beforeAll(async () => {
-        if (mongoose.connection.readyState === 0) {
-            const mongoUri = process.env.DB_URL_TESTE || 'mongodb://localhost:27017/teste';
-            await mongoose.connect(mongoUri);
-        }
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri);
 
         // Criar campus para testes
         const campus = await Campus.create({
@@ -50,13 +73,25 @@ describe("Importacao Routes", () => {
             if (mongoose.connection.readyState !== 0) {
                 await mongoose.connection.close();
             }
+            if (mongoServer) {
+                await mongoServer.stop();
+            }
         } catch (error) {
             console.error('Erro na limpeza:', error);
         }
     }, 60000);
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
+        // Limpar collections antes de cada teste
+        await Campus.deleteMany({});
+        
+        // Recriar campus para testes
+        const campus = await Campus.create({
+            nome: 'Campus Importacao Test',
+            cidade: 'Cidade Importacao Test'
+        });
+        campusId = campus._id.toString();
     });
 
     describe("POST /csv/:campusId", () => {

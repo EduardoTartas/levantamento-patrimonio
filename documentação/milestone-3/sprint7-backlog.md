@@ -20,6 +20,6 @@
    - Seguindo as regras de negócio
    - Responsáveis: Eduardo, Thiago e Gustavo
 
-2. **Teste unitário das funcionalidades implementadas**  
+3. **Teste unitário das funcionalidades implementadas**  
    - Explicação do teste do fluxo principal, demonstrar a cobertura de testes unitários.
    - Responsáveis: Eduardo, Thiago e Gustavo

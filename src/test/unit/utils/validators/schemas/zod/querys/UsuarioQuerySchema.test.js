@@ -9,28 +9,16 @@ describe('UsuarioIdSchema', () => {
         expect(resultado).toBe(validObjectId);
     });
 
-    it('deve lançar um erro para um ObjectId inválido (curto demais)', () => {
-        const invalidId = '123';
-        expect(() => UsuarioIdSchema.parse(invalidId)).toThrowError(/ID inválido/);
-    });
-
-    it('deve lançar um erro para um ObjectId inválido (formato incorreto)', () => {
-        const invalidId = 'nao-e-um-objectid-valido';
-        expect(() => UsuarioIdSchema.parse(invalidId)).toThrowError(/ID inválido/);
-    });
-
-    it('deve lançar um erro para um ObjectId inválido (caracteres inválidos)', () => {
-        const invalidId = '507f1f77bcf86cd79943901g';
-        expect(() => UsuarioIdSchema.parse(invalidId)).toThrowError(/ID inválido/);
-    });
-
-    it('deve lançar um erro para null', () => {
+    it('deve falhar para ObjectId inválido', () => {
+        expect(() => UsuarioIdSchema.parse('123')).toThrowError(/ID inválido/);
+        expect(() => UsuarioIdSchema.parse('nao-e-um-objectid-valido')).toThrowError(/ID inválido/);
+        expect(() => UsuarioIdSchema.parse('507f1f77bcf86cd79943901g')).toThrowError(/ID inválido/);
         expect(() => UsuarioIdSchema.parse(null)).toThrowError(/"message":\s*"Expected string, received null"/);
     });
 });
 
 describe('UsuarioQuerySchema', () => {
-    it('deve analisar um objeto vazio corretamente (usando defaults)', () => {
+    it('deve analisar um objeto vazio corretamente usando defaults', () => {
         const resultado = UsuarioQuerySchema.parse({});
         expect(resultado).toEqual({
             nome: undefined,
@@ -59,104 +47,47 @@ describe('UsuarioQuerySchema', () => {
         });
     });
 
-    it('deve permitir "ativo" como "false"', () => {
+    it('deve permitir ativo como false', () => {
         const query = { ativo: 'false' };
         const resultado = UsuarioQuerySchema.parse(query);
         expect(resultado.ativo).toBe('false');
     });
 
-    // Testes para 'nome'
-    it('lança um erro quando "nome" é uma string vazia', () => {
-        const query = { nome: '' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
+    it('deve analisar page e limite como float strings convertendo para int', () => {
+        expect(UsuarioQuerySchema.parse({ page: '2.5' }).page).toBe(2);
+        expect(UsuarioQuerySchema.parse({ limite: '20.7' }).limite).toBe(20);
     });
 
-    it('lança um erro quando "nome" contém apenas espaços', () => {
-        const query = { nome: '   ' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Nome não pode ser vazio/);
+    it('deve aceitar limite nos valores extremos', () => {
+        expect(UsuarioQuerySchema.parse({ limite: '1' }).limite).toBe(1);
+        expect(UsuarioQuerySchema.parse({ limite: '100' }).limite).toBe(100);
     });
 
-    // Testes para 'ativo'
-    it('lança um erro quando "ativo" é inválido', () => {
-        const query = { ativo: 'talvez' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+    it('deve falhar para nome inválido', () => {
+        expect(() => UsuarioQuerySchema.parse({ nome: '' })).toThrowError(/Nome não pode ser vazio/);
+        expect(() => UsuarioQuerySchema.parse({ nome: '   ' })).toThrowError(/Nome não pode ser vazio/);
     });
 
-    it('lança um erro quando "ativo" é um número (como string)', () => {
-        const query = { ativo: '1' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+    it('deve falhar para ativo inválido', () => {
+        expect(() => UsuarioQuerySchema.parse({ ativo: 'talvez' })).toThrowError(/Ativo deve ser 'true' ou 'false'/);
+        expect(() => UsuarioQuerySchema.parse({ ativo: '1' })).toThrowError(/Ativo deve ser 'true' ou 'false'/);
     });
 
-    // Testes para 'campus'
-
-    it('lança um erro quando "campus" é uma string vazia', () => {
-        const query = { campus: '' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/campus não pode ser vazio/);
+    it('deve falhar para campus inválido', () => {
+        expect(() => UsuarioQuerySchema.parse({ campus: '' })).toThrowError(/campus não pode ser vazio/);
+        expect(() => UsuarioQuerySchema.parse({ campus: '   ' })).toThrowError(/campus não pode ser vazio/);
     });
 
-    it('lança um erro quando "campus" contém apenas espaços', () => {
-        const query = { campus: '   ' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/campus não pode ser vazio/);
+    it('deve falhar para page inválido', () => {
+        expect(() => UsuarioQuerySchema.parse({ page: 'abc' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+        expect(() => UsuarioQuerySchema.parse({ page: '0' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
+        expect(() => UsuarioQuerySchema.parse({ page: '-1' })).toThrowError(/Page deve ser um número inteiro maior que 0/);
     });
 
-    // Testes para 'page'
-    it('lança um erro quando "page" é fornecido como string não numérica', () => {
-        const query = { page: 'abc' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('lança um erro quando "page" é "0"', () => {
-        const query = { page: '0' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('lança um erro quando "page" é um número negativo', () => {
-        const query = { page: '-1' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Page deve ser um número inteiro maior que 0/);
-    });
-
-    it('deve analisar "page" como float string (e.g., "2.5" torna-se 2)', () => {
-        const query = { page: '2.5' };
-        const resultado = UsuarioQuerySchema.parse(query);
-        expect(resultado.page).toBe(2);
-    });
-
-    // Testes para 'limite'
-    it('lança um erro quando "limite" é fornecido como string não numérica', () => {
-        const query = { limite: 'xyz' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('lança um erro quando "limite" é "0"', () => {
-        const query = { limite: '0' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('lança um erro quando "limite" é um número negativo', () => {
-        const query = { limite: '-5' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('lança um erro quando "limite" é maior que 100', () => {
-        const query = { limite: '101' };
-        expect(() => UsuarioQuerySchema.parse(query)).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
-    });
-
-    it('deve analisar "limite" como float string (e.g., "20.7" torna-se 20)', () => {
-        const query = { limite: '20.7' };
-        const resultado = UsuarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(20);
-    });
-
-    it('deve aceitar "limite" como 1', () => {
-        const query = { limite: '1' };
-        const resultado = UsuarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(1);
-    });
-
-    it('deve aceitar "limite" como 100', () => {
-        const query = { limite: '100' };
-        const resultado = UsuarioQuerySchema.parse(query);
-        expect(resultado.limite).toBe(100);
+    it('deve falhar para limite inválido', () => {
+        expect(() => UsuarioQuerySchema.parse({ limite: 'xyz' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => UsuarioQuerySchema.parse({ limite: '0' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => UsuarioQuerySchema.parse({ limite: '-5' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
+        expect(() => UsuarioQuerySchema.parse({ limite: '101' })).toThrowError(/Limite deve ser um número inteiro entre 1 e 100/);
     });
 });

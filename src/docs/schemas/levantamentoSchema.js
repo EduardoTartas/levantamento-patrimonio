@@ -75,8 +75,32 @@ const levantamentoSchemas = {
     description: "Schema para detalhes de um levantamento"
   },
   LevantamentoPost: {
-    ...deepCopy(levantamentoJsonSchema),
-    required: ["inventario", "bem", "usuario", "estado"],
+    type: "object",
+    properties: {
+      inventario: {
+        type: "string",
+        description: "ID do inventário"
+      },
+      bemId: {
+        type: "string",
+        description: "ID do bem"
+      },
+      estado: {
+        type: "string",
+        enum: ["Em condições de uso", "Inservível", "Danificado"],
+        description: "Estado do bem"
+      },
+      salaNova: {
+        type: "string",
+        description: "ID da nova sala (opcional)"
+      },
+      ocioso: {
+        type: "boolean",
+        default: false,
+        description: "Se o bem está ocioso"
+      }
+    },
+    required: ["inventario", "bem", "estado"],
     description: "Schema para criação de levantamento"
   },
   LevantamentoPutPatch: {

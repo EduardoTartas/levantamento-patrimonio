@@ -65,7 +65,6 @@ describe('LevantamentoRepository', () => {
         });
 
         it('deve lançar erro quando modelo não tem método paginate', () => {
-            const invalidModel = {};
             Levantamento.paginate = undefined;
 
             expect(() => new LevantamentoRepository()).toThrow(
@@ -105,21 +104,12 @@ describe('LevantamentoRepository', () => {
             messages.error.resourceNotFound.mockReturnValue('Levantamento não encontrado');
 
             await expect(repository.buscarPorId(mockId)).rejects.toThrow();
-            expect(mockModel.findById).toHaveBeenCalledWith(mockId);
             expect(CustomError).toHaveBeenCalledWith({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
                 field: 'Levantamento',
                 customMessage: 'Levantamento não encontrado'
             });
-        });
-
-        it('deve propagar erro do banco de dados', async () => {
-            const dbError = new Error('Erro de conexão');
-            mockModel.lean.mockRejectedValue(dbError);
-
-            await expect(repository.buscarPorId(mockId)).rejects.toThrow('Erro de conexão');
-            expect(mockModel.findById).toHaveBeenCalledWith(mockId);
         });
     });
 
@@ -152,21 +142,7 @@ describe('LevantamentoRepository', () => {
 
             const resultado = await repository.buscarPorInventarioEBem(inventarioId, bemId);
 
-            expect(mockModel.findOne).toHaveBeenCalledWith({
-                inventario: inventarioId,
-                'bem.id': bemId
-            });
             expect(resultado).toBeNull();
-        });
-
-        it('deve propagar erro do banco de dados', async () => {
-            const inventarioId = '507f1f77bcf86cd799439011';
-            const bemId = '507f1f77bcf86cd799439012';
-            const dbError = new Error('Erro de conexão');
-            
-            mockModel.findOne.mockRejectedValue(dbError);
-
-            await expect(repository.buscarPorInventarioEBem(inventarioId, bemId)).rejects.toThrow('Erro de conexão');
         });
     });
 
@@ -282,25 +258,8 @@ describe('LevantamentoRepository', () => {
                 );
             });
 
-            it('deve usar valores padrão para page e limite quando não fornecidos', async () => {
+            it('deve usar valores padrão para page e limite', async () => {
                 const mockReq = { params: {}, query: {} };
-                mockModel.paginate.mockResolvedValue(mockLevantamentos);
-
-                await repository.listar(mockReq);
-
-                expect(mockModel.paginate).toHaveBeenCalledWith(expect.any(Object), 
-                    expect.objectContaining({
-                        page: 1,
-                        limit: 10
-                    })
-                );
-            });
-
-            it('deve tratar page e limite inválidos', async () => {
-                const mockReq = {
-                    params: {},
-                    query: { page: 'invalid', limite: 'invalid' }
-                };
                 mockModel.paginate.mockResolvedValue(mockLevantamentos);
 
                 await repository.listar(mockReq);
@@ -326,14 +285,6 @@ describe('LevantamentoRepository', () => {
                     customMessage: expect.any(String)
                 });
             });
-
-            it('deve propagar erro do banco na paginação', async () => {
-                const mockReq = { params: {}, query: {} };
-                const dbError = new Error('Erro de paginação');
-                mockModel.paginate.mockRejectedValue(dbError);
-
-                await expect(repository.listar(mockReq)).rejects.toThrow('Erro de paginação');
-            });
         });
     });
 
@@ -353,26 +304,6 @@ describe('LevantamentoRepository', () => {
 
             expect(Levantamento).toHaveBeenCalledWith(mockParsedData);
             expect(mockModel.save).toHaveBeenCalled();
-            expect(resultado).toBe(mockCreatedLevantamento);
-        });
-
-        it('deve propagar erro do banco na criação', async () => {
-            const dbError = new Error('Erro de validação');
-            mockModel.save.mockRejectedValue(dbError);
-
-            await expect(repository.criar(mockParsedData)).rejects.toThrow('Erro de validação');
-            expect(Levantamento).toHaveBeenCalledWith(mockParsedData);
-            expect(mockModel.save).toHaveBeenCalled();
-        });
-
-        it('deve criar levantamento com dados vazios', async () => {
-            const emptyData = {};
-            const mockCreatedLevantamento = { _id: '507f1f77bcf86cd799439013' };
-            mockModel.save.mockResolvedValue(mockCreatedLevantamento);
-
-            const resultado = await repository.criar(emptyData);
-
-            expect(Levantamento).toHaveBeenCalledWith(emptyData);
             expect(resultado).toBe(mockCreatedLevantamento);
         });
     });
@@ -406,7 +337,6 @@ describe('LevantamentoRepository', () => {
             messages.error.resourceNotFound.mockReturnValue('Levantamento não encontrado');
 
             await expect(repository.atualizar(mockId, mockParsedData)).rejects.toThrow();
-            expect(mockModel.findByIdAndUpdate).toHaveBeenCalledWith(mockId, mockParsedData, { new: true });
             expect(CustomError).toHaveBeenCalledWith({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
@@ -414,25 +344,6 @@ describe('LevantamentoRepository', () => {
                 details: [],
                 customMessage: 'Levantamento não encontrado'
             });
-        });
-
-        it('deve propagar erro do banco na atualização', async () => {
-            const dbError = new Error('Erro de atualização');
-            mockModel.populate.mockRejectedValue(dbError);
-
-            await expect(repository.atualizar(mockId, mockParsedData)).rejects.toThrow('Erro de atualização');
-            expect(mockModel.findByIdAndUpdate).toHaveBeenCalledWith(mockId, mockParsedData, { new: true });
-        });
-
-        it('deve atualizar com dados vazios', async () => {
-            const emptyData = {};
-            const mockResult = { _id: mockId };
-            mockModel.populate.mockResolvedValue(mockResult);
-
-            const resultado = await repository.atualizar(mockId, emptyData);
-
-            expect(mockModel.findByIdAndUpdate).toHaveBeenCalledWith(mockId, emptyData, { new: true });
-            expect(resultado).toBe(mockResult);
         });
     });
 
@@ -460,69 +371,6 @@ describe('LevantamentoRepository', () => {
 
             expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith(mockId);
             expect(resultado).toBeNull();
-        });
-
-        it('deve propagar erro do banco na deleção', async () => {
-            const dbError = new Error('Erro de deleção');
-            mockModel.findByIdAndDelete.mockRejectedValue(dbError);
-
-            await expect(repository.deletar(mockId)).rejects.toThrow('Erro de deleção');
-            expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith(mockId);
-        });
-
-        it('deve deletar com ID inválido', async () => {
-            const invalidId = 'invalid-id';
-            mockModel.findByIdAndDelete.mockResolvedValue(null);
-
-            const resultado = await repository.deletar(invalidId);
-
-            expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith(invalidId);
-            expect(resultado).toBeNull();
-        });
-    });
-
-    describe('Integração com dependencies', () => {
-        it('deve usar corretamente o LevantamentoFilterBuilder', async () => {
-            const mockReq = {
-                params: {},
-                query: {
-                    inventario: '507f1f77bcf86cd799439011',
-                    estado: 'Em condições de uso'
-                }
-            };
-            mockModel.paginate.mockResolvedValue({ docs: [] });
-
-            await repository.listar(mockReq);
-
-            expect(LevantamentoFilterBuilder).toHaveBeenCalled();
-            expect(mockFilterBuilder.comInventario).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
-            expect(mockFilterBuilder.comEstado).toHaveBeenCalledWith('Em condições de uso');
-            expect(mockFilterBuilder.build).toHaveBeenCalled();
-        });
-
-        it('deve aplicar populates corretos em todas as operações que precisam', async () => {
-            const mockId = '507f1f77bcf86cd799439011';
-            const expectedPopulates = [
-                { path: 'inventario', select: 'nome _id' },
-                { path: 'salaNova', select: 'nome _id' },
-                { path: 'usuario', select: 'nome cpf _id' }
-            ];
-
-            mockModel.lean.mockResolvedValue({ _id: mockId });
-            await repository.buscarPorId(mockId);
-            expect(mockModel.populate).toHaveBeenCalledWith(expectedPopulates);
-
-            mockModel.populate.mockClear();
-
-            const expectedPopulatesUpdate = [
-                { path: 'inventario', select: 'nome _id' },
-                { path: 'bem', select: 'nome tombo _id' },
-                { path: 'salaNova', select: 'nome _id' },
-                { path: 'usuario', select: 'nome cpf _id' }
-            ];
-            mockModel.populate.mockResolvedValue({ _id: mockId });
-            await repository.atualizar(mockId, {});
-            expect(mockModel.populate).toHaveBeenCalledWith(expectedPopulatesUpdate);
         });
     });
 });

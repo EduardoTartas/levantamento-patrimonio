@@ -1,19 +1,22 @@
 import request from "supertest";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import dotenv from 'dotenv';
 import app from '../../app';
 import Inventario from '@models/Inventario';
 import Campus from '@models/Campus';
 
+let mongoServer;
+
 dotenv.config();
 
-jest.mock('../../middlewares/AuthMiddleware', () => (req, res, next) => {
-    req.user = { id: 'testuser' };
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
     next();
 });
 
-jest.mock('../../middlewares/AuthPermission', () => (req, res, next) => {
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
     next();
 });
 
@@ -35,14 +38,9 @@ describe("Inventário Routes", () => {
     beforeAll(async () => {
         token = 'mock-jwt-token';
 
-        if (mongoose.connection.readyState === 0) {
-            const mongoUri = process.env.DB_URL_TESTE || process.env.DB_URL || 'mongodb://localhost:27017/levantamento_patrimonio_test';
-            await mongoose.connect(mongoUri);
-        }
-
-        // Limpar dados existentes
-        await Campus.deleteMany({});
-        await Inventario.deleteMany({});
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri);
 
         // Criar campus para testes
         const campus = await Campus.create({
@@ -50,19 +48,16 @@ describe("Inventário Routes", () => {
             cidade: 'Cidade Inventário Test'
         });
         campusId = campus._id;
-    }, 30000);
+    }, 60000);
 
     afterAll(async () => {
         try {
-            await Inventario.deleteMany({});
-            await Campus.deleteMany({});
-            if (mongoose.connection.readyState !== 0) {
-                await mongoose.connection.close();
-            }
+            await mongoose.disconnect();
+            await mongoServer.stop();
         } catch (error) {
             console.error('Erro na limpeza:', error);
         }
-    }, 30000);
+    }, 60000);
 
     beforeEach(async () => {
         await Inventario.deleteMany({});

@@ -70,23 +70,30 @@ describe('CampusFilterBuilder', () => {
     });
   });
 
-  describe('escapeRegex()', () => {
-    it('deve escapar corretamente caracteres especiais', () => {
-      const texto = 'port.o(velho)?+';
-      const escaped = builder.escapeRegex(texto);
-      expect(escaped).toBe('port\\.o\\(velho\\)\\?\\+');
-    });
-  });
-
   describe('build()', () => {
-    it('deve retornar objeto de filtros construído', () => {
-      builder.comNome('abc').comCidade('xyz').comAtivo('true');
+    it('deve retornar objeto vazio quando nenhum filtro é definido', () => {
+      const filtros = builder.build();
+      expect(filtros).toEqual({});
+    });
+
+    it('deve retornar objeto de filtros construído com todos os métodos', () => {
+      builder.comNome('vilhena').comCidade('Porto Velho').comAtivo('true');
       const filtros = builder.build();
       expect(filtros).toMatchObject({
-        nome: { $regex: 'abc', $options: 'i' },
-        cidade: { $regex: 'xyz', $options: 'i' },
+        nome: { $regex: 'vilhena', $options: 'i' },
+        cidade: { $regex: 'Porto\\ Velho', $options: 'i' },
         status: true
       });
+    });
+
+    it('deve retornar objeto com apenas filtros válidos', () => {
+      builder.comNome('vilhena').comCidade('').comAtivo('invalid');
+      const filtros = builder.build();
+      expect(filtros).toMatchObject({
+        nome: { $regex: 'vilhena', $options: 'i' }
+      });
+      expect(filtros).not.toHaveProperty('cidade');
+      expect(filtros).not.toHaveProperty('status');
     });
   });
 });

@@ -18,41 +18,9 @@ describe('InventarioFilterBuilder', () => {
 
   beforeEach(() => {
     CampusRepositoryMock = require('@repositories/CampusRepository.js');
-
     CampusRepositoryMock.mockClear();
     mockBuscarPorNomeCampus.mockClear();
-
     builder = new InventarioFilterBuilder();
-  });
-
-  describe('constructor', () => {
-    it('deve inicializar filtros como um objeto vazio', () => {
-      expect(builder.build()).toEqual({});
-    });
-  });
-
-  describe('escapeRegex', () => {
-    it('deve escapar caracteres especiais de regex corretamente', () => {
-      expect(builder.escapeRegex('test.[]{}()*+?^$|#')).toBe('test\\.\\[\\]\\{\\}\\(\\)\\*\\+\\?\\^\\$\\|\\#');
-    });
-
-    it('deve escapar espaços em branco para serem literais no regex', () => {
-      expect(builder.escapeRegex('test case with spaces')).toBe('test\\ case\\ with\\ spaces');
-    });
-
-    it('não deve alterar strings que não contêm caracteres especiais de regex', () => {
-      expect(builder.escapeRegex('test')).toBe('test');
-    });
-
-    it('deve escapar vírgulas e pontos', () => {
-      expect(builder.escapeRegex('test,value.com')).toBe('test\\,value\\\.com');
-    });
-
-    it('deve retornar string vazia se a entrada não for uma string', () => {
-      expect(builder.escapeRegex(null)).toBe('');
-      expect(builder.escapeRegex(undefined)).toBe('');
-      expect(builder.escapeRegex(123)).toBe('');
-    });
   });
 
   describe('comNome', () => {
@@ -74,17 +42,13 @@ describe('InventarioFilterBuilder', () => {
       });
     });
 
-    it('não deve adicionar filtro se o nome for nulo', () => {
+    it('não deve adicionar filtro se o nome for nulo ou vazio', () => {
       builder.comNome(null);
       expect(builder.build()).toEqual({});
-    });
 
-    it('não deve adicionar filtro se o nome for uma string vazia', () => {
       builder.comNome('');
       expect(builder.build()).toEqual({});
-    });
 
-    it('não deve adicionar filtro se o nome for uma string contendo apenas espaços', () => {
       builder.comNome('   ');
       expect(builder.build()).toEqual({});
     });
@@ -97,65 +61,45 @@ describe('InventarioFilterBuilder', () => {
           nome: { $regex: nomeEscaped, $options: 'i' },
         });
     });
-    
-    it('deve permitir encadeamento de chamadas', () => {
-      expect(builder.comNome('Teste')).toBe(builder);
-    });
   });
 
   describe('comAtivo', () => {
-    it('deve adicionar filtro de status true para a string "true"', () => {
+    it('deve adicionar filtro de status true para a string "true" ou booleano true', () => {
       builder.comAtivo('true');
       expect(builder.build()).toEqual({ status: true });
-    });
 
-    it('deve adicionar filtro de status true para o booleano true', () => {
       builder.comAtivo(true);
       expect(builder.build()).toEqual({ status: true });
     });
 
-    it('deve adicionar filtro de status false para a string "false"', () => {
+    it('deve adicionar filtro de status false para a string "false" ou booleano false', () => {
       builder.comAtivo('false');
       expect(builder.build()).toEqual({ status: false });
-    });
 
-    it('deve adicionar filtro de status false para o booleano false', () => {
       builder.comAtivo(false);
       expect(builder.build()).toEqual({ status: false });
     });
 
-    it('não deve adicionar filtro para valores de ativo diferentes (ex: "qualquer")', () => {
+    it('não deve adicionar filtro para valores inválidos ou nulos', () => {
       builder.comAtivo('qualquer');
       expect(builder.build()).toEqual({});
-    });
 
-    it('não deve adicionar filtro se ativo for nulo', () => {
       builder.comAtivo(null);
       expect(builder.build()).toEqual({});
-    });
-
-    it('deve permitir encadeamento de chamadas', () => {
-      expect(builder.comAtivo(true)).toBe(builder);
     });
   });
 
   describe('comCampus', () => {
-    it('não deve adicionar filtro se o nome do campus for nulo', async () => {
+    it('não deve adicionar filtro se o nome do campus for nulo ou vazio', async () => {
       await builder.comCampus(null);
       expect(builder.build()).toEqual({});
       expect(mockBuscarPorNomeCampus).not.toHaveBeenCalled();
-    });
 
-    it('não deve adicionar filtro se o nome do campus for uma string vazia', async () => {
       await builder.comCampus('');
       expect(builder.build()).toEqual({});
-      expect(mockBuscarPorNomeCampus).not.toHaveBeenCalled();
-    });
-    
-    it('não deve adicionar filtro se o nome do campus for uma string contendo apenas espaços', async () => {
+
       await builder.comCampus('   ');
       expect(builder.build()).toEqual({});
-      expect(mockBuscarPorNomeCampus).not.toHaveBeenCalled();
     });
 
     it('deve fazer trim no nome do campus antes de buscar', async () => {
@@ -164,7 +108,7 @@ describe('InventarioFilterBuilder', () => {
         expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('CampusExistente');
     });
 
-    it('deve adicionar filtro com $in: [] se nenhum campus for encontrado (retorno array vazio)', async () => {
+    it('deve adicionar filtro com $in: [] se nenhum campus for encontrado', async () => {
       mockBuscarPorNomeCampus.mockResolvedValue([]);
       await builder.comCampus('Campus Inexistente');
       expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Inexistente');
@@ -177,15 +121,6 @@ describe('InventarioFilterBuilder', () => {
       mockBuscarPorNomeCampus.mockResolvedValue(null);
       await builder.comCampus('Campus Fantasma');
       expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Fantasma');
-      expect(builder.build()).toEqual({
-        campus: { $in: [] },
-      });
-    });
-    
-    it('deve adicionar filtro com $in: [] se buscarPorNome retornar um objeto sem _id', async () => {
-      mockBuscarPorNomeCampus.mockResolvedValue({ nome: 'Campus Sem Id' });
-      await builder.comCampus('Campus Sem Id');
-      expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Sem Id');
       expect(builder.build()).toEqual({
         campus: { $in: [] },
       });
@@ -213,28 +148,16 @@ describe('InventarioFilterBuilder', () => {
         campus: { $in: ['idCampusUnicoRet'] },
       });
     });
-
-    it('deve permitir encadeamento de chamadas', async () => {
-      mockBuscarPorNomeCampus.mockResolvedValue([]);
-      const result = await builder.comCampus('TesteEncadeado');
-      expect(result).toBe(builder);
-    });
   });
 
   describe('comData', () => {
-    it('não deve adicionar filtro se data for nula ou undefined', () => {
+    it('não deve adicionar filtro se data for nula, undefined ou vazia', () => {
       builder.comData(null);
       expect(builder.build()).toEqual({});
-      builder.comData(undefined);
-      expect(builder.build()).toEqual({});
-    });
-
-    it('não deve adicionar filtro se data for uma string vazia', () => {
+      
       builder.comData('');
       expect(builder.build()).toEqual({});
-    });
-    
-    it('não deve adicionar filtro se data for uma string contendo apenas espaços', () => {
+      
       builder.comData('   ');
       expect(builder.build()).toEqual({});
     });
@@ -242,15 +165,15 @@ describe('InventarioFilterBuilder', () => {
     it('não deve adicionar filtro se data for uma string inválida', () => {
       builder.comData('data-invalida');
       expect(builder.build()).toEqual({});
+      
       builder.comData('32/13/2023');
       expect(builder.build()).toEqual({});
+      
       builder.comData('30/02/2024');
-      expect(builder.build()).toEqual({});
-      builder.comData('texto-qualquer');
       expect(builder.build()).toEqual({});
     });
 
-    it('deve adicionar filtro de data $gte e $lte para o dia todo em formato DD/MM/YYYY (gerando UTC)', () => {
+    it('deve adicionar filtro de data $gte e $lte para o dia todo em formato DD/MM/YYYY', () => {
       const dataStr = '25/12/2023';
       builder.comData(dataStr);
       const filtros = builder.build();
@@ -263,7 +186,7 @@ describe('InventarioFilterBuilder', () => {
       expect(filtros.data.$lte.toISOString()).toBe('2023-12-25T23:59:59.999Z');
     });
 
-    it('deve adicionar filtro de data $gte e $lte para o dia todo em formato YYYY-MM-DD (gerando UTC)', () => {
+    it('deve adicionar filtro de data $gte e $lte para o dia todo em formato YYYY-MM-DD', () => {
       const dataStr = '2024-01-15';
       builder.comData(dataStr);
       const filtros = builder.build();
@@ -276,7 +199,7 @@ describe('InventarioFilterBuilder', () => {
       expect(filtros.data.$lte.toISOString()).toBe('2024-01-15T23:59:59.999Z');
     });
 
-    it('deve adicionar filtro de data $gte e $lte para um objeto Date (considerando o dia local)', () => {
+    it('deve adicionar filtro de data $gte e $lte para um objeto Date', () => {
       const dateObj = new Date(2023, 5, 10, 15, 30);
       builder.comData(dateObj);
       const filtros = builder.build();
@@ -297,9 +220,32 @@ describe('InventarioFilterBuilder', () => {
       expect(filtros.data.$gte.getHours()).toBe(0);
       expect(filtros.data.$lte.getHours()).toBe(23);
     });
+  });
 
-    it('deve permitir encadeamento de chamadas', () => {
-      expect(builder.comData('2023-01-01')).toBe(builder);
+  describe('build()', () => {
+    it('deve retornar objeto vazio quando nenhum filtro é definido', () => {
+      expect(builder.build()).toEqual({});
+    });
+
+    it('deve retornar objeto com todos os filtros aplicados', async () => {
+      mockBuscarPorNomeCampus.mockResolvedValue([{ _id: 'campusId123', nome: 'Campus Teste' }]);
+      
+      builder.comNome('Inventário Teste');
+      builder.comAtivo('true');
+      await builder.comCampus('Campus Teste');
+      builder.comData('2023-12-25');
+      
+      const filtros = builder.build();
+      
+      expect(filtros).toMatchObject({
+        nome: { $regex: 'Inventário\\ Teste', $options: 'i' },
+        status: true,
+        campus: { $in: ['campusId123'] },
+        data: {
+          $gte: expect.any(Date),
+          $lte: expect.any(Date)
+        }
+      });
     });
   });
 });

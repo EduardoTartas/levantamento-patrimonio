@@ -8,21 +8,22 @@ import {
     beforeEach
 } from "@jest/globals";
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import dotenv from 'dotenv';
 import app from '../../app';
 import Campus from '@models/Campus';
 import Usuario from '@models/Usuario';
 
+let mongoServer;
+
 dotenv.config();
 
-jest.mock('../../middlewares/AuthMiddleware', () => (req, res, next) => {
-    req.user = {
-        id: 'testuser'
-    };
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
     next();
 });
 
-jest.mock('../../middlewares/AuthPermission', () => (req, res, next) => {
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
     next();
 });
 
@@ -43,10 +44,9 @@ describe("Campus", () => {
     beforeAll(async () => {
         token = 'mock-jwt-token';
 
-        if (mongoose.connection.readyState === 0) {
-            const mongoUri = process.env.DB_URL_TESTE || process.env.DB_URL || 'mongodb://localhost:27017/levantamento_patrimonio_test';
-            await mongoose.connect(mongoUri);
-        }
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri);
 
         try {
             const adminUser = await Usuario.create({
@@ -65,19 +65,16 @@ describe("Campus", () => {
                 adminUserId = existingAdmin._id;
             }
         }
-    }, 30000);
+    }, 60000);
 
     afterAll(async () => {
         try {
-            await Campus.deleteMany({});
-            await Usuario.deleteMany({});
-            if (mongoose.connection.readyState !== 0) {
-                await mongoose.connection.close();
-            }
+            await mongoose.disconnect();
+            await mongoServer.stop();
         } catch (error) {
             console.error('Erro na limpeza:', error);
         }
-    });
+    }, 60000);
 
     beforeEach(async () => {
         await Campus.deleteMany({});

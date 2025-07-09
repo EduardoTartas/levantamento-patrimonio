@@ -2,6 +2,16 @@ import request from 'supertest';
 import express from 'express';
 import router from '@routes/relatorioRoutes';
 
+// Mock dos middlewares de autenticação
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
+    next();
+});
+
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
+    next();
+});
+
 jest.mock('@utils/helpers/index.js', () => ({
     asyncWrapper: (fn) => fn
 }));

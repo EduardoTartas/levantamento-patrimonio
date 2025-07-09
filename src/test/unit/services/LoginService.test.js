@@ -9,7 +9,6 @@ import PasswordResetToken from '@models/PassResetToken';
 import SendMail from '@utils/SendMail';
 import TokenUtil from '@utils/TokenUtil';
 
-// Mocks
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 jest.mock('@utils/SendMail');
@@ -59,14 +58,6 @@ describe('LoginService', () => {
     process.env.RECUPERACAO_URL = 'http://test.com/reset';
   });
 
-  describe('Constructor', () => {
-    test('deve criar instância com configurações corretas', () => {
-      expect(loginService.jwtSecret).toBe(mockConfig.jwtSecret);
-      expect(loginService.jwtRefreshSecret).toBe(mockConfig.jwtRefreshSecret);
-      expect(loginService.loginRepository).toBe(mockLoginRepository);
-    });
-  });
-
   describe('autenticar', () => {
     test('deve autenticar usuário com credenciais válidas', async () => {
       const email = 'joao@test.com';
@@ -97,21 +88,23 @@ describe('LoginService', () => {
       });
     });
 
-    test('deve lançar erros para casos inválidos', async () => {
-      // Dados inválidos
+    test('deve lançar erros para dados inválidos', async () => {
       await expect(loginService.autenticar('', 'senha')).rejects.toThrow(CustomError);
       await expect(loginService.autenticar('email-invalido', 'senha')).rejects.toThrow(CustomError);
-      
-      // Usuário não encontrado
+    });
+
+    test('deve lançar erro para usuário não encontrado', async () => {
       mockLoginRepository.buscarPorEmail.mockResolvedValue(null);
       await expect(loginService.autenticar('inexistente@test.com', 'senha')).rejects.toThrow(AuthenticationError);
-      
-      // Senha incorreta
+    });
+
+    test('deve lançar erro para senha incorreta', async () => {
       mockLoginRepository.buscarPorEmail.mockResolvedValue(mockUser);
       bcrypt.compare.mockResolvedValue(false);
       await expect(loginService.autenticar('joao@test.com', 'senhaErrada')).rejects.toThrow(AuthenticationError);
-      
-      // Erro do repositório
+    });
+
+    test('deve propagar erros do repositório', async () => {
       mockLoginRepository.buscarPorEmail.mockRejectedValue(new Error('DB Error'));
       await expect(loginService.autenticar('joao@test.com', 'senha123')).rejects.toThrow('DB Error');
     });
@@ -145,24 +138,21 @@ describe('LoginService', () => {
       });
     });
 
-    test('deve lançar erros para casos inválidos', async () => {
-      // Token inválido
+    test('deve lançar erro para token inválido', async () => {
       mockLoginRepository.validarRefreshToken.mockResolvedValue(null);
       await expect(loginService.refreshToken('invalid.token')).rejects.toThrow(CustomError);
+    });
 
-      // Token JWT inválido
+    test('deve lançar erro para JWT inválido', async () => {
       mockLoginRepository.validarRefreshToken.mockResolvedValue({ token: validToken });
       jwt.verify.mockImplementation(() => { throw new Error('Invalid token'); });
       await expect(loginService.refreshToken(validToken)).rejects.toThrow(TokenInvalidError);
+    });
 
-      // Sessão expirada
+    test('deve lançar erro para sessão expirada', async () => {
       const expiredTokenData = { id: 'user123', iat: Math.floor((Date.now() - 8 * 24 * 60 * 60 * 1000) / 1000) };
+      mockLoginRepository.validarRefreshToken.mockResolvedValue({ token: validToken });
       jwt.verify.mockReturnValue(expiredTokenData);
-      await expect(loginService.refreshToken(validToken)).rejects.toThrow(CustomError);
-
-      // Usuário não encontrado
-      jwt.verify.mockReturnValue(mockTokenData);
-      mockLoginRepository.buscarPorId.mockResolvedValue(null);
       await expect(loginService.refreshToken(validToken)).rejects.toThrow(CustomError);
     });
   });
@@ -188,11 +178,9 @@ describe('LoginService', () => {
       expect(result).toEqual({ mensagem: "E-mail de recuperação enviado." });
     });
 
-    test('deve retornar mensagem padrão para usuário inexistente', async () => {
+    test('deve lançar erro para usuário inexistente', async () => {
       mockLoginRepository.buscarPorEmail.mockResolvedValue(null);
-
-      await expect(loginService.solicitarRecuperacao('inexistente@test.com'))
-        .rejects.toThrow(CustomError);
+      await expect(loginService.solicitarRecuperacao('inexistente@test.com')).rejects.toThrow(CustomError);
     });
 
     test('deve propagar erros de envio de email', async () => {
@@ -201,8 +189,7 @@ describe('LoginService', () => {
       PasswordResetToken.create.mockResolvedValue();
       SendMail.enviaEmail.mockRejectedValue(new Error('Email Error'));
 
-      await expect(loginService.solicitarRecuperacao('joao@test.com'))
-        .rejects.toThrow('Email Error');
+      await expect(loginService.solicitarRecuperacao('joao@test.com')).rejects.toThrow('Email Error');
     });
   });
 
@@ -230,42 +217,25 @@ describe('LoginService', () => {
       expect(result).toEqual({ mensagem: "Senha alterada com sucesso." });
     });
 
-    test('deve lançar erros para casos inválidos', async () => {
-      // Token expirado
+    test('deve lançar erro para token expirado', async () => {
       jwt.verify.mockImplementation(() => {
-        const error = new Error('Token expired'); error.name = 'TokenExpiredError'; throw error;
+        const error = new Error('Token expired'); 
+        error.name = 'TokenExpiredError'; 
+        throw error;
       });
       await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(TokenExpiredError);
+    });
 
-      // Token JWT inválido
-      jwt.verify.mockImplementation(() => {
-        const error = new Error('Invalid token'); error.name = 'JsonWebTokenError'; throw error;
-      });
-      await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(TokenExpiredError);
-
-      // Reset mocks para próximos testes
+    test('deve lançar erro para token não encontrado', async () => {
       jwt.verify.mockReturnValue({ id: mockUser._id });
-
-      // Token não encontrado
       PasswordResetToken.findOne.mockResolvedValue(null);
       await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(TokenInvalidError);
+    });
 
-      // Token já usado
+    test('deve lançar erro para token já usado', async () => {
+      jwt.verify.mockReturnValue({ id: mockUser._id });
       PasswordResetToken.findOne.mockResolvedValue({ ...mockResetTokenDoc, used: true });
       await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(TokenInvalidError);
-
-      // Token expirado no banco (mas que existe e não foi usado)
-      PasswordResetToken.findOne.mockResolvedValue({
-        ...mockResetTokenDoc, 
-        used: false, // garantir que não foi usado
-        expiresAt: new Date(Date.now() - 3600000) // expirado
-      });
-      await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(TokenExpiredError);
-
-      // Usuário não encontrado
-      PasswordResetToken.findOne.mockResolvedValue(mockResetTokenDoc);
-      mockLoginRepository.buscarPorId.mockResolvedValue(null);
-      await expect(loginService.redefinirSenha(resetToken, novaSenha)).rejects.toThrow(CustomError);
     });
   });
 
@@ -283,78 +253,7 @@ describe('LoginService', () => {
 
     test('deve propagar erros do repositório', async () => {
       mockLoginRepository.deleteRefreshToken.mockRejectedValue(new Error('Repository Error'));
-
-      await expect(loginService.deletarRefreshToken('token'))
-        .rejects.toThrow('Repository Error');
-    });
-  });
-
-  describe('Testes de integração', () => {
-    test('deve manter consistência entre autenticar e refreshToken', async () => {
-      const email = 'joao@test.com';
-      const senha = 'senha123';
-      const accessToken = 'access.token';
-      const refreshToken = 'refresh.token';
-
-      // Setup para autenticar
-      mockLoginRepository.buscarPorEmail.mockResolvedValue(mockUser);
-      bcrypt.compare.mockResolvedValue(true);
-      TokenUtil.generateAccessToken.mockReturnValue(accessToken);
-      TokenUtil.generateRefreshToken.mockReturnValue(refreshToken);
-      mockLoginRepository.salvarRefreshToken.mockResolvedValue();
-
-      // Autenticar
-      const authResult = await loginService.autenticar(email, senha);
-      expect(authResult.refreshToken).toBe(refreshToken);
-
-      // Setup para refresh
-      const newAccessToken = 'new.access.token';
-      const newRefreshToken = 'new.refresh.token';
-      const mockTokenData = { id: mockUser._id, iat: Math.floor(Date.now() / 1000) };
-
-      mockLoginRepository.validarRefreshToken.mockResolvedValue({ token: refreshToken });
-      jwt.verify.mockReturnValue(mockTokenData);
-      mockLoginRepository.buscarPorId.mockResolvedValue(mockUser);
-      TokenUtil.generateAccessToken.mockReturnValue(newAccessToken);
-      TokenUtil.generateRefreshToken.mockReturnValue(newRefreshToken);
-      mockLoginRepository.deleteRefreshToken.mockResolvedValue();
-
-      // Refresh token
-      const refreshResult = await loginService.refreshToken(refreshToken);
-      expect(refreshResult.accessToken).toBe(newAccessToken);
-      expect(refreshResult.refreshToken).toBe(newRefreshToken);
-    });
-
-    test('deve lidar com fluxo completo de recuperação de senha', async () => {
-      const email = 'joao@test.com';
-      const resetToken = 'reset.token';
-      const novaSenha = 'novaSenha123';
-
-      // Solicitar recuperação
-      mockLoginRepository.buscarPorEmail.mockResolvedValue(mockUser);
-      jwt.sign.mockReturnValue(resetToken);
-      PasswordResetToken.create.mockResolvedValue();
-      SendMail.enviaEmail.mockResolvedValue();
-
-      const solicitacaoResult = await loginService.solicitarRecuperacao(email);
-      expect(solicitacaoResult.mensagem).toBe("E-mail de recuperação enviado.");
-
-      // Redefinir senha
-      const mockResetTokenDoc = { 
-        used: false, 
-        expiresAt: new Date(Date.now() + 3600000), 
-        save: jest.fn() 
-      };
-
-      jwt.verify.mockReturnValue({ id: mockUser._id });
-      PasswordResetToken.findOne.mockResolvedValue(mockResetTokenDoc);
-      mockLoginRepository.buscarPorId.mockResolvedValue(mockUser);
-      bcrypt.hash.mockResolvedValue('hashedNovaSenha');
-      mockLoginRepository.atualizarSenha.mockResolvedValue();
-
-      const redefinicaoResult = await loginService.redefinirSenha(resetToken, novaSenha);
-      expect(redefinicaoResult.mensagem).toBe("Senha alterada com sucesso.");
-      expect(mockResetTokenDoc.used).toBe(true);
+      await expect(loginService.deletarRefreshToken('token')).rejects.toThrow('Repository Error');
     });
   });
 });

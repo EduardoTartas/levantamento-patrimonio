@@ -18,11 +18,13 @@ jest.mock('multer', () => {
     return multer;
 });
 
-jest.mock('@middlewares/AuthMiddleware.js', () => {
-    return (req, res, next) => {
-        req.user = { _id: '655f5e39884c8b76c56a5083', nome: 'Usuario Teste' };
-        next();
-    };
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
+    next();
+});
+
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
+    next();
 });
 
 jest.mock('@utils/helpers/index.js', () => ({

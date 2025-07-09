@@ -26,22 +26,22 @@ describe('UsuarioFilterBuilder', () => {
     });
   });
 
- describe('escapeRegex', () => {
-    it('deve escapar caracteres especiais de regex corretamente', () => {
+  describe('escapeRegex', () => {
+    it('deve escapar caracteres especiais de regex', () => {
       expect(builder.escapeRegex('test.[]{}()*+?^$|#')).toBe('test\\.\\[\\]\\{\\}\\(\\)\\*\\+\\?\\^\\$\\|\\#');
     });
 
-    it('deve escapar espaços em branco para serem literais no regex', () => {
+    it('deve escapar espaços em branco', () => {
       expect(builder.escapeRegex('test case with spaces')).toBe('test\\ case\\ with\\ spaces');
     });
 
-    it('não deve alterar strings que não contêm caracteres especiais de regex', () => {
+    it('não deve alterar strings sem caracteres especiais', () => {
       expect(builder.escapeRegex('test')).toBe('test');
     });
   });
 
   describe('comNome', () => {
-    it('deve adicionar filtro de nome com regex para nome com mais de um caractere', () => {
+    it('deve adicionar filtro de nome com regex', () => {
       const nome = 'Usuário Teste';
       const nomeEscaped = builder.escapeRegex(nome);
       builder.comNome(nome);
@@ -50,7 +50,7 @@ describe('UsuarioFilterBuilder', () => {
       });
     });
 
-    it('deve adicionar filtro de nome com regex iniciando com ^ para nome com um único caractere', () => {
+    it('deve usar ^ para nome com um único caractere', () => {
       const nome = 'U';
       const nomeEscaped = builder.escapeRegex(nome);
       builder.comNome(nome);
@@ -59,14 +59,12 @@ describe('UsuarioFilterBuilder', () => {
       });
     });
 
-    it('não deve adicionar filtro se o nome for nulo', () => {
-      builder.comNome(null);
-      expect(builder.build()).toEqual({});
-    });
-
-    it('não deve adicionar filtro se o nome for uma string vazia', () => {
-      builder.comNome('');
-      expect(builder.build()).toEqual({});
+    it('não deve adicionar filtro se o nome for inválido', () => {
+      [null, '', undefined].forEach(nome => {
+        const newBuilder = new UsuarioFilterBuilder();
+        newBuilder.comNome(nome);
+        expect(newBuilder.build()).toEqual({});
+      });
     });
 
     it('deve permitir encadeamento de chamadas', () => {
@@ -75,34 +73,32 @@ describe('UsuarioFilterBuilder', () => {
   });
 
   describe('comAtivo', () => {
-    it('deve adicionar filtro de status true para a string "true"', () => {
+    it('deve adicionar filtro de status true', () => {
       builder.comAtivo('true');
       expect(builder.build()).toEqual({ status: true });
     });
 
-    it('deve adicionar filtro de status true para o booleano true', () => {
+    it('deve adicionar filtro de status true para booleano', () => {
       builder.comAtivo(true);
       expect(builder.build()).toEqual({ status: true });
     });
 
-    it('deve adicionar filtro de status false para a string "false"', () => {
+    it('deve adicionar filtro de status false', () => {
       builder.comAtivo('false');
       expect(builder.build()).toEqual({ status: false });
     });
 
-    it('deve adicionar filtro de status false para o booleano false', () => {
+    it('deve adicionar filtro de status false para booleano', () => {
       builder.comAtivo(false);
       expect(builder.build()).toEqual({ status: false });
     });
 
-    it('não deve adicionar filtro para valores de ativo diferentes (ex: "qualquer")', () => {
-      builder.comAtivo('qualquer');
-      expect(builder.build()).toEqual({});
-    });
-
-    it('não deve adicionar filtro se ativo for nulo', () => {
-      builder.comAtivo(null);
-      expect(builder.build()).toEqual({});
+    it('não deve adicionar filtro para valores inválidos', () => {
+      ['qualquer', null, undefined, 'invalid'].forEach(ativo => {
+        const newBuilder = new UsuarioFilterBuilder();
+        newBuilder.comAtivo(ativo);
+        expect(newBuilder.build()).toEqual({});
+      });
     });
 
     it('deve permitir encadeamento de chamadas', () => {
@@ -111,20 +107,14 @@ describe('UsuarioFilterBuilder', () => {
   });
 
   describe('comCampus', () => {
-    it('não deve adicionar filtro se o nome do campus for nulo', async () => {
+    it('não deve adicionar filtro se o nome do campus for inválido', async () => {
       await builder.comCampus(null);
       expect(builder.build()).toEqual({});
       expect(mockBuscarPorNomeCampus).not.toHaveBeenCalled();
     });
 
-    it('não deve adicionar filtro se o nome do campus for uma string vazia', async () => {
-      await builder.comCampus('');
-      expect(builder.build()).toEqual({});
-      expect(mockBuscarPorNomeCampus).not.toHaveBeenCalled();
-    });
-
     it('deve adicionar filtro com $in: [] se nenhum campus for encontrado', async () => {
-      mockBuscarPorNomeCampus.mockResolvedValue([]); // Retorna array vazio
+      mockBuscarPorNomeCampus.mockResolvedValue([]);
       await builder.comCampus('Campus Inexistente');
       expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Inexistente');
       expect(builder.build()).toEqual({
@@ -133,15 +123,15 @@ describe('UsuarioFilterBuilder', () => {
     });
 
     it('deve adicionar filtro com $in: [] se buscarPorNome retornar null', async () => {
-        mockBuscarPorNomeCampus.mockResolvedValue(null); // Retorna null
-        await builder.comCampus('Campus Fantasma');
-        expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Fantasma');
-        expect(builder.build()).toEqual({
-          campus: { $in: [] },
-        });
+      mockBuscarPorNomeCampus.mockResolvedValue(null);
+      await builder.comCampus('Campus Fantasma');
+      expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Campus Fantasma');
+      expect(builder.build()).toEqual({
+        campus: { $in: [] },
       });
+    });
 
-    it('deve adicionar filtro com IDs dos campi encontrados (array de resultados)', async () => {
+    it('deve adicionar filtro com IDs dos campi encontrados (array)', async () => {
       const mockCampi = [
         { _id: 'idCampus1', nome: 'Campus Alpha' },
         { _id: 'idCampus2', nome: 'Campus Beta' },
@@ -154,15 +144,15 @@ describe('UsuarioFilterBuilder', () => {
       });
     });
 
-    it('deve adicionar filtro com ID do campus encontrado (objeto único como resultado)', async () => {
-        const mockCampusUnico = { _id: 'idCampusUnico', nome: 'Campus Unico' };
-        mockBuscarPorNomeCampus.mockResolvedValue(mockCampusUnico);
-        await builder.comCampus('Unico');
-        expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Unico');
-        expect(builder.build()).toEqual({
-          campus: { $in: ['idCampusUnico'] },
-        });
+    it('deve adicionar filtro com ID do campus encontrado (objeto único)', async () => {
+      const mockCampusUnico = { _id: 'idCampusUnico', nome: 'Campus Unico' };
+      mockBuscarPorNomeCampus.mockResolvedValue(mockCampusUnico);
+      await builder.comCampus('Unico');
+      expect(mockBuscarPorNomeCampus).toHaveBeenCalledWith('Unico');
+      expect(builder.build()).toEqual({
+        campus: { $in: ['idCampusUnico'] },
       });
+    });
 
     it('deve permitir encadeamento de chamadas', async () => {
       mockBuscarPorNomeCampus.mockResolvedValue([]);
@@ -172,7 +162,7 @@ describe('UsuarioFilterBuilder', () => {
   });
 
   describe('build', () => {
-    it('deve retornar corretamente todos os filtros configurados', async () => {
+    it('deve retornar todos os filtros configurados', async () => {
       const nome = 'Admin';
       const ativo = true;
       const nomeCampus = 'Central';

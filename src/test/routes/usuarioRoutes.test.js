@@ -2,10 +2,16 @@ import request from 'supertest';
 import express from 'express';
 import router from '@routes/usuarioRoutes.js';
 
-jest.mock('../../../src/middlewares/AuthMiddleware.js', () => (_req, _res, next) => next());
-jest.mock('../../../src/middlewares/AuthPermission.js', () => (_req, _res, next) => next());
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
+    next();
+});
 
-jest.mock('../../../src/controllers/UsuarioController.js', () => {
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
+    next();
+});
+
+jest.mock('@controllers/UsuarioController.js', () => {
   return jest.fn().mockImplementation(() => ({
     listar: jest.fn((req, res) => {
       if (req.params.id) {

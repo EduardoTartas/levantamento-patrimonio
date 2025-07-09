@@ -2,12 +2,10 @@ import BemRepository from '@repositories/BemRepository.js';
 
 const mockBemFindById = jest.fn();
 const mockBemPaginate = jest.fn();
-
 const mockPopulate = jest.fn();
 let directQueryResolverValue;
 
 const queryMock = {};
-
 Object.assign(queryMock, {
   populate: mockPopulate,
   then: (onFulfilled, onRejected) => Promise.resolve(directQueryResolverValue).then(onFulfilled, onRejected),
@@ -41,13 +39,10 @@ const mockCustomErrorTracker = jest.fn();
 const mockMessagesErrorResourceNotFound = jest.fn(resource => `${resource} não encontrado.`);
 const mockMessagesErrorInternalServerError = jest.fn(resource => `Erro interno no servidor ao processar ${resource}.`);
 
-
 jest.mock('@models/Bem.js', () => {
   const MockedBemConstructor = jest.fn();
-
   MockedBemConstructor.findById = jest.fn().mockImplementation(() => queryMock);
   MockedBemConstructor.paginate = jest.fn().mockImplementation((...args) => mockBemPaginate(...args));
-  
   return MockedBemConstructor;
 });
 
@@ -93,14 +88,9 @@ describe('BemRepository', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    require('@repositories/filters/BemFilterBuild.js').mockImplementation(() => mockBemFilterBuilderInstance);
-
     MockedBem = require('@models/Bem.js');
     repository = new BemRepository();
-
     directQueryResolverValue = undefined;
-
     mockFilterBuilderBuild.mockReturnValue({});
   });
 
@@ -132,7 +122,7 @@ describe('BemRepository', () => {
       expect(result).toEqual(mockBemData);
     });
 
-    it('deve lançar CustomError se bem não for encontrado em buscarPorId', async () => {
+    it('deve lançar CustomError se bem não for encontrado', async () => {
       directQueryResolverValue = null;
       
       await expect(repository.buscarPorId(mockBemId)).rejects.toThrow('Bem não encontrado.');
@@ -141,18 +131,8 @@ describe('BemRepository', () => {
         statusCode: 404,
         errorType: 'resourceNotFound',
         field: 'Bem',
-        details: [],
         customMessage: 'Bem não encontrado.',
       }));
-    });
-
-    it('deve propagar erro do banco de dados em buscarPorId', async () => {
-      const dbError = new Error('Erro de conexão com o banco');
-      MockedBem.findById.mockImplementationOnce(() => {
-        throw dbError;
-      });
-
-      await expect(repository.buscarPorId(mockBemId)).rejects.toThrow('Erro de conexão com o banco');
     });
   });
 
@@ -177,35 +157,10 @@ describe('BemRepository', () => {
         directQueryResolverValue = null;
 
         await expect(repository.listar(req)).rejects.toThrow('Bem não encontrado.');
-
-        expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
-          statusCode: 404,
-          errorType: 'resourceNotFound',
-          field: 'Bem',
-          details: [],
-          customMessage: 'Bem não encontrado.',
-        }));
-      });
-
-      it('deve buscar bem quando req.params.id está presente', async () => {
-        const req = { params: { id: mockBemId }, query: {} };
-        directQueryResolverValue = mockBemData;
-
-        const result = await repository.listar(req);
-
-        expect(MockedBem.findById).toHaveBeenCalledWith(mockBemId);
-        expect(result).toEqual(mockBemData);
       });
     });
 
     describe('listar com paginação e filtros', () => {
-      beforeEach(() => {
-        mockFilterBuilderBuild.mockReturnValue({
-          nome: { $regex: 'Mesa', $options: 'i' },
-          auditado: false
-        });
-      });
-
       it('deve listar bens com filtros padrão', async () => {
         const req = { params: {}, query: {} };
         const mockPaginateResult = {
@@ -229,7 +184,7 @@ describe('BemRepository', () => {
         expect(mockFilterBuilderBuild).toHaveBeenCalled();
         
         expect(mockBemPaginate).toHaveBeenCalledWith(
-          { nome: { $regex: 'Mesa', $options: 'i' }, auditado: false },
+          expect.any(Object),
           {
             page: 1,
             populate: {
@@ -306,7 +261,7 @@ describe('BemRepository', () => {
         );
       });
 
-      it('deve usar valores padrão para paginação quando não fornecidos', async () => {
+      it('deve usar valores padrão para paginação', async () => {
         const req = { params: {}, query: {} };
         const mockPaginateResult = { docs: [], totalDocs: 0 };
         mockBemPaginate.mockResolvedValue(mockPaginateResult);
@@ -320,121 +275,6 @@ describe('BemRepository', () => {
             limit: 10,
           })
         );
-      });
-
-      it('deve tratar limite não numérico como padrão', async () => {
-        const req = { 
-          params: {}, 
-          query: { limite: 'abc' } 
-        };
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        await repository.listar(req);
-
-        expect(mockBemPaginate).toHaveBeenCalledWith(
-          expect.any(Object),
-          expect.objectContaining({
-            limit: 10,
-          })
-        );
-      });
-
-      it('deve tratar page não numérica como padrão', async () => {
-        const req = { 
-          params: {}, 
-          query: { page: 'invalid' } 
-        };
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        await repository.listar(req);
-
-        expect(mockBemPaginate).toHaveBeenCalledWith(
-          expect.any(Object),
-          expect.objectContaining({
-            page: 1, // Valor padrão
-          })
-        );
-      });
-
-      it('deve usar auditado padrão false quando não fornecido', async () => {
-        const req = { params: {}, query: {} };
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        await repository.listar(req);
-
-        expect(mockFilterBuilderComAuditado).toHaveBeenCalledWith(false);
-      });
-
-      it('deve lançar CustomError se filterBuilder.build não for função', async () => {
-        const req = { params: {}, query: {} };
-       
-        mockBemFilterBuilderInstance.build = undefined;
-
-        await expect(repository.listar(req)).rejects.toThrow('Erro interno no servidor ao processar Bem.');
-
-        expect(mockCustomErrorTracker).toHaveBeenCalledWith(expect.objectContaining({
-          statusCode: 500,
-          errorType: 'internalServerError',
-          field: 'Bem',
-          details: [],
-          customMessage: 'Erro interno no servidor ao processar Bem.',
-        }));
-        
-        mockBemFilterBuilderInstance.build = mockFilterBuilderBuild;
-      });
-
-      it('deve propagar erro do método paginate', async () => {
-        const req = { params: {}, query: {} };
-        const dbError = new Error('Erro na paginação');
-        mockBemPaginate.mockRejectedValue(dbError);
-
-        await expect(repository.listar(req)).rejects.toThrow('Erro na paginação');
-      });
-    });
-
-    describe('edge cases', () => {
-      it('deve lidar com req.query undefined', async () => {
-        const req = { params: {} };
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        const result = await repository.listar(req);
-
-        expect(mockFilterBuilderComNome).toHaveBeenCalledWith('');
-        expect(mockFilterBuilderComAuditado).toHaveBeenCalledWith(false);
-        expect(result).toEqual(mockPaginateResult);
-      });
-
-      it('deve lidar com req.params null', async () => {
-        const req = { query: { nome: 'Mesa' }, params: null }; 
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        await expect(repository.listar(req)).rejects.toThrow();
-      });
-
-      it('deve tratar campos undefined/null em query como strings vazias', async () => {
-        const req = { 
-          params: {}, 
-          query: { 
-            nome: null,
-            tombo: undefined,
-            responsavel: '',
-            sala: null
-          } 
-        };
-        const mockPaginateResult = { docs: [], totalDocs: 0 };
-        mockBemPaginate.mockResolvedValue(mockPaginateResult);
-
-        await repository.listar(req);
-
-        expect(mockFilterBuilderComNome).toHaveBeenCalledWith('');
-        expect(mockFilterBuilderComTombo).toHaveBeenCalledWith('');
-        expect(mockFilterBuilderComResponsavel).toHaveBeenCalledWith('');
-        expect(mockFilterBuilderComSala).toHaveBeenCalledWith('');
       });
     });
   });

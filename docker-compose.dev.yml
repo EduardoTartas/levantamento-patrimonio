@@ -41,7 +41,6 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
       - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
-      - MINIO_SERVER_URL=${MINIO_PUBLIC_URL} 
       - MINIO_BROWSER_REDIRECT_URL=http://localhost:${MINIO_CONSOLE_PORT} 
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
 

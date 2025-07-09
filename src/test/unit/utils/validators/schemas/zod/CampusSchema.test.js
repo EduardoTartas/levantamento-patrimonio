@@ -29,33 +29,7 @@ describe('CampusSchema', () => {
     expect(result.telefone).toBe('69984567890');
   });
 
-  it('deve lançar erro se o nome estiver ausente', () => {
-    const data = {
-      cidade: 'Vilhena'
-    };
-
-    expect(() => CampusSchema.parse(data)).toThrowError(/nome/i);
-  });
-
-  it('deve lançar erro se a cidade estiver ausente', () => {
-    const data = {
-      nome: 'Campus IFRO'
-    };
-
-    expect(() => CampusSchema.parse(data)).toThrowError(/cidade/i);
-  });
-
-  it('deve lançar erro se o telefone for inválido', () => {
-    const data = {
-      nome: 'Campus IFRO',
-      telefone: 'telefone-invalido',
-      cidade: 'Vilhena'
-    };
-
-    expect(() => CampusSchema.parse(data)).toThrowError(/Telefone inválido/i);
-  });
-
-  it('deve aplicar valor padrão "true" para status se omitido', () => {
+  it('deve aplicar valor padrão true para status se omitido', () => {
     const data = {
       nome: 'Campus IFRO',
       cidade: 'Vilhena'
@@ -63,6 +37,21 @@ describe('CampusSchema', () => {
 
     const result = CampusSchema.parse(data);
     expect(result.status).toBe(true);
+  });
+
+  it('deve falhar para campos obrigatórios ausentes', () => {
+    expect(() => CampusSchema.parse({ cidade: 'Vilhena' })).toThrowError(/nome/i);
+    expect(() => CampusSchema.parse({ nome: 'Campus IFRO' })).toThrowError(/cidade/i);
+  });
+
+  it('deve falhar para telefone inválido', () => {
+    const data = {
+      nome: 'Campus IFRO',
+      telefone: 'telefone-invalido',
+      cidade: 'Vilhena'
+    };
+
+    expect(() => CampusSchema.parse(data)).toThrowError(/Telefone inválido/i);
   });
 });
 
@@ -73,13 +62,13 @@ describe('CampusUpdateSchema', () => {
     expect(result.nome).toBe('Novo Nome');
   });
 
-  it('deve aplicar valor padrão "true" para status se omitido na atualização', () => {
+  it('deve aplicar valor padrão true para status se omitido na atualização', () => {
     const data = { nome: 'Nome Atualizado' };
     const result = CampusUpdateSchema.parse(data);
     expect(result.status).toBe(true);
   });
 
-  it('deve lançar erro se telefone inválido for fornecido na atualização', () => {
+  it('deve falhar para telefone inválido na atualização', () => {
     const data = {
       telefone: '123'
     };

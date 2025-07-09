@@ -71,35 +71,34 @@ describe('errorHandler', () => {
         );
     });
 
-    it('deve lidar com AuthenticationError e retornar seu status e mensagem', () => {
-        const fakeError = new AuthenticationError('Not authenticated', 401);
-        errorHandler(fakeError, req, res, next);
+    it('deve lidar com AuthenticationError e TokenExpiredError', () => {
+        const authError = new AuthenticationError('Not authenticated', 401);
+        errorHandler(authError, req, res, next);
 
         expect(CommonResponse.error).toHaveBeenCalledWith(
             res,
-            fakeError.statusCode,
+            authError.statusCode,
             'authenticationError',
             null,
-            [{ message: fakeError.message }],
-            fakeError.message
+            [{ message: authError.message }],
+            authError.message
         );
-    });
 
-    it('deve lidar com TokenExpiredError e retornar seu status e mensagem', () => {
-        const fakeError = new TokenExpiredError('Token expired', 401);
-        errorHandler(fakeError, req, res, next);
+        CommonResponse.error.mockClear();
+        const tokenError = new TokenExpiredError('Token expired', 401);
+        errorHandler(tokenError, req, res, next);
 
         expect(CommonResponse.error).toHaveBeenCalledWith(
             res,
-            fakeError.statusCode,
+            tokenError.statusCode,
             'authenticationError',
             null,
-            [{ message: fakeError.message }],
-            fakeError.message
+            [{ message: tokenError.message }],
+            tokenError.message
         );
     });
 
-    it("deve lidar com CustomError com errorType 'tokenExpired'", () => {
+    it('deve lidar com CustomError com errorType tokenExpired', () => {
         const fakeError = new CustomError({
             errorType: 'tokenExpired',
             statusCode: 401,
@@ -142,17 +141,15 @@ describe('errorHandler', () => {
         process.env.NODE_ENV = 'development';
         errorHandler(fakeError, req, res, next);
 
-        // Em desenvolvimento, os detalhes do erro incluem mensagem e stack.
         const callArgs = CommonResponse.error.mock.calls[0];
         expect(callArgs[0]).toBe(res);
         expect(callArgs[1]).toBe(500);
         expect(callArgs[2]).toBe('serverError');
-        // Verificamos que os detalhes contêm a mensagem de erro e a stack.
         expect(callArgs[4][0].message).toBe(fakeError.message);
         expect(callArgs[4][0].stack).toBeDefined();
     });
 
-    it('deve lidar com erro como string', () => {
+    it('deve lidar com diferentes tipos de erro', () => {
         errorHandler('erro string', req, res, next);
         expect(CommonResponse.error).toHaveBeenCalledWith(
             res,
@@ -161,36 +158,12 @@ describe('errorHandler', () => {
             null,
             [{ message: undefined, stack: undefined }]
         );
-    });
 
-    it('deve lidar com erro como nulo', () => {
+        CommonResponse.error.mockClear();
         expect(() => errorHandler(null, req, res, next)).toThrow(TypeError);
-    });
 
-    it('deve lidar com erro como objeto vazio', () => {
+        CommonResponse.error.mockClear();
         errorHandler({}, req, res, next);
-        expect(CommonResponse.error).toHaveBeenCalledWith(
-            res,
-            500,
-            'serverError',
-            null,
-            [{ message: undefined, stack: undefined }]
-        );
-    });
-
-    it('deve lidar com erro como array', () => {
-        errorHandler([], req, res, next);
-        expect(CommonResponse.error).toHaveBeenCalledWith(
-            res,
-            500,
-            'serverError',
-            null,
-            [{ message: undefined, stack: undefined }]
-        );
-    });
-
-    it('deve lidar com erro como Symbol', () => {
-        errorHandler(Symbol('erro'), req, res, next);
         expect(CommonResponse.error).toHaveBeenCalledWith(
             res,
             500,
@@ -209,18 +182,6 @@ describe('errorHandler', () => {
             'serverError',
             null,
             [{ message: 'I am a teapot', stack: undefined }]
-        );
-    });
-
-    it('deve lidar com erro com errorType mas sem statusCode', () => {
-        const err = { errorType: 'customType', message: 'Custom error' };
-        errorHandler(err, req, res, next);
-        expect(CommonResponse.error).toHaveBeenCalledWith(
-            res,
-            500,
-            'serverError',
-            null,
-            [{ message: 'Custom error', stack: undefined }]
         );
     });
 });

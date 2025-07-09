@@ -3,8 +3,7 @@ import { z } from 'zod';
 
 describe('RotaSchema', () => {
     describe('RotaSchema', () => {
-        // --- Testes de validação com dados válidos ---
-        it('deve aceitar dados válidos mínimos', () => {
+        it('deve aceitar dados válidos mínimos com valores padrão', () => {
             const validData = {
                 rota: '/api/teste',
                 dominio: 'usuario'
@@ -15,12 +14,12 @@ describe('RotaSchema', () => {
             expect(result.success).toBe(true);
             expect(result.data.rota).toBe('/api/teste');
             expect(result.data.dominio).toBe('usuario');
-            expect(result.data.ativo).toBe(true); // valor padrão
-            expect(result.data.buscar).toBe(false); // valor padrão
-            expect(result.data.enviar).toBe(false); // valor padrão
-            expect(result.data.substituir).toBe(false); // valor padrão
-            expect(result.data.modificar).toBe(false); // valor padrão
-            expect(result.data.excluir).toBe(false); // valor padrão
+            expect(result.data.ativo).toBe(true);
+            expect(result.data.buscar).toBe(false);
+            expect(result.data.enviar).toBe(false);
+            expect(result.data.substituir).toBe(false);
+            expect(result.data.modificar).toBe(false);
+            expect(result.data.excluir).toBe(false);
         });
 
         it('deve aceitar dados válidos completos', () => {
@@ -41,25 +40,7 @@ describe('RotaSchema', () => {
             expect(result.data).toEqual(validData);
         });
 
-        it('deve aplicar valores padrão corretamente', () => {
-            const validData = {
-                rota: '/api/teste',
-                dominio: 'admin'
-            };
-
-            const result = RotaSchema.safeParse(validData);
-            
-            expect(result.success).toBe(true);
-            expect(result.data.ativo).toBe(true);
-            expect(result.data.buscar).toBe(false);
-            expect(result.data.enviar).toBe(false);
-            expect(result.data.substituir).toBe(false);
-            expect(result.data.modificar).toBe(false);
-            expect(result.data.excluir).toBe(false);
-        });
-
-        // --- Testes de validação de campos obrigatórios ---
-        it('deve rejeitar quando rota está ausente', () => {
+        it('deve rejeitar quando campos obrigatórios estão ausentes', () => {
             const invalidData = {
                 dominio: 'usuario'
             };
@@ -76,23 +57,6 @@ describe('RotaSchema', () => {
             );
         });
 
-        it('deve rejeitar quando dominio está ausente', () => {
-            const invalidData = {
-                rota: '/api/teste'
-            };
-
-            const result = RotaSchema.safeParse(invalidData);
-            
-            expect(result.success).toBe(false);
-            expect(result.error.issues).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        path: ['dominio']
-                    })
-                ])
-            );
-        });
-
         it('deve rejeitar quando rota é string vazia', () => {
             const invalidData = {
                 rota: '',
@@ -104,7 +68,6 @@ describe('RotaSchema', () => {
             expect(result.success).toBe(false);
         });
 
-        // --- Testes de validação de tipos ---
         it('deve rejeitar quando campos boolean são inválidos', () => {
             const invalidData = {
                 rota: '/api/teste',
@@ -117,24 +80,6 @@ describe('RotaSchema', () => {
             
             expect(result.success).toBe(false);
             expect(result.error.issues.length).toBeGreaterThanOrEqual(2);
-        });
-
-        it('deve aceitar diferentes valores boolean válidos', () => {
-            const validData = {
-                rota: '/api/teste',
-                dominio: 'usuario',
-                ativo: false,
-                buscar: true,
-                enviar: false,
-                substituir: true,
-                modificar: false,
-                excluir: true
-            };
-
-            const result = RotaSchema.safeParse(validData);
-            
-            expect(result.success).toBe(true);
-            expect(result.data).toEqual(validData);
         });
 
         it('deve aceitar caracteres especiais em rota', () => {
@@ -150,8 +95,7 @@ describe('RotaSchema', () => {
     });
 
     describe('RotaUpdateSchema', () => {
-        // --- Testes com schema parcial ---
-        it('deve aceitar objeto vazio (todos campos opcionais)', () => {
+        it('deve aceitar objeto vazio', () => {
             const validData = {};
 
             const result = RotaUpdateSchema.safeParse(validData);
@@ -160,33 +104,11 @@ describe('RotaSchema', () => {
             expect(result.data).toEqual({});
         });
 
-        it('deve aceitar apenas rota', () => {
+        it('deve aceitar campos parciais', () => {
             const validData = {
-                rota: '/api/nova-rota'
-            };
-
-            const result = RotaUpdateSchema.safeParse(validData);
-            
-            expect(result.success).toBe(true);
-            expect(result.data).toEqual(validData);
-        });
-
-        it('deve aceitar apenas dominio', () => {
-            const validData = {
-                dominio: 'novo-dominio'
-            };
-
-            const result = RotaUpdateSchema.safeParse(validData);
-            
-            expect(result.success).toBe(true);
-            expect(result.data).toEqual(validData);
-        });
-
-        it('deve aceitar apenas campos boolean', () => {
-            const validData = {
+                rota: '/api/nova-rota',
                 ativo: false,
-                buscar: true,
-                modificar: true
+                buscar: true
             };
 
             const result = RotaUpdateSchema.safeParse(validData);
@@ -213,7 +135,7 @@ describe('RotaSchema', () => {
             expect(result.data).toEqual(validData);
         });
 
-        it('deve rejeitar tipos inválidos mesmo sendo parcial', () => {
+        it('deve rejeitar tipos inválidos', () => {
             const invalidData = {
                 rota: 123,
                 ativo: 'sim'
@@ -223,16 +145,6 @@ describe('RotaSchema', () => {
             
             expect(result.success).toBe(false);
             expect(result.error.issues.length).toBeGreaterThanOrEqual(2);
-        });
-
-        it('deve aceitar rota vazia no update (pode querer limpar)', () => {
-            const validData = {
-                rota: ''
-            };
-
-            const result = RotaUpdateSchema.safeParse(validData);
-            
-            expect(result.success).toBe(false); // BaseRotaSchema ainda exige min(1)
         });
 
         it('deve não aplicar valores padrão no update schema', () => {

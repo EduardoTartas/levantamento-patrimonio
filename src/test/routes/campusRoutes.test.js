@@ -15,14 +15,12 @@ import Usuario from '@models/Usuario';
 
 dotenv.config();
 
-jest.mock('../../middlewares/AuthMiddleware', () => (req, res, next) => {
-    req.user = {
-        id: 'testuser'
-    };
+jest.mock('@middlewares/AuthMiddleware.js', () => (req, res, next) => {
+    req.user = { _id: 'testuser', id: 'testuser' };
     next();
 });
 
-jest.mock('../../middlewares/AuthPermission', () => (req, res, next) => {
+jest.mock('@middlewares/AuthPermission.js', () => (req, res, next) => {
     next();
 });
 

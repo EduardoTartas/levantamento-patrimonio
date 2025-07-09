@@ -13,6 +13,9 @@ let mongoServer;
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     await mongoose.connect(mongoServer.getUri());
+    
+    // Garantir que os índices sejam criados
+    await RefreshToken.createIndexes();
 });
 
 afterAll(async () => {
@@ -66,13 +69,26 @@ describe('Modelo RefreshToken', () => {
     });
 
     describe('Restrições de unicidade', () => {
+        beforeEach(async () => {
+            // Garantir que os índices estejam criados antes de cada teste
+            await RefreshToken.createIndexes();
+        });
+
         it('deve garantir token único', async () => {
             const token = 'duplicate-token';
             const userId1 = new mongoose.Types.ObjectId();
             const userId2 = new mongoose.Types.ObjectId();
 
-            await RefreshToken.create({ token, user: userId1 });
-            await expect(RefreshToken.create({ token, user: userId2 })).rejects.toThrow(/duplicate key/);
+            // Criar o primeiro token
+            const firstToken = await RefreshToken.create({ token, user: userId1 });
+            expect(firstToken).toBeDefined();
+            
+            // Tentar criar o segundo token com o mesmo valor deve falhar
+            await expect(RefreshToken.create({ token, user: userId2 }))
+                .rejects
+                .toThrow(expect.objectContaining({
+                    code: 11000 // Código específico para violação de índice único
+                }));
         });
 
         it('deve permitir tokens diferentes para mesmo usuário', async () => {

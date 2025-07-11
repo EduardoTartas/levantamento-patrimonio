@@ -14,6 +14,7 @@
     "seed": "docker exec levantamento-api node src/seeds/seeds.js",
     "test": "jest --coverage --detectOpenHandles",
     "start": "node server.js",
+    "docker:test": "docker exec levantamento-api npm test",
     "docker": "docker compose -f docker-compose.yml up --build -d"
   },
   "dependencies": {
